@@ -26,7 +26,7 @@ export const WishlistItems = createAsyncThunk<
 >("wishlist/WishlistItems", async (product_id, thunkAPI) => {
   try {
     await fetchWithRefresh(
-      "https://e-commerce-web-production-4bb8.up.railway.app/api/wishlist/add/",
+      "https://e-commerce-web-production-ead4.up.railway.app/api/wishlist/add/",
       {
         method: "POST",
         body: JSON.stringify({ product_id }),
@@ -50,7 +50,7 @@ export const WishlistRemove = createAsyncThunk<
 >("wishlist/WishlistRemove", async (product_id, thunkAPI) => {
   try {
     await fetchWithRefresh(
-      "https://e-commerce-web-production-4bb8.up.railway.app/api/wishlist/remove/",
+      "https://e-commerce-web-production-ead4.up.railway.app/api/wishlist/remove/",
       {
         method: "DELETE",
         body: JSON.stringify({ product_id }),
@@ -141,7 +141,7 @@ export default WishlistSlice.reducer;
 //       let token = state.auth.access;
 
 //       let res = await fetch(
-//         "https://e-commerce-web-production-4bb8.up.railway.app/api/wishlist/add/",
+//         "https://e-commerce-web-production-ead4.up.railway.app/api/wishlist/add/",
 //         {
 //           method: "POST",
 //           headers: {
@@ -159,7 +159,7 @@ export default WishlistSlice.reducer;
 //           token = refreshRes.access;
 
 //           res = await fetch(
-//             "https://e-commerce-web-production-4bb8.up.railway.app/api/wishlist/add/",
+//             "https://e-commerce-web-production-ead4.up.railway.app/api/wishlist/add/",
 //             {
 //               method: "POST",
 //               headers: {
@@ -195,7 +195,7 @@ export default WishlistSlice.reducer;
 //       let token = state.auth.access;
 
 //       let res = await fetch(
-//         "https://e-commerce-web-production-4bb8.up.railway.app/api/wishlist/remove/",
+//         "https://e-commerce-web-production-ead4.up.railway.app/api/wishlist/remove/",
 //         {
 //           method: "DELETE",
 //           headers: {
@@ -214,7 +214,7 @@ export default WishlistSlice.reducer;
 //           token = refreshRes.access;
 
 //           res = await fetch(
-//             "https://e-commerce-web-production-4bb8.up.railway.app/api/wishlist/remove/",
+//             "https://e-commerce-web-production-ead4.up.railway.app/api/wishlist/remove/",
 //             {
 //               method: "DELETE",
 //               headers: {

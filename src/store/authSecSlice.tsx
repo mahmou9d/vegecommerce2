@@ -25,7 +25,7 @@ export const signupUser = createAsyncThunk(
   ) => {
     try {
       const res = await fetch(
-        "https://e-commerce-web-production-4bb8.up.railway.app/api/auth/signup/",
+        "https://e-commerce-web-production-ead4.up.railway.app/api/auth/signup/",
         {
           method: "POST",
           headers: {

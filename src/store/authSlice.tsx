@@ -22,7 +22,7 @@ export const loginUser = createAsyncThunk(
   async (payload: { email: string; password: string }, { rejectWithValue }) => {
     try {
       const res = await fetch(
-        "https://e-commerce-web-production-4bb8.up.railway.app/api/auth/login/",
+        "https://e-commerce-web-production-ead4.up.railway.app/api/auth/login/",
         {
           method: "POST",
           headers: {
@@ -57,7 +57,7 @@ export const refreshAccessToken = createAsyncThunk(
       }
 
       const res = await fetch(
-        "https://e-commerce-web-production-4bb8.up.railway.app/api/auth/token/refresh/",
+        "https://e-commerce-web-production-ead4.up.railway.app/api/auth/token/refresh/",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -81,7 +81,7 @@ export const refreshAccessToken = createAsyncThunk(
 );
 export const Logout = createAsyncThunk(
   "auth/Logout", // ✅ خليها اسم Action عادي مش URL
-  async (_, { getState, rejectWithValue,dispatch }) => {
+  async (_, { getState, rejectWithValue, dispatch }) => {
     try {
       const state = getState() as RootState;
       const refreshToken = state.auth.refresh; // ✅ استخدم refresh
@@ -92,7 +92,7 @@ export const Logout = createAsyncThunk(
       }
 
       let res = await fetch(
-        "https://e-commerce-web-production-4bb8.up.railway.app/api/auth/logout/",
+        "https://e-commerce-web-production-ead4.up.railway.app/api/auth/logout/",
         {
           method: "POST",
           headers: {
@@ -108,27 +108,27 @@ export const Logout = createAsyncThunk(
       // if (!res.ok) {
       //   throw new Error(`HTTP error! status: ${res.status}`);
       // }
-      
-            if (res.status === 401) {
-              try {
-                const refreshRes = await dispatch(refreshAccessToken()).unwrap();
-                const token = refreshRes.access;
-      
-                res = await fetch(
-                  "https://e-commerce-web-production-4bb8.up.railway.app/api/auth/logout/",
-                  {
-                    method: "GET",
-                    headers: {
-                      "Content-Type": "application/json",
-                      ...(token && { Authorization: `Bearer ${token}` }),
-                    },
-                    // body: JSON.stringify(payload),
-                  }
-                );
-              } catch (refreshErr) {
-                return rejectWithValue("Session expired, please login again.");
-              }
+
+      if (res.status === 401) {
+        try {
+          const refreshRes = await dispatch(refreshAccessToken()).unwrap();
+          const token = refreshRes.access;
+
+          res = await fetch(
+            "https://e-commerce-web-production-ead4.up.railway.app/api/auth/logout/",
+            {
+              method: "GET",
+              headers: {
+                "Content-Type": "application/json",
+                ...(token && { Authorization: `Bearer ${token}` }),
+              },
+              // body: JSON.stringify(payload),
             }
+          );
+        } catch (refreshErr) {
+          return rejectWithValue("Session expired, please login again.");
+        }
+      }
 
       const data = await res.json();
       // console.log(data)

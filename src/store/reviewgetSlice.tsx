@@ -31,7 +31,7 @@ export const GetReview = createAsyncThunk(
       let token = state.auth.access;
 
       let res = await fetch(
-        "https://e-commerce-web-production-4bb8.up.railway.app/api/reviews/recent/",
+        "https://e-commerce-web-production-ead4.up.railway.app/api/reviews/recent/",
         {
           method: "GET",
           headers: {
@@ -48,7 +48,7 @@ export const GetReview = createAsyncThunk(
           token = refreshRes.access;
 
           res = await fetch(
-            "https://e-commerce-web-production-4bb8.up.railway.app/api/reviews/recent/",
+            "https://e-commerce-web-production-ead4.up.railway.app/api/reviews/recent/",
             {
               method: "GET",
               headers: {

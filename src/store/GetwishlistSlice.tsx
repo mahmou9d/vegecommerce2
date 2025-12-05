@@ -39,7 +39,7 @@ export const GetWishlist = createAsyncThunk<
 
     const fetchWishlist = async (token: string) => {
       const res = await fetch(
-        "https://e-commerce-web-production-4bb8.up.railway.app/api/wishlist/items/",
+        "https://e-commerce-web-production-ead4.up.railway.app/api/wishlist/items/",
         {
           method: "GET",
           headers: {
@@ -163,7 +163,7 @@ export default wishlistSlice.reducer;
 //     let token = state.auth.access;
 
 //     let res = await fetch(
-//       "https://e-commerce-web-production-4bb8.up.railway.app/api/wishlist/items/",
+//       "https://e-commerce-web-production-ead4.up.railway.app/api/wishlist/items/",
 //       {
 //         method: "GET",
 //         headers: {
@@ -181,7 +181,7 @@ export default wishlistSlice.reducer;
 //         token = refreshRes.access;
 
 //         res = await fetch(
-//           "https://e-commerce-web-production-4bb8.up.railway.app/api/wishlist/items/",
+//           "https://e-commerce-web-production-ead4.up.railway.app/api/wishlist/items/",
 //           {
 //             method: "GET",
 //             headers: {

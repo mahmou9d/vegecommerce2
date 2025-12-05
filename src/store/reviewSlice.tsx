@@ -35,7 +35,7 @@
 // >("review/GetReview", async (_, thunkAPI) => {
 //   try {
 //     return await fetchWithRefresh(
-//       "https://e-commerce-web-production-4bb8.up.railway.app/api/reviews/recent/",
+//       "https://e-commerce-web-production-ead4.up.railway.app/api/reviews/recent/",
 //       { method: "GET" },
 //       thunkAPI
 //     );
@@ -54,7 +54,7 @@
 // >("review/AddReviews", async (payload, thunkAPI) => {
 //   try {
 //     return await fetchWithRefresh(
-//       "https://e-commerce-web-production-4bb8.up.railway.app/api/reviews/add/",
+//       "https://e-commerce-web-production-ead4.up.railway.app/api/reviews/add/",
 //       {
 //         method: "POST",
 //         body: JSON.stringify({
@@ -147,7 +147,7 @@ export const AddReviews = createAsyncThunk(
       let token = state.auth.access;
       // console.log(payload, "handleAddReviews");
       let res = await fetch(
-        "https://e-commerce-web-production-4bb8.up.railway.app/api/reviews/add/",
+        "https://e-commerce-web-production-ead4.up.railway.app/api/reviews/add/",
         {
           method: "POST",
           headers: {
@@ -168,7 +168,7 @@ export const AddReviews = createAsyncThunk(
           token = refreshRes.access;
 
           res = await fetch(
-            "https://e-commerce-web-production-4bb8.up.railway.app/api/reviews/add/",
+            "https://e-commerce-web-production-ead4.up.railway.app/api/reviews/add/",
             {
               method: "POST",
               headers: {
