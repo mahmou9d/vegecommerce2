@@ -80,7 +80,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* ========== Charts Section (Placeholder) ========== */}
-      <div className="bg-white p-6 rounded-2xl shadow-md h-96">
+      <div className="bg-white p-10 rounded-2xl shadow-md h-96">
         <h2 className="text-lg font-semibold mb-3">Sales & Orders Chart</h2>
 
         <ResponsiveContainer width="100%" height="100%">
