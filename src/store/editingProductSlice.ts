@@ -10,6 +10,8 @@ interface IEditingProduct {
     stock: number;
     img: string;
     imgFile?: File | null;
+    categories: string[];
+    tags: string[];
 }
 
 const initialState: IEditingProduct = {
@@ -21,6 +23,8 @@ const initialState: IEditingProduct = {
     stock: 0,
     img: "",
     imgFile: null,
+    categories: [],
+    tags: [],
 };
 
 const editingProductSlice = createSlice({

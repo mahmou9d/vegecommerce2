@@ -9,6 +9,7 @@ import { FiTag, FiDollarSign } from "react-icons/fi";
 import { useNavigate } from "react-router";
 import { useAppSelector, useAppDispatch } from "../../store/hook";
 import { clearEditingProduct } from "../../store/editingProductSlice";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
 
 interface IItem {
   id?: number;
@@ -20,6 +21,8 @@ interface IItem {
   stock: number;
   img: string;
   imgFile?: File | null;
+  categories: string[];
+  tags: string[];
 }
 
 export default function EditProductPage() {
@@ -50,32 +53,66 @@ export default function EditProductPage() {
   const handleSubmit = () => {
     if (editingProduct.id) {
       // Update existing product
-      setItems((prev) =>
-        prev.map((item) => (item.id === editingProduct.id ? form : item))
+      setItems((prev:any) =>
+        prev.map((item:any) => (item.id === editingProduct.id ? form : item))
       );
       dispatch(clearEditingProduct()); // بعد التعديل امسح ال state
     } else {
       // Add new product
       const newItem = { ...form, id: Date.now() };
-      setItems((prev) => [newItem, ...prev]);
+      setItems((prev:any) => [newItem, ...prev]);
     }
 
-    setForm({
-      name: "",
-      description: "",
-      original_price: "",
-      final_price: "",
-      discount: 0,
-      stock: 0,
-      img: "",
-      imgFile: null,
-    });
+setForm({
+  name: "",
+  description: "",
+  original_price: "",
+  final_price: "",
+  discount: 0,
+  stock: 0,
+  img: "",
+  imgFile: null,
+  categories: [],
+  tags: [],
+});
+
   };
 
   const handleDelete = (id?: number) => {
     if (!id) return;
     setItems((prev) => prev.filter((item) => item.id !== id));
   };
+  const handleChangePrice = (
+  e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+) => {
+  const { name, value } = e.target;
+
+  setForm((prev) => {
+    const updated = { ...prev, [name]: value };
+
+    // حساب السعر النهائي تلقائياً
+    const original = parseFloat(updated.original_price) || 0;
+    const discount = parseFloat(updated.discount.toString()) || 0;
+
+    const final = original - (original * discount) / 100;
+
+    return { ...updated, final_price: final.toFixed(2) };
+  });
+};
+
+const categoriesList = [
+  "Bestsellers",
+  "Breads & Sweats",
+  "Cleaning Materials",
+  "Fishes & Raw Meats",
+  "Fruits & Vegetables",
+  "Milks & Proteins",
+  "Others",
+  "Supermarket",
+  "Uncategorized",
+];
+
+const tagsList = ["Pasta", "Sauce", "Cowboy", "Steak", "Burgers", "Spray"];
 
   return (
     <div className="p-8 min-h-screen bg-gradient-to-br from-green-50 to-white">
@@ -123,34 +160,39 @@ export default function EditProductPage() {
 
             {/* Prices */}
             <div className="grid grid-cols-2 gap-4">
+              {/* Original Price */}
               <div className="space-y-2">
                 <label className="font-semibold text-green-500">
                   Original Price
                 </label>
                 <Input
                   name="original_price"
+                  type="number"
                   placeholder="Original Price"
                   value={form.original_price}
-                  onChange={handleChange}
+                  onChange={handleChangePrice}
                   className="border-green-400 h-12 rounded-2xl focus:ring-2 focus:ring-green-600 focus:outline-none"
                 />
               </div>
+
+              {/* Final Price (Auto Calculated) */}
               <div className="space-y-2">
                 <label className="font-semibold text-green-500">
                   Final Price
                 </label>
                 <Input
                   name="final_price"
+                  type="number"
                   placeholder="Final Price"
                   value={form.final_price}
-                  onChange={handleChange}
-                  className="border-green-400 h-12 rounded-2xl focus:ring-2 focus:ring-green-600 focus:outline-none"
+                  disabled
+                  className="border-green-400 bg-gray-100 h-12 rounded-2xl focus:ring-2 focus:ring-green-600 focus:outline-none"
                 />
               </div>
             </div>
 
-            {/* Discount & Stock */}
             <div className="grid grid-cols-2 gap-4">
+              {/* Discount */}
               <div className="space-y-2">
                 <label className="font-semibold text-green-500">
                   Discount (%)
@@ -160,10 +202,12 @@ export default function EditProductPage() {
                   type="number"
                   placeholder="Discount %"
                   value={form.discount}
-                  onChange={handleChange}
+                  onChange={handleChangePrice}
                   className="border-green-400 h-12 rounded-2xl focus:ring-2 focus:ring-green-600 focus:outline-none"
                 />
               </div>
+
+              {/* Stock */}
               <div className="space-y-2">
                 <label className="font-semibold text-green-500">Stock</label>
                 <Input
@@ -189,7 +233,72 @@ export default function EditProductPage() {
                 className="border-green-400 h-12 rounded-2xl focus:ring-2 focus:ring-green-600 focus:outline-none p-2"
               />
             </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="font-semibold text-green-500">
+                  Categories
+                </label>
+                <Select
+                  onValueChange={(val) =>
+                    setForm({
+                      ...form,
+                      categories: form.categories.includes(val)
+                        ? form.categories
+                        : [...form.categories, val],
+                    })
+                  }
+                >
+                  <SelectTrigger className="w-full h-12 rounded-2xl border-green-400 focus:ring-green-600">
+                    <SelectValue placeholder="Select Categories" />
+                  </SelectTrigger>
 
+                  <SelectContent>
+                    <SelectGroup>
+                      {categoriesList.map((cat) => (
+                        <SelectItem
+                          className="p-3 hover:border-l-4 hover:border-green-500"
+                          key={cat}
+                          value={cat}
+                        >
+                          {cat}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="font-semibold text-green-500">Tags</label>
+                <Select
+                  onValueChange={(val) =>
+                    setForm({
+                      ...form,
+                      tags: form.tags.includes(val)
+                        ? form.tags
+                        : [...form.tags, val],
+                    })
+                  }
+                >
+                  <SelectTrigger className="w-full h-12 rounded-2xl border-green-400 focus:ring-green-600">
+                    <SelectValue placeholder="Select Tags" />
+                  </SelectTrigger>
+
+                  <SelectContent>
+                    <SelectGroup>
+                      {tagsList.map((tag) => (
+                        <SelectItem
+                          className="p-3 hover:border-l-4 hover:border-green-500"
+                          key={tag}
+                          value={tag}
+                        >
+                          {tag}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
             <motion.button
               onClick={handleSubmit}
               whileHover={{
