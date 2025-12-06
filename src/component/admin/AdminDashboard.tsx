@@ -1,7 +1,21 @@
 import { motion } from "framer-motion";
 import { ShoppingCart, Package, Users, DollarSign } from "lucide-react";
+import { ResponsiveContainer, CartesianGrid, XAxis, YAxis, Tooltip, Legend, Line, LineChart } from "recharts";
 
+interface IData{
+  month:string
+  sales:number
+  orders:number
+}
 export default function AdminDashboard() {
+  const data: IData[] = [
+    { month: "Jan", sales: 4000, orders: 2400 },
+    { month: "Feb", sales: 3000, orders: 2210 },
+    { month: "Mar", sales: 5000, orders: 2290 },
+    { month: "Apr", sales: 4780, orders: 2000 },
+    { month: "May", sales: 5890, orders: 2780 },
+    { month: "Jun", sales: 4390, orders: 1890 },
+  ];
   return (
     <div className="space-y-10">
       {/* ========== Header ========== */}
@@ -66,20 +80,31 @@ export default function AdminDashboard() {
       </div>
 
       {/* ========== Charts Section (Placeholder) ========== */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white p-6 rounded-2xl shadow-md h-72">
-          <h2 className="text-lg font-semibold mb-3">Sales Chart</h2>
-          <div className="w-full h-full flex items-center justify-center text-gray-400">
-            (Chart Coming Soon)
-          </div>
-        </div>
+      <div className="bg-white p-6 rounded-2xl shadow-md h-96">
+        <h2 className="text-lg font-semibold mb-3">Sales & Orders Chart</h2>
 
-        <div className="bg-white p-6 rounded-2xl shadow-md h-72">
-          <h2 className="text-lg font-semibold mb-3">Orders Overview</h2>
-          <div className="w-full h-full flex items-center justify-center text-gray-400">
-            (Chart Coming Soon)
-          </div>
-        </div>
+        <ResponsiveContainer width="100%" height="100%">
+          <LineChart data={data}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="month" />
+            <YAxis />
+            <Tooltip />
+            <Legend />
+
+            <Line
+              type="monotone"
+              dataKey="sales"
+              stroke="#4F46E5"
+              strokeWidth={3}
+            />
+            <Line
+              type="monotone"
+              dataKey="orders"
+              stroke="#10B981"
+              strokeWidth={3}
+            />
+          </LineChart>
+        </ResponsiveContainer>
       </div>
 
       {/* ========== Recent Orders Table ========== */}
