@@ -157,7 +157,72 @@ const tagsList = ["Pasta", "Sauce", "Cowboy", "Steak", "Burgers", "Spray"];
                 className="border-green-400 h-32 rounded-2xl p-3 focus:ring-2 focus:ring-green-600 focus:outline-none resize-none"
               />
             </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="font-semibold text-green-500">
+                  Categories
+                </label>
+                <Select
+                  onValueChange={(val) =>
+                    setForm({
+                      ...form,
+                      categories: form.categories.includes(val)
+                        ? form.categories
+                        : [...form.categories, val],
+                    })
+                  }
+                >
+                  <SelectTrigger className="w-full h-12 rounded-2xl border-green-400 focus:ring-green-600">
+                    <SelectValue placeholder="Select Categories" />
+                  </SelectTrigger>
 
+                  <SelectContent>
+                    <SelectGroup>
+                      {categoriesList.map((cat) => (
+                        <SelectItem
+                          className="p-3 hover:border-l-4 hover:border-green-500"
+                          key={cat}
+                          value={cat}
+                        >
+                          {cat}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="font-semibold text-green-500">Tags</label>
+                <Select
+                  onValueChange={(val) =>
+                    setForm({
+                      ...form,
+                      tags: form.tags.includes(val)
+                        ? form.tags
+                        : [...form.tags, val],
+                    })
+                  }
+                >
+                  <SelectTrigger className="w-full h-12 rounded-2xl border-green-400 focus:ring-green-600">
+                    <SelectValue placeholder="Select Tags" />
+                  </SelectTrigger>
+
+                  <SelectContent>
+                    <SelectGroup>
+                      {tagsList.map((tag) => (
+                        <SelectItem
+                          className="p-3 hover:border-l-4 hover:border-green-500"
+                          key={tag}
+                          value={tag}
+                        >
+                          {tag}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
             {/* Prices */}
             <div className="grid grid-cols-2 gap-4">
               {/* Original Price */}
@@ -233,72 +298,7 @@ const tagsList = ["Pasta", "Sauce", "Cowboy", "Steak", "Burgers", "Spray"];
                 className="border-green-400 h-12 rounded-2xl focus:ring-2 focus:ring-green-600 focus:outline-none p-2"
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="font-semibold text-green-500">
-                  Categories
-                </label>
-                <Select
-                  onValueChange={(val) =>
-                    setForm({
-                      ...form,
-                      categories: form.categories.includes(val)
-                        ? form.categories
-                        : [...form.categories, val],
-                    })
-                  }
-                >
-                  <SelectTrigger className="w-full h-12 rounded-2xl border-green-400 focus:ring-green-600">
-                    <SelectValue placeholder="Select Categories" />
-                  </SelectTrigger>
 
-                  <SelectContent>
-                    <SelectGroup>
-                      {categoriesList.map((cat) => (
-                        <SelectItem
-                          className="p-3 hover:border-l-4 hover:border-green-500"
-                          key={cat}
-                          value={cat}
-                        >
-                          {cat}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <label className="font-semibold text-green-500">Tags</label>
-                <Select
-                  onValueChange={(val) =>
-                    setForm({
-                      ...form,
-                      tags: form.tags.includes(val)
-                        ? form.tags
-                        : [...form.tags, val],
-                    })
-                  }
-                >
-                  <SelectTrigger className="w-full h-12 rounded-2xl border-green-400 focus:ring-green-600">
-                    <SelectValue placeholder="Select Tags" />
-                  </SelectTrigger>
-
-                  <SelectContent>
-                    <SelectGroup>
-                      {tagsList.map((tag) => (
-                        <SelectItem
-                          className="p-3 hover:border-l-4 hover:border-green-500"
-                          key={tag}
-                          value={tag}
-                        >
-                          {tag}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
             <motion.button
               onClick={handleSubmit}
               whileHover={{
