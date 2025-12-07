@@ -87,7 +87,7 @@ const [sidebarOpen, setSidebarOpen] = useState(false);
       )}
 
       {/* Main Content */}
-      <main className="px-8 pb-8 pt-0 md:pt-8">
+      <main className="px-8 pb-8 pt-0 md:pt-8 md:flex-1">
         <Outlet />
       </main>
     </div>
