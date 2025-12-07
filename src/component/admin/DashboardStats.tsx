@@ -1,3 +1,4 @@
+import { useAppSelector } from "../../store/hook";
 import { Card, CardContent } from "../../components/ui/card";
 import { useMemo } from "react";
 import {
@@ -11,6 +12,7 @@ import {
   Bar,
   Legend,
 } from "recharts";
+import { RootState } from "@/store";
 
 interface IItem {
   id: number;
@@ -75,6 +77,10 @@ const items: IItem[] = [
 ];
 
 export default function DashboardStats() {
+    const { products, loading, error } = useAppSelector(
+      (state: RootState) => state.product
+    );
+    const lowStockProducts = products.filter((p) => p.stock < 20);
   const totalProducts = items.length;
 
   const totalStock = useMemo(
@@ -99,7 +105,11 @@ export default function DashboardStats() {
       count: map[Number(key)],
     }));
   }, []);
-
+const topSelling = [
+  { name: "T-Shirt", sales: 120 },
+  { name: "Sneakers", sales: 90 },
+  { name: "Backpack", sales: 70 },
+];
   return (
     <div className="p-8 min-h-screen bg-gradient-to-br from-green-50 to-white">
       <h1 className="text-4xl font-extrabold text-green-700 mb-8 text-center drop-shadow-md">
@@ -136,37 +146,80 @@ export default function DashboardStats() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Stock per Product */}
-        <Card className="p-6 shadow-xl rounded-2xl">
+        <Card className="p-6 shadow-2xl rounded-3xl bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200">
           <CardContent>
-            <h2 className="text-lg font-semibold text-green-800 mb-4">
-              Stock per Product
+            <h2 className="text-xl font-bold text-blue-900 mb-6">
+              Top Selling Products
             </h2>
             <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={items}>
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Bar dataKey="stock" fill="#22c55e" />
+              <BarChart
+                data={topSelling}
+                margin={{ top: 20, right: 20, left: 0, bottom: 20 }}
+              >
+                <XAxis
+                  dataKey="name"
+                  tick={{ fontSize: 14, fill: "#1e3a8a" }}
+                  tickLine={false}
+                />
+                <YAxis
+                  tick={{ fontSize: 14, fill: "#1e3a8a" }}
+                  axisLine={{ stroke: "#3b82f6" }}
+                />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "#f0f9ff",
+                    borderRadius: 10,
+                  }}
+                  itemStyle={{ color: "#1e40af", fontWeight: "bold" }}
+                />
+                <Legend
+                  verticalAlign="top"
+                  wrapperStyle={{ paddingBottom: 10 }}
+                />
+                <Bar
+                  dataKey="sales"
+                  fill="#3b82f6"
+                  radius={[10, 10, 0, 0]} // rounded top corners
+                  barSize={30}
+                  onMouseEnter={(data) => console.log("Hovered:", data)}
+                />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
 
-        {/* Discount distribution */}
-        <Card className="p-6 shadow-xl rounded-2xl">
+        <Card className="p-6 shadow-2xl rounded-3xl bg-gradient-to-br from-red-50 to-red-100 border border-red-200">
           <CardContent>
-            <h2 className="text-lg font-semibold text-green-800 mb-4">
-              Products per Discount %
+            <h2 className="text-xl font-bold text-red-700 mb-6">
+              Products Low in Stock
             </h2>
             <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={discountData}>
-                <XAxis dataKey="discount" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Bar dataKey="count" fill="#facc15" />
+              <BarChart
+                data={lowStockProducts}
+                margin={{ top: 20, right: 20, left: 0, bottom: 20 }}
+              >
+                <XAxis
+                  dataKey="name"
+                  tick={{ fontSize: 14, fill: "#b91c1c" }}
+                  tickLine={false}
+                />
+                <YAxis
+                  tick={{ fontSize: 14, fill: "#b91c1c" }}
+                  axisLine={{ stroke: "#ef4444" }}
+                />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "#fee2e2",
+                    borderRadius: 10,
+                  }}
+                  itemStyle={{ color: "#991b1b", fontWeight: "bold" }}
+                />
+                <Bar
+                  dataKey="stock"
+                  fill="#ef4444"
+                  radius={[10, 10, 0, 0]} // rounded top corners
+                  barSize={30}
+                />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>

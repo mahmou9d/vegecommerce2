@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { ShoppingCart, Package, Users, DollarSign } from "lucide-react";
-import { ResponsiveContainer, CartesianGrid, XAxis, YAxis, Tooltip, Legend, Line, LineChart } from "recharts";
+import { ResponsiveContainer, CartesianGrid, XAxis, YAxis, Tooltip, Legend, Line, LineChart, BarChart, Bar } from "recharts";
 
 interface IData{
   month:string
@@ -80,30 +80,46 @@ export default function AdminDashboard() {
       </div>
 
       {/* ========== Charts Section (Placeholder) ========== */}
-      <div className="bg-white p-10 rounded-2xl shadow-md h-96">
-        <h2 className="text-lg font-semibold mb-3">Sales & Orders Chart</h2>
+      <div className="bg-white p-8 rounded-3xl shadow-2xl h-96">
+        <h2 className="text-xl font-bold text-gray-800 mb-5">
+          Sales & Orders Chart
+        </h2>
 
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={data}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="month" />
-            <YAxis />
-            <Tooltip />
-            <Legend />
+          <BarChart
+            data={data}
+            margin={{ top: 20, right: 20, left: 0, bottom: 20 }}
+            barCategoryGap="20%"
+          >
+            <CartesianGrid strokeDasharray="4 4" stroke="#e5e7eb" />
+            <XAxis
+              dataKey="month"
+              tick={{ fontSize: 14, fill: "#374151" }}
+              tickLine={false}
+            />
+            <YAxis
+              tick={{ fontSize: 14, fill: "#374151" }}
+              axisLine={{ stroke: "#4F46E5" }}
+            />
+            <Tooltip
+              contentStyle={{ backgroundColor: "#f9fafb", borderRadius: 10 }}
+              itemStyle={{ fontWeight: "bold", color: "#1f2937" }}
+            />
+            <Legend verticalAlign="top" wrapperStyle={{ paddingBottom: 10 }} />
 
-            <Line
-              type="monotone"
+            <Bar
               dataKey="sales"
-              stroke="#4F46E5"
-              strokeWidth={3}
+              fill="#4F46E5"
+              barSize={30}
+              radius={[6, 6, 0, 0]}
             />
-            <Line
-              type="monotone"
+            <Bar
               dataKey="orders"
-              stroke="#10B981"
-              strokeWidth={3}
+              fill="#10B981"
+              barSize={30}
+              radius={[6, 6, 0, 0]}
             />
-          </LineChart>
+          </BarChart>
         </ResponsiveContainer>
       </div>
 
