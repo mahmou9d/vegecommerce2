@@ -18,33 +18,20 @@ export default function AdminDashboard() {
     { month: "Jun", sales: 4390, orders: 1890 },
   ];
   return (
-    <div className="space-y-10">
-      {/* ========== Header ========== */}
-      <div className="mb-8">
-        <h1
-          className="
-    text-4xl font-extrabold tracking-tight 
-    text-gray-900
-  "
-        >
+    <div className="">
+      {/* Header */}
+      <div className="mb-6">
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-gray-900">
           Dashboard Overview
         </h1>
-
-        <p
-          className="
-    text-gray-500 text-base mt-2 
-    leading-relaxed
-  "
-        >
+        <p className="text-xs md:text-sm text-gray-500 mt-1 md:mt-2">
           Quick summary of your store performance
         </p>
-
-        {/* Underline Accent */}
-        <div className="mt-3 w-24 h-1.5 bg-gradient-to-r from-blue-700 to-green-700 rounded-full"></div>
+        <div className="mt-2 w-16 h-1.5 rounded-full bg-gradient-to-r from-blue-700 to-green-700"></div>
       </div>
 
-      {/* ========== Stats Cards ========== */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
         {[
           {
             title: "Total Sales",
@@ -73,15 +60,15 @@ export default function AdminDashboard() {
         ].map(({ title, value, Icon, gradient }, i) => (
           <Card
             key={i}
-            className={`p-6 rounded-3xl bg-gradient-to-r ${gradient} text-white shadow-2xl hover:shadow-3xl transition-shadow duration-500`}
+            className={`p-2 md:p-4 rounded-2xl sm:rounded-3xl text-white bg-gradient-to-r ${gradient} shadow-lg hover:shadow-2xl transition`}
           >
             <CardContent className="flex items-center justify-between">
               <div>
-                <h2 className="text-2xl font-semibold flex items-center space-x-2">
-                  <Icon size={24} />
+                <h2 className="text-lg sm:text-xl md:text-2xl font-semibold flex items-center gap-2">
+                  <Icon size={22} />
                   <span>{title}</span>
                 </h2>
-                <p className="text-4xl md:text-5xl font-extrabold mt-2">
+                <p className="text-2xl sm:text-3xl md:text-4xl font-extrabold mt-1">
                   {value}
                 </p>
               </div>
@@ -90,122 +77,76 @@ export default function AdminDashboard() {
         ))}
       </div>
 
-      {/* ========== Charts Section (Placeholder) ========== */}
-      <div className="bg-white p-10 rounded-3xl shadow-2xl h-96">
-        <h2 className="text-xl font-bold text-gray-800 mb-5">
+      {/* Chart Section */}
+      <div className="bg-white p-7 md:p-10 rounded-2xl shadow-lg h-72 sm:h-80 md:h-96 mb-10">
+        <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-800 mb-4">
           Sales & Orders Chart
         </h2>
-
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
             data={data}
-            margin={{ top: 0, right: 30, left: 0, bottom: 10 }}
-            barCategoryGap="25%"
+            margin={{ top: 0, right: 20, left: 0, bottom: 10 }}
+            barCategoryGap="20%"
           >
             <CartesianGrid
               strokeDasharray="3 3"
-              stroke="#d1d5db"
-              opacity={0.6}
+              stroke="#e5e7eb"
               vertical={false}
             />
-
             <XAxis
               dataKey="month"
-              tick={{ fontSize: 14, fill: "#1f2937", fontWeight: 500 }}
+              tick={{ fontSize: 12, fill: "#1f2937" }}
               tickLine={false}
-              axisLine={{ stroke: "#e5e7eb" }}
+              axisLine={{ stroke: "#d1d5db" }}
             />
-
             <YAxis
-              tick={{ fontSize: 14, fill: "#1f2937", fontWeight: 500 }}
+              tick={{ fontSize: 12, fill: "#1f2937" }}
               axisLine={false}
               tickLine={false}
             />
-
-            <Tooltip
-              cursor={{ fill: "rgba(0,0,0,0.03)" }}
-              contentStyle={{
-                backgroundColor: "#ffffff",
-                borderRadius: "12px",
-                padding: "10px 15px",
-                border: "1px solid #e5e7eb",
-                boxShadow: "0 4px 14px rgba(0,0,0,0.1)",
-              }}
-              itemStyle={{ fontWeight: 600, color: "#111827" }}
-              labelStyle={{ color: "#6b7280", marginBottom: 5 }}
-            />
-
-            <Legend
-              verticalAlign="top"
-              wrapperStyle={{
-                paddingBottom: 20,
-                fontWeight: 600,
-                color: "#374151",
-              }}
-            />
-
+            <Tooltip />
+            <Legend verticalAlign="top" />
             <Bar
               dataKey="sales"
               fill="#4F46E5"
-              barSize={34}
-              radius={[10, 10, 0, 0]}
-              animationDuration={900}
+              radius={[6, 6, 0, 0]}
+              barSize={20}
             />
-
             <Bar
               dataKey="orders"
               fill="#10B981"
-              barSize={34}
-              radius={[10, 10, 0, 0]}
-              animationDuration={900}
+              radius={[6, 6, 0, 0]}
+              barSize={20}
             />
           </BarChart>
         </ResponsiveContainer>
       </div>
 
-      {/* ========== Recent Orders Table ========== */}
-      <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
-        <h2 className="text-2xl font-bold text-gray-800 mb-6 tracking-tight">
+      {/* Recent Orders Table */}
+      <div className="bg-white rounded-2xl p-4 sm:p-6 shadow-lg border border-gray-100 overflow-x-auto">
+        <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-800 mb-4">
           Recent Orders
         </h2>
-
-        <table className="w-full border-collapse">
+        <table className="min-w-[600px] w-full border-collapse">
           <thead>
-            <tr className="text-gray-500 text-sm border-b">
-              <th className="py-3 px-4 font-semibold">Order ID</th>
-              <th className="py-3 px-4 font-semibold">Customer</th>
-              <th className="py-3 px-4 font-semibold">Total</th>
-              <th className="py-3 px-4 font-semibold">Status</th>
+            <tr className="text-gray-500 text-sm sm:text-base border-b">
+              <th className="py-2 px-4 text-left font-medium">Order ID</th>
+              <th className="py-2 px-4 text-left font-medium">Customer</th>
+              <th className="py-2 px-4 text-left font-medium">Total</th>
+              <th className="py-2 px-4 text-left font-medium">Status</th>
             </tr>
           </thead>
-
-          <tbody className="text-gray-700">
+          <tbody className="text-gray-700 text-sm sm:text-base">
             {[1, 2, 3, 4].map((id) => (
               <tr
                 key={id}
-                className="group hover:bg-gray-50 transition border-b last:border-none"
+                className="hover:bg-gray-50 transition border-b last:border-none"
               >
-                <td className="py-4 px-auto font-medium text-center">
-                  #{id}002
-                </td>
-                <td className="py-4 px-auto text-center">Ahmed Ali</td>
-                <td className="py-4 px-auto font-semibold text-gray-900 text-center">
-                  $150
-                </td>
-
-                <td className="py-4 px-auto text-center">
-                  <span
-                    className="
-              px-3 py-1.5 
-              rounded-full 
-              text-sm 
-              font-medium
-              bg-green-100 
-              text-green-700 
-              border border-green-200
-              shadow-sm
-            "
-                  >
+                <td className="py-2 px-4 font-medium">#{id}002</td>
+                <td className="py-2 px-4">Ahmed Ali</td>
+                <td className="py-2 px-4 font-semibold">$150</td>
+                <td className="py-2 px-4">
+                  <span className="px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-700 border border-green-200">
                     Completed
                   </span>
                 </td>

@@ -1,6 +1,6 @@
 import { useAppSelector } from "../../store/hook";
 import { Card, CardContent } from "../../components/ui/card";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   LineChart,
   Line,
@@ -80,18 +80,36 @@ export default function DashboardStats() {
     const { products, loading, error } = useAppSelector(
       (state: RootState) => state.product
     );
-    // const lowStockProducts = products.filter((p) => p.stock < 20);
+    const [tickFontSize, setTickFontSize] = useState(14);
+
+    useEffect(() => {
+      const handleResize = () => {
+        if (window.innerWidth < 640) {
+          setTickFontSize(10); // شاشة صغيرة
+        } else if (window.innerWidth < 1024) {
+          setTickFontSize(12); // شاشة متوسطة
+        } else {
+          setTickFontSize(14); // شاشة كبيرة
+        }
+      };
+
+      handleResize(); // initial
+      window.addEventListener("resize", handleResize);
+
+      return () => window.removeEventListener("resize", handleResize);
+    }, []);
+    const lowStockProducts = products.filter((p) => p.stock < 20);
   const totalProducts = items.length;
   const [page, setPage] = useState(0);
-  const itemsPerPage = 10;
+  const itemsPerPage = 4;
 
   // تقسيم المنتجات حسب الصفحة
-  const paginatedProducts = products.slice(
+  const paginatedProducts = lowStockProducts.slice(
     page * itemsPerPage,
     (page + 1) * itemsPerPage
   );
 
-  const totalPages = Math.ceil(products.length / itemsPerPage);
+  const totalPages = Math.ceil(lowStockProducts.length / itemsPerPage);
   const totalStock = useMemo(
     () => items.reduce((acc, item) => acc + item.stock, 0),
     []
@@ -134,7 +152,7 @@ const topSelling = [
       <div className="mb-8">
         <h1
           className="
-    text-4xl font-extrabold tracking-tight 
+    text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight 
     text-gray-900
   "
         >
@@ -169,7 +187,7 @@ const topSelling = [
         ].map((card, index) => (
           <Card
             key={index}
-            className={`p-6 rounded-3xl bg-gradient-to-r ${card.gradient} text-white shadow-2xl hover:shadow-3xl transition-shadow duration-500`}
+            className={`p-2 md:p-6 rounded-3xl bg-gradient-to-r ${card.gradient} text-white shadow-2xl hover:shadow-3xl transition-shadow duration-500`}
           >
             <CardContent className="text-center space-y-4">
               <h2 className="text-2xl font-semibold flex items-center justify-center space-x-2">
@@ -185,9 +203,9 @@ const topSelling = [
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
-        <Card className="p-6 shadow-2xl rounded-3xl bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 flex flex-col">
+        <Card className="p-2 md:p-6 shadow-2xl rounded-3xl bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 flex flex-col">
           <CardContent className="flex-1 flex flex-col">
-            <h2 className="text-xl font-bold text-blue-900 mb-6">
+            <h2 className="text-xl font-bold text-blue-900">
               Top Selling Products
             </h2>
             <div className="flex-1">
@@ -198,7 +216,7 @@ const topSelling = [
                 >
                   <XAxis
                     dataKey="name"
-                    tick={{ fontSize: 14, fill: "#1e3a8a" }}
+                    tick={{ fontSize: tickFontSize, fill: "#1e3a8a" }}
                     tickLine={false}
                   />
                   <YAxis
@@ -228,9 +246,9 @@ const topSelling = [
           </CardContent>
         </Card>
 
-        <Card className="p-6 shadow-2xl rounded-3xl bg-gradient-to-br from-red-50 to-red-100 border border-red-200 flex flex-col">
+        <Card className="p-2 md:p-6 shadow-2xl rounded-3xl bg-gradient-to-br from-red-50 to-red-100 border border-red-200 flex flex-col">
           <CardContent className="flex-1 flex flex-col">
-            <h2 className="text-xl font-bold text-red-700 mb-6 flex justify-between">
+            <h2 className="text-xl font-bold text-red-700 flex justify-between">
               <span>Products Low in Stock</span>
               <span>{`Stock < 20`}</span>
             </h2>
@@ -238,12 +256,12 @@ const topSelling = [
             <div className="flex-1">
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart
-                  data={paginatedProductsSec}
+                  data={paginatedProducts}
                   margin={{ top: 20, right: 20, left: 0, bottom: 20 }}
                 >
                   <XAxis
                     dataKey="name"
-                    tick={{ fontSize: 14, fill: "#b91c1c" }}
+                    tick={{ fontSize: tickFontSize, fill: "#b91c1c" }}
                     tickLine={false}
                     interval={0}
                   />
@@ -272,20 +290,20 @@ const topSelling = [
             <div className="flex justify-center mt-4 space-x-2">
               <button
                 className="px-3 py-1 bg-red-200 text-red-700 rounded disabled:opacity-50"
-                onClick={() => setPageSec((prev) => Math.max(prev - 1, 0))}
-                disabled={pageSec === 0}
+                onClick={() => setPage((prev) => Math.max(prev - 1, 0))}
+                disabled={page === 0}
               >
                 Prev
               </button>
               <span className="px-3 py-1 text-red-700 font-semibold">
-                {pageSec + 1} / {totalPagesSec}
+                {page + 1} / {totalPages}
               </span>
               <button
                 className="px-3 py-1 bg-red-200 text-red-700 rounded disabled:opacity-50"
                 onClick={() =>
-                  setPageSec((prev) => Math.min(prev + 1, totalPagesSec - 1))
+                  setPage((prev) => Math.min(prev + 1, totalPages - 1))
                 }
-                disabled={pageSec === totalPagesSec - 1}
+                disabled={page === totalPages - 1}
               >
                 Next
               </button>
@@ -294,20 +312,18 @@ const topSelling = [
         </Card>
       </div>
 
-      <Card className="p-6 mt-10 shadow-2xl rounded-3xl bg-gradient-to-br from-yellow-50 to-yellow-100 border border-yellow-200">
+      <Card className="p-2 md:p-6 mt-10 shadow-2xl rounded-3xl bg-gradient-to-br from-yellow-50 to-yellow-100 border border-yellow-200">
         <CardContent>
-          <h2 className="text-xl font-bold text-yellow-800 mb-6">
-            Products Stock
-          </h2>
+          <h2 className="text-xl font-bold text-yellow-800">Products Stock</h2>
 
           <ResponsiveContainer width="100%" height={300}>
             <BarChart
-              data={paginatedProducts}
+              data={paginatedProductsSec}
               margin={{ top: 20, right: 20, left: 0, bottom: 20 }}
             >
               <XAxis
                 dataKey="name"
-                tick={{ fontSize: 14, fill: "#b45309" }}
+                tick={{ fontSize: tickFontSize, fill: "#b45309" }}
                 tickLine={false}
               />
               <YAxis
@@ -315,7 +331,12 @@ const topSelling = [
                 axisLine={{ stroke: "#f59e0b" }}
               />
               <Tooltip
-                contentStyle={{ backgroundColor: "#fef3c7", borderRadius: 10 }}
+                contentStyle={{
+                  backgroundColor: "#fef3c7", // لون الخلفية اللي انت عايزه
+                  border: "none", // الغي البوردر الأسود
+                  boxShadow: "none", // الغي أي ظل
+                  borderRadius: 10, // الزوايا مدورة لو تحب
+                }}
                 itemStyle={{ color: "#92400e", fontWeight: "bold" }}
               />
               <Bar
@@ -331,20 +352,20 @@ const topSelling = [
           <div className="flex justify-center mt-4 space-x-2">
             <button
               className="px-3 py-1 bg-yellow-200 text-yellow-800 rounded disabled:opacity-50"
-              onClick={() => setPage((prev) => Math.max(prev - 1, 0))}
-              disabled={page === 0}
+              onClick={() => setPageSec((prev) => Math.max(prev - 1, 0))}
+              disabled={pageSec === 0}
             >
               Prev
             </button>
             <span className="px-3 py-1 text-yellow-800 font-semibold">
-              {page + 1} / {totalPages}
+              {pageSec + 1} / {totalPagesSec}
             </span>
             <button
               className="px-3 py-1 bg-yellow-200 text-yellow-800 rounded disabled:opacity-50"
               onClick={() =>
-                setPage((prev) => Math.min(prev + 1, totalPages - 1))
+                setPageSec((prev) => Math.min(prev + 1, totalPagesSec - 1))
               }
-              disabled={page === totalPages - 1}
+              disabled={pageSec === totalPagesSec - 1}
             >
               Next
             </button>

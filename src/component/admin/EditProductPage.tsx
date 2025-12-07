@@ -9,7 +9,14 @@ import { FiTag, FiDollarSign } from "react-icons/fi";
 import { useNavigate } from "react-router";
 import { useAppSelector, useAppDispatch } from "../../store/hook";
 import { clearEditingProduct } from "../../store/editingProductSlice";
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../../components/ui/select";
 
 interface IItem {
   id?: number;
@@ -53,29 +60,28 @@ export default function EditProductPage() {
   const handleSubmit = () => {
     if (editingProduct.id) {
       // Update existing product
-      setItems((prev:any) =>
-        prev.map((item:any) => (item.id === editingProduct.id ? form : item))
+      setItems((prev: any) =>
+        prev.map((item: any) => (item.id === editingProduct.id ? form : item))
       );
       dispatch(clearEditingProduct()); // بعد التعديل امسح ال state
     } else {
       // Add new product
       const newItem = { ...form, id: Date.now() };
-      setItems((prev:any) => [newItem, ...prev]);
+      setItems((prev: any) => [newItem, ...prev]);
     }
 
-setForm({
-  name: "",
-  description: "",
-  original_price: "",
-  final_price: "",
-  discount: 0,
-  stock: 0,
-  img: "",
-  imgFile: null,
-  categories: [],
-  tags: [],
-});
-
+    setForm({
+      name: "",
+      description: "",
+      original_price: "",
+      final_price: "",
+      discount: 0,
+      stock: 0,
+      img: "",
+      imgFile: null,
+      categories: [],
+      tags: [],
+    });
   };
 
   const handleDelete = (id?: number) => {
@@ -83,36 +89,36 @@ setForm({
     setItems((prev) => prev.filter((item) => item.id !== id));
   };
   const handleChangePrice = (
-  e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-) => {
-  const { name, value } = e.target;
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
 
-  setForm((prev) => {
-    const updated = { ...prev, [name]: value };
+    setForm((prev) => {
+      const updated = { ...prev, [name]: value };
 
-    // حساب السعر النهائي تلقائياً
-    const original = parseFloat(updated.original_price) || 0;
-    const discount = parseFloat(updated.discount.toString()) || 0;
+      // حساب السعر النهائي تلقائياً
+      const original = parseFloat(updated.original_price) || 0;
+      const discount = parseFloat(updated.discount.toString()) || 0;
 
-    const final = original - (original * discount) / 100;
+      const final = original - (original * discount) / 100;
 
-    return { ...updated, final_price: final.toFixed(2) };
-  });
-};
+      return { ...updated, final_price: final.toFixed(2) };
+    });
+  };
 
-const categoriesList = [
-  "Bestsellers",
-  "Breads & Sweats",
-  "Cleaning Materials",
-  "Fishes & Raw Meats",
-  "Fruits & Vegetables",
-  "Milks & Proteins",
-  "Others",
-  "Supermarket",
-  "Uncategorized",
-];
+  const categoriesList = [
+    "Bestsellers",
+    "Breads & Sweats",
+    "Cleaning Materials",
+    "Fishes & Raw Meats",
+    "Fruits & Vegetables",
+    "Milks & Proteins",
+    "Others",
+    "Supermarket",
+    "Uncategorized",
+  ];
 
-const tagsList = ["Pasta", "Sauce", "Cowboy", "Steak", "Burgers", "Spray"];
+  const tagsList = ["Pasta", "Sauce", "Cowboy", "Steak", "Burgers", "Spray"];
 
   return (
     <div className="min-h-screen">
