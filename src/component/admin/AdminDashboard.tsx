@@ -85,38 +85,59 @@ export default function AdminDashboard() {
           Sales & Orders Chart
         </h2>
 
-        <ResponsiveContainer width="100%" height="100%">
+        <ResponsiveContainer width="100%" height={300}>
           <BarChart
             data={data}
             margin={{ top: 20, right: 20, left: 0, bottom: 20 }}
-            barCategoryGap="20%"
+            barCategoryGap="25%"
           >
-            <CartesianGrid strokeDasharray="4 4" stroke="#e5e7eb" />
+            {/* Grid خفيف وناعم */}
+            <CartesianGrid
+              strokeDasharray="3 3"
+              stroke="#e5e7eb"
+              vertical={false}
+            />
+
+            {/* المحاور */}
             <XAxis
               dataKey="month"
-              tick={{ fontSize: 14, fill: "#374151" }}
+              tick={{ fontSize: 13, fill: "#4b5563", fontWeight: 500 }}
               tickLine={false}
+              axisLine={{ stroke: "#d1d5db" }}
             />
             <YAxis
-              tick={{ fontSize: 14, fill: "#374151" }}
-              axisLine={{ stroke: "#4F46E5" }}
+              tick={{ fontSize: 13, fill: "#4b5563", fontWeight: 500 }}
+              axisLine={{ stroke: "#d1d5db" }}
             />
-            <Tooltip
-              contentStyle={{ backgroundColor: "#f9fafb", borderRadius: 10 }}
-              itemStyle={{ fontWeight: "bold", color: "#1f2937" }}
-            />
-            <Legend verticalAlign="top" wrapperStyle={{ paddingBottom: 10 }} />
 
+            {/* Tooltip */}
+            <Tooltip
+              contentStyle={{
+                backgroundColor: "#f3f4f6",
+                borderRadius: 8,
+                border: "1px solid #d1d5db",
+              }}
+              itemStyle={{ fontWeight: 600, color: "#111827" }}
+            />
+
+            {/* Legend */}
+            <Legend
+              verticalAlign="top"
+              align="right"
+              wrapperStyle={{ paddingBottom: 10, fontSize: 13 }}
+            />
+
+            {/* Bars مع حواف دائرية */}
             <Bar
               dataKey="sales"
               fill="#4F46E5"
-              barSize={30}
+              barSize={28}
               radius={[6, 6, 0, 0]}
             />
             <Bar
               dataKey="orders"
               fill="#10B981"
-              barSize={30}
+              barSize={28}
               radius={[6, 6, 0, 0]}
             />
           </BarChart>

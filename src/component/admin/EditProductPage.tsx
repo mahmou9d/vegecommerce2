@@ -328,7 +328,7 @@ const tagsList = ["Pasta", "Sauce", "Cowboy", "Steak", "Burgers", "Spray"];
               }}
               className="w-full py-3 rounded-2xl bg-gradient-to-r from-green-500 to-green-700 text-white text-lg font-semibold shadow-lg transition-all duration-300"
             >
-              Edit Products
+            Products
             </motion.button>
           </CardContent>
         </Card>
