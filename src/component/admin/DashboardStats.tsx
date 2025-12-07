@@ -130,47 +130,58 @@ const topSelling = [
   { name: "Backpack", sales: 70 },
 ];
   return (
-    <div className="p-8 min-h-screen bg-gradient-to-br from-green-50 to-white">
-      <h1 className="text-4xl font-extrabold text-green-700 mb-8 text-center drop-shadow-md">
+    <div className="min-h-screen">
+      <div className="mb-8">
+        <h1
+          className="
+    text-4xl font-extrabold tracking-tight 
+    text-gray-900
+  "
+        >
+          Products Statistics
+        </h1>
+        {/* Underline Accent */}
+        <div className="mt-3 w-24 h-1.5 bg-gradient-to-r from-blue-700 to-green-700 rounded-full"></div>
+      </div>
+      {/* <h1 className="text-4xl font-extrabold text-green-700 mb-8 text-center drop-shadow-md">
         Products Statistics
-      </h1>
-
+      </h1> */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        {/* Total Products */}
-        <Card className="p-6 shadow-xl rounded-3xl bg-white border-l-8 border-green-500 hover:shadow-2xl transition-shadow">
-          <CardContent className="text-center">
-            <h2 className="text-sm font-semibold text-gray-500 uppercase mb-2">
-              Total Products
-            </h2>
-            <p className="text-3xl md:text-4xl font-bold text-gray-900">
-              {totalProducts}
-            </p>
-          </CardContent>
-        </Card>
-
-        {/* Total Stock */}
-        <Card className="p-6 shadow-xl rounded-3xl bg-white border-l-8 border-yellow-500 hover:shadow-2xl transition-shadow">
-          <CardContent className="text-center">
-            <h2 className="text-sm font-semibold text-gray-500 uppercase mb-2">
-              Total Stock
-            </h2>
-            <p className="text-3xl md:text-4xl font-bold text-gray-900">
-              {totalStock}
-            </p>
-          </CardContent>
-        </Card>
-
-        {/* Price of the Goods */}
-        <Card className="p-6 shadow-xl rounded-3xl bg-white border-l-8 border-blue-500 hover:shadow-2xl transition-shadow">
-          <CardContent className="text-center">
-            <h2 className="text-sm font-semibold text-gray-500 uppercase mb-2">
-              Price of the Goods
-            </h2>
-            <p className="text-3xl md:text-4xl font-bold text-gray-900">
-              ${avgPrice.toFixed(2)}
-            </p>
-          </CardContent>
-        </Card>
+        {[
+          {
+            title: "Total Products",
+            value: totalProducts,
+            icon: "📦",
+            gradient: "from-green-400 to-green-600",
+          },
+          {
+            title: "Total Stock",
+            value: totalStock,
+            icon: "📊",
+            gradient: "from-yellow-400 to-yellow-600",
+          },
+          {
+            title: "Price of the Goods",
+            value: `$${avgPrice.toFixed(2)}`,
+            icon: "💰",
+            gradient: "from-blue-400 to-blue-600",
+          },
+        ].map((card, index) => (
+          <Card
+            key={index}
+            className={`p-6 rounded-3xl bg-gradient-to-r ${card.gradient} text-white shadow-2xl hover:shadow-3xl transition-shadow duration-500`}
+          >
+            <CardContent className="text-center space-y-4">
+              <h2 className="text-2xl font-semibold flex items-center justify-center space-x-2">
+                <span>{card.icon}</span>
+                <span>{card.title}</span>
+              </h2>
+              <p className="text-4xl md:text-5xl font-extrabold">
+                {card.value}
+              </p>
+            </CardContent>
+          </Card>
+        ))}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">

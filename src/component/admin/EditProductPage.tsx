@@ -115,10 +115,19 @@ const categoriesList = [
 const tagsList = ["Pasta", "Sauce", "Cowboy", "Steak", "Burgers", "Spray"];
 
   return (
-    <div className="p-8 min-h-screen bg-gradient-to-br from-green-50 to-white">
-      <h1 className="text-4xl font-extrabold text-green-700 mb-8 text-center drop-shadow-md">
-        Product Admin Dashboard
-      </h1>
+    <div className="min-h-screen">
+      <div className="mb-8">
+        <h1
+          className="
+    text-4xl font-extrabold tracking-tight 
+    text-gray-900
+  "
+        >
+          Product Admin Dashboard
+        </h1>
+        {/* Underline Accent */}
+        <div className="mt-3 w-24 h-1.5 bg-gradient-to-r from-blue-700 to-green-700 rounded-full"></div>
+      </div>
 
       {/* Form Card */}
       <motion.div
@@ -126,13 +135,13 @@ const tagsList = ["Pasta", "Sauce", "Cowboy", "Steak", "Burgers", "Spray"];
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
       >
-        <Card className="rounded-3xl shadow-2xl backdrop-blur-md bg-white/30 border border-green-300 mb-10">
+        <Card className="rounded-3xl shadow-2xl backdrop-blur-md bg-white/40 border border-green-300 mb-10">
           <CardContent className="space-y-6 p-6">
             <h2 className="text-2xl font-bold text-green-800">Add Product</h2>
 
             {/* Product Name */}
             <div className="space-y-2">
-              <label className="font-semibold text-green-500">
+              <label className="font-semibold text-green-600">
                 Product Name
               </label>
               <Input
@@ -140,13 +149,13 @@ const tagsList = ["Pasta", "Sauce", "Cowboy", "Steak", "Burgers", "Spray"];
                 placeholder="Product Name"
                 value={form.name}
                 onChange={handleChange}
-                className="border-green-400 h-12 rounded-2xl focus:ring-2 focus:ring-green-600 focus:outline-none"
+                className="border-green-400 h-12 rounded-2xl focus:ring-2 focus:ring-green-500 focus:outline-none transition-shadow duration-300 shadow-sm hover:shadow-md"
               />
             </div>
 
             {/* Description */}
             <div className="space-y-2">
-              <label className="font-semibold text-green-500">
+              <label className="font-semibold text-green-600">
                 Description
               </label>
               <Textarea
@@ -154,12 +163,14 @@ const tagsList = ["Pasta", "Sauce", "Cowboy", "Steak", "Burgers", "Spray"];
                 placeholder="Description..."
                 value={form.description}
                 onChange={handleChange}
-                className="border-green-400 h-32 rounded-2xl p-3 focus:ring-2 focus:ring-green-600 focus:outline-none resize-none"
+                className="border-green-400 h-32 rounded-2xl p-3 focus:ring-2 focus:ring-green-500 focus:outline-none resize-none transition-shadow duration-300 shadow-sm hover:shadow-md"
               />
             </div>
+
+            {/* Categories & Tags */}
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="font-semibold text-green-500">
+                <label className="font-semibold text-green-600">
                   Categories
                 </label>
                 <Select
@@ -172,10 +183,9 @@ const tagsList = ["Pasta", "Sauce", "Cowboy", "Steak", "Burgers", "Spray"];
                     })
                   }
                 >
-                  <SelectTrigger className="w-full h-12 rounded-2xl border-green-400 focus:ring-green-600">
+                  <SelectTrigger className="w-full h-12 rounded-2xl border-green-400 focus:ring-green-500">
                     <SelectValue placeholder="Select Categories" />
                   </SelectTrigger>
-
                   <SelectContent>
                     <SelectGroup>
                       {categoriesList.map((cat) => (
@@ -191,8 +201,9 @@ const tagsList = ["Pasta", "Sauce", "Cowboy", "Steak", "Burgers", "Spray"];
                   </SelectContent>
                 </Select>
               </div>
+
               <div>
-                <label className="font-semibold text-green-500">Tags</label>
+                <label className="font-semibold text-green-600">Tags</label>
                 <Select
                   onValueChange={(val) =>
                     setForm({
@@ -203,10 +214,9 @@ const tagsList = ["Pasta", "Sauce", "Cowboy", "Steak", "Burgers", "Spray"];
                     })
                   }
                 >
-                  <SelectTrigger className="w-full h-12 rounded-2xl border-green-400 focus:ring-green-600">
+                  <SelectTrigger className="w-full h-12 rounded-2xl border-green-400 focus:ring-green-500">
                     <SelectValue placeholder="Select Tags" />
                   </SelectTrigger>
-
                   <SelectContent>
                     <SelectGroup>
                       {tagsList.map((tag) => (
@@ -223,11 +233,11 @@ const tagsList = ["Pasta", "Sauce", "Cowboy", "Steak", "Burgers", "Spray"];
                 </Select>
               </div>
             </div>
+
             {/* Prices */}
             <div className="grid grid-cols-2 gap-4">
-              {/* Original Price */}
               <div className="space-y-2">
-                <label className="font-semibold text-green-500">
+                <label className="font-semibold text-green-600">
                   Original Price
                 </label>
                 <Input
@@ -236,13 +246,12 @@ const tagsList = ["Pasta", "Sauce", "Cowboy", "Steak", "Burgers", "Spray"];
                   placeholder="Original Price"
                   value={form.original_price}
                   onChange={handleChangePrice}
-                  className="border-green-400 h-12 rounded-2xl focus:ring-2 focus:ring-green-600 focus:outline-none"
+                  className="border-green-400 h-12 rounded-2xl focus:ring-2 focus:ring-green-500 focus:outline-none transition-shadow duration-300 shadow-sm hover:shadow-md"
                 />
               </div>
 
-              {/* Final Price (Auto Calculated) */}
               <div className="space-y-2">
-                <label className="font-semibold text-green-500">
+                <label className="font-semibold text-green-600">
                   Final Price
                 </label>
                 <Input
@@ -251,15 +260,15 @@ const tagsList = ["Pasta", "Sauce", "Cowboy", "Steak", "Burgers", "Spray"];
                   placeholder="Final Price"
                   value={form.final_price}
                   disabled
-                  className="border-green-400 bg-gray-100 h-12 rounded-2xl focus:ring-2 focus:ring-green-600 focus:outline-none"
+                  className="border-green-400 bg-gray-100 h-12 rounded-2xl focus:ring-2 focus:ring-green-500 focus:outline-none"
                 />
               </div>
             </div>
 
+            {/* Discount & Stock */}
             <div className="grid grid-cols-2 gap-4">
-              {/* Discount */}
               <div className="space-y-2">
-                <label className="font-semibold text-green-500">
+                <label className="font-semibold text-green-600">
                   Discount (%)
                 </label>
                 <Input
@@ -268,68 +277,59 @@ const tagsList = ["Pasta", "Sauce", "Cowboy", "Steak", "Burgers", "Spray"];
                   placeholder="Discount %"
                   value={form.discount}
                   onChange={handleChangePrice}
-                  className="border-green-400 h-12 rounded-2xl focus:ring-2 focus:ring-green-600 focus:outline-none"
+                  className="border-green-400 h-12 rounded-2xl focus:ring-2 focus:ring-green-500 focus:outline-none transition-shadow duration-300 shadow-sm hover:shadow-md"
                 />
               </div>
 
-              {/* Stock */}
               <div className="space-y-2">
-                <label className="font-semibold text-green-500">Stock</label>
+                <label className="font-semibold text-green-600">Stock</label>
                 <Input
                   name="stock"
                   type="number"
                   placeholder="Stock"
                   value={form.stock}
                   onChange={handleChange}
-                  className="border-green-400 h-12 rounded-2xl focus:ring-2 focus:ring-green-600 focus:outline-none"
+                  className="border-green-400 h-12 rounded-2xl focus:ring-2 focus:ring-green-500 focus:outline-none transition-shadow duration-300 shadow-sm hover:shadow-md"
                 />
               </div>
             </div>
 
             {/* Image Upload */}
             <div className="space-y-2">
-              <label className="font-semibold text-green-500">
+              <label className="font-semibold text-green-600">
                 Product Image
               </label>
               <Input
                 name="imgFile"
                 type="file"
                 onChange={handleFileChange}
-                className="border-green-400 h-12 rounded-2xl focus:ring-2 focus:ring-green-600 focus:outline-none p-2"
+                className="border-green-400 h-12 rounded-2xl focus:ring-2 focus:ring-green-500 focus:outline-none p-2"
               />
             </div>
 
-            <motion.button
-              onClick={handleSubmit}
-              whileHover={{
-                // scale: 1.05,
-                boxShadow: "0px 8px 20px rgba(34,197,94,0.6)",
-              }}
-              whileTap={{
-                // scale: 0.97,
-                boxShadow: "0px 4px 10px rgba(34,197,94,0.4)",
-              }}
-              className="w-full py-3 rounded-2xl bg-gradient-to-r from-green-500 to-green-700 text-white text-lg font-semibold shadow-lg transition-all duration-300"
-            >
-              Save Product
-            </motion.button>
-            <motion.button
-              onClick={() => {
-                navigate("/shop");
-                window.scrollTo(0, 0);
-              }}
-              whileHover={{
-                // scale: 1.05,
-                boxShadow: "0px 8px 20px rgba(34,197,94,0.6)",
-              }}
-              whileTap={{
-                // scale: 0.97,
-                boxShadow: "0px 4px 10px rgba(34,197,94,0.4)",
-              }}
-              className="w-full py-3 rounded-2xl bg-gradient-to-r from-green-500 to-green-700 text-white text-lg font-semibold shadow-lg transition-all duration-300"
-            >
-            Products
-            </motion.button>
+            {/* Buttons */}
+            <div className="grid grid-cols-2 gap-4 mt-4">
+              <motion.button
+                onClick={handleSubmit}
+                whileHover={{ boxShadow: "0px 8px 20px rgba(34,197,94,0.6)" }}
+                whileTap={{ boxShadow: "0px 4px 10px rgba(34,197,94,0.4)" }}
+                className="w-full py-3 rounded-2xl bg-gradient-to-r from-green-500 to-green-700 text-white text-lg font-semibold shadow-lg transition-all duration-300"
+              >
+                Save Product
+              </motion.button>
+
+              <motion.button
+                onClick={() => {
+                  navigate("/shop");
+                  window.scrollTo(0, 0);
+                }}
+                whileHover={{ boxShadow: "0px 8px 20px rgba(34,197,94,0.6)" }}
+                whileTap={{ boxShadow: "0px 4px 10px rgba(34,197,94,0.4)" }}
+                className="w-full py-3 rounded-2xl bg-gradient-to-r from-green-500 to-green-700 text-white text-lg font-semibold shadow-lg transition-all duration-300"
+              >
+                Products
+              </motion.button>
+            </div>
           </CardContent>
         </Card>
       </motion.div>
