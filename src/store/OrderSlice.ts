@@ -22,7 +22,8 @@ export const GetOrder = createAsyncThunk<
 >("Order/GetOrder", async (_, thunkAPI) => {
   try {
     const { auth } = thunkAPI.getState();
-    let token = auth.access;
+    let token = localStorage.getItem("access"); // ✅ معاك access
+
 
     const fetchWishlist = async (token: string) => {
       const res = await fetch(

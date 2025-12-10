@@ -8,7 +8,6 @@ import { Badge } from "../../components/ui/badge";
 import { FiTag, FiDollarSign } from "react-icons/fi";
 import { useNavigate } from "react-router";
 import { useAppSelector, useAppDispatch } from "../../store/hook";
-import { clearEditingProduct } from "../../store/editingProductSlice";
 import {
   Select,
   SelectContent,
@@ -17,31 +16,54 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../../components/ui/select";
+import { AddProduct } from "../../store/AddProductSlice";
+import { RootState } from "../../store";
 
 interface IItem {
-  id?: number;
   name: string;
   description: string;
   original_price: string;
-  final_price: string;
   discount: number;
   stock: number;
-  img: string;
-  imgFile?: File | null;
   categories: string[];
   tags: string[];
+  final_price?: string;
+  img: File[];
 }
 
 export default function EditProductPage() {
-  const [items, setItems] = useState<IItem[]>([]);
-  const editingProduct = useAppSelector((state) => state.editingProduct);
   const dispatch = useAppDispatch();
-
-  const [form, setForm] = useState(editingProduct);
   const navigate = useNavigate();
-  useEffect(() => {
-    setForm(editingProduct); // كل مرة يتغير المنتج المختار
-  }, [editingProduct]);
+  const {
+    products: items,
+  } = useAppSelector((state: RootState) => state.product);
+  // ============================
+  //   INITIAL FORM STATE
+  // ============================
+  const [form, setForm] = useState<IItem>({
+    name: "",
+    description: "",
+    original_price: "",
+    discount: 0,
+    stock: 0,
+    categories: [],
+    tags: [],
+    final_price: "0",
+    img: [],
+  });
+
+  // ============================
+  //   ITEMS (Placeholder)
+  // ============================
+  // const items = useAppSelector((s) => s.products?.items || []);
+
+  const handleDelete = (id: string) => {
+    console.log("delete", id);
+  };
+
+  // ============================
+  //   BASIC TEXT HANDLER
+  // ============================
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -49,45 +71,18 @@ export default function EditProductPage() {
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
+  // ============================
+  //   FILE UPLOAD HANDLER
+  // ============================
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const imgPreview = URL.createObjectURL(file);
-      setForm((prev) => ({ ...prev, img: imgPreview, imgFile: file }));
+    if (e.target.files) {
+      setForm((prev) => ({ ...prev, img: [...prev.img, ...e.target.files!] }));
     }
   };
 
-  const handleSubmit = () => {
-    if (editingProduct.id) {
-      // Update existing product
-      setItems((prev: any) =>
-        prev.map((item: any) => (item.id === editingProduct.id ? form : item))
-      );
-      dispatch(clearEditingProduct()); // بعد التعديل امسح ال state
-    } else {
-      // Add new product
-      const newItem = { ...form, id: Date.now() };
-      setItems((prev: any) => [newItem, ...prev]);
-    }
-
-    setForm({
-      name: "",
-      description: "",
-      original_price: "",
-      final_price: "",
-      discount: 0,
-      stock: 0,
-      img: "",
-      imgFile: null,
-      categories: [],
-      tags: [],
-    });
-  };
-
-  const handleDelete = (id?: number) => {
-    if (!id) return;
-    setItems((prev) => prev.filter((item) => item.id !== id));
-  };
+  // ============================
+  //   PRICE AUTO CALC
+  // ============================
   const handleChangePrice = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -96,7 +91,6 @@ export default function EditProductPage() {
     setForm((prev) => {
       const updated = { ...prev, [name]: value };
 
-      // حساب السعر النهائي تلقائياً
       const original = parseFloat(updated.original_price) || 0;
       const discount = parseFloat(updated.discount.toString()) || 0;
 
@@ -106,6 +100,26 @@ export default function EditProductPage() {
     });
   };
 
+  // ============================
+  //   SUBMIT
+  // ============================
+  const handleSubmit = () => {
+    dispatch(AddProduct(form));
+    setForm({
+      name: "",
+      description: "",
+      original_price: "",
+      discount: 0,
+      stock: 0,
+      categories: [],
+      tags: [],
+      final_price: "0",
+      img: [],
+    });
+  };
+const handleEdit=()=>{
+  
+}
   const categoriesList = [
     "Bestsellers",
     "Breads & Sweats",
@@ -122,20 +136,15 @@ export default function EditProductPage() {
 
   return (
     <div className="min-h-screen">
+      {/* ======= HEADER ======= */}
       <div className="mb-8">
-        <h1
-          className="
-    text-4xl font-extrabold tracking-tight 
-    text-gray-900
-  "
-        >
+        <h1 className="text-4xl font-extrabold tracking-tight text-gray-900">
           Product Admin Dashboard
         </h1>
-        {/* Underline Accent */}
         <div className="mt-3 w-24 h-1.5 bg-gradient-to-r from-blue-700 to-green-700 rounded-full"></div>
       </div>
 
-      {/* Form Card */}
+      {/* ======= FORM ======= */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -145,17 +154,17 @@ export default function EditProductPage() {
           <CardContent className="space-y-6 p-6">
             <h2 className="text-2xl font-bold text-green-800">Add Product</h2>
 
-            {/* Product Name */}
+            {/* Name */}
             <div className="space-y-2">
               <label className="font-semibold text-green-600">
                 Product Name
               </label>
               <Input
                 name="name"
-                placeholder="Product Name"
                 value={form.name}
                 onChange={handleChange}
-                className="border-green-400 h-12 rounded-2xl focus:ring-2 focus:ring-green-500 focus:outline-none transition-shadow duration-300 shadow-sm hover:shadow-md"
+                placeholder="Product Name"
+                className="border-green-400 h-12 rounded-2xl"
               />
             </div>
 
@@ -166,14 +175,14 @@ export default function EditProductPage() {
               </label>
               <Textarea
                 name="description"
-                placeholder="Description..."
                 value={form.description}
                 onChange={handleChange}
-                className="border-green-400 h-32 rounded-2xl p-3 focus:ring-2 focus:ring-green-500 focus:outline-none resize-none transition-shadow duration-300 shadow-sm hover:shadow-md"
+                placeholder="Description..."
+                className="border-green-400 h-32 rounded-2xl resize-none"
               />
             </div>
 
-            {/* Categories & Tags */}
+            {/* Categories + Tags */}
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="font-semibold text-green-600">
@@ -181,25 +190,21 @@ export default function EditProductPage() {
                 </label>
                 <Select
                   onValueChange={(val) =>
-                    setForm({
-                      ...form,
-                      categories: form.categories.includes(val)
-                        ? form.categories
-                        : [...form.categories, val],
-                    })
+                    setForm((prev) => ({
+                      ...prev,
+                      categories: prev.categories.includes(val)
+                        ? prev.categories
+                        : [...prev.categories, val],
+                    }))
                   }
                 >
-                  <SelectTrigger className="w-full h-12 rounded-2xl border-green-400 focus:ring-green-500">
+                  <SelectTrigger className="h-12 rounded-2xl border-green-400">
                     <SelectValue placeholder="Select Categories" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectGroup>
                       {categoriesList.map((cat) => (
-                        <SelectItem
-                          className="p-3 hover:border-l-4 hover:border-green-500"
-                          key={cat}
-                          value={cat}
-                        >
+                        <SelectItem key={cat} value={cat}>
                           {cat}
                         </SelectItem>
                       ))}
@@ -212,25 +217,21 @@ export default function EditProductPage() {
                 <label className="font-semibold text-green-600">Tags</label>
                 <Select
                   onValueChange={(val) =>
-                    setForm({
-                      ...form,
-                      tags: form.tags.includes(val)
-                        ? form.tags
-                        : [...form.tags, val],
-                    })
+                    setForm((prev) => ({
+                      ...prev,
+                      tags: prev.tags.includes(val)
+                        ? prev.tags
+                        : [...prev.tags, val],
+                    }))
                   }
                 >
-                  <SelectTrigger className="w-full h-12 rounded-2xl border-green-400 focus:ring-green-500">
+                  <SelectTrigger className="h-12 rounded-2xl border-green-400">
                     <SelectValue placeholder="Select Tags" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectGroup>
                       {tagsList.map((tag) => (
-                        <SelectItem
-                          className="p-3 hover:border-l-4 hover:border-green-500"
-                          key={tag}
-                          value={tag}
-                        >
+                        <SelectItem key={tag} value={tag}>
                           {tag}
                         </SelectItem>
                       ))}
@@ -249,10 +250,10 @@ export default function EditProductPage() {
                 <Input
                   name="original_price"
                   type="number"
-                  placeholder="Original Price"
                   value={form.original_price}
                   onChange={handleChangePrice}
-                  className="border-green-400 h-12 rounded-2xl focus:ring-2 focus:ring-green-500 focus:outline-none transition-shadow duration-300 shadow-sm hover:shadow-md"
+                  placeholder="Original Price"
+                  className="border-green-400 h-12 rounded-2xl"
                 />
               </div>
 
@@ -261,17 +262,14 @@ export default function EditProductPage() {
                   Final Price
                 </label>
                 <Input
-                  name="final_price"
-                  type="number"
-                  placeholder="Final Price"
                   value={form.final_price}
                   disabled
-                  className="border-green-400 bg-gray-100 h-12 rounded-2xl focus:ring-2 focus:ring-green-500 focus:outline-none"
+                  className="border-green-400 bg-gray-100 h-12 rounded-2xl"
                 />
               </div>
             </div>
 
-            {/* Discount & Stock */}
+            {/* Discount + Stock */}
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <label className="font-semibold text-green-600">
@@ -280,10 +278,10 @@ export default function EditProductPage() {
                 <Input
                   name="discount"
                   type="number"
-                  placeholder="Discount %"
                   value={form.discount}
                   onChange={handleChangePrice}
-                  className="border-green-400 h-12 rounded-2xl focus:ring-2 focus:ring-green-500 focus:outline-none transition-shadow duration-300 shadow-sm hover:shadow-md"
+                  placeholder="Discount %"
+                  className="border-green-400 h-12 rounded-2xl"
                 />
               </div>
 
@@ -292,24 +290,23 @@ export default function EditProductPage() {
                 <Input
                   name="stock"
                   type="number"
-                  placeholder="Stock"
                   value={form.stock}
                   onChange={handleChange}
-                  className="border-green-400 h-12 rounded-2xl focus:ring-2 focus:ring-green-500 focus:outline-none transition-shadow duration-300 shadow-sm hover:shadow-md"
+                  placeholder="Stock"
+                  className="border-green-400 h-12 rounded-2xl"
                 />
               </div>
             </div>
 
-            {/* Image Upload */}
+            {/* File Upload */}
             <div className="space-y-2">
               <label className="font-semibold text-green-600">
                 Product Image
               </label>
               <Input
-                name="imgFile"
                 type="file"
                 onChange={handleFileChange}
-                className="border-green-400 h-12 rounded-2xl focus:ring-2 focus:ring-green-500 focus:outline-none p-2"
+                className="border-green-400 h-12 rounded-2xl"
               />
             </div>
 
@@ -317,9 +314,7 @@ export default function EditProductPage() {
             <div className="grid grid-cols-2 gap-4 mt-4">
               <motion.button
                 onClick={handleSubmit}
-                whileHover={{ boxShadow: "0px 8px 20px rgba(34,197,94,0.6)" }}
-                whileTap={{ boxShadow: "0px 4px 10px rgba(34,197,94,0.4)" }}
-                className="w-full py-3 rounded-2xl bg-gradient-to-r from-green-500 to-green-700 text-white text-lg font-semibold shadow-lg transition-all duration-300"
+                className="py-3 rounded-2xl bg-gradient-to-r from-green-500 to-green-700 text-white text-lg font-semibold shadow-lg"
               >
                 Save Product
               </motion.button>
@@ -329,9 +324,7 @@ export default function EditProductPage() {
                   navigate("/shop");
                   window.scrollTo(0, 0);
                 }}
-                whileHover={{ boxShadow: "0px 8px 20px rgba(34,197,94,0.6)" }}
-                whileTap={{ boxShadow: "0px 4px 10px rgba(34,197,94,0.4)" }}
-                className="w-full py-3 rounded-2xl bg-gradient-to-r from-green-500 to-green-700 text-white text-lg font-semibold shadow-lg transition-all duration-300"
+                className="py-3 rounded-2xl bg-gradient-to-r from-green-500 to-green-700 text-white text-lg font-semibold shadow-lg"
               >
                 Products
               </motion.button>
@@ -340,10 +333,10 @@ export default function EditProductPage() {
         </Card>
       </motion.div>
 
-      {/* Products List */}
+      {/* PRODUCTS LIST */}
       <div className="grid gap-6">
         <AnimatePresence>
-          {items.map((item) => (
+          {items.map((item: any) => (
             <motion.div
               key={item.id}
               initial={{ opacity: 0, y: 20, scale: 0.95 }}
@@ -351,52 +344,73 @@ export default function EditProductPage() {
               exit={{ opacity: 0, y: 20, scale: 0.95 }}
               transition={{ duration: 0.3 }}
             >
-              <Card className="p-6 border border-green-300 bg-white/40 backdrop-blur-md shadow-xl rounded-3xl flex items-center gap-6 hover:shadow-2xl hover:scale-105 transform transition-all duration-300 relative">
-                {/* Image with overlay */}
-                <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-green-500 relative group">
-                  <img src={item.img} className="w-full h-full object-cover" />
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    whileHover={{ opacity: 1 }}
-                    className="absolute inset-0 bg-black/40 flex flex-col justify-center items-center text-white text-xs font-bold gap-1 transition-opacity rounded-full"
-                  >
-                    <div>Stock: {item.stock}</div>
-                    {item.discount > 0 && <div>Discount: {item.discount}%</div>}
-                  </motion.div>
+              <Card className="p-6 border border-green-300 bg-white/40 shadow-xl rounded-3xl flex items-center gap-6">
+                {/* ========== Image ========== */}
+                <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-green-500 relative">
+                  <img
+                    src={item.img_url}
+                    className="w-full h-full object-cover"
+                  />
                 </div>
 
-                {/* Info */}
-                <div className="flex-1 space-y-1">
+                {/* ========== Info Section ========== */}
+                <div className="flex-1">
                   <h3 className="text-xl font-bold text-green-800">
                     {item.name}
                   </h3>
                   <p className="text-green-700 text-sm">{item.description}</p>
+
+                  {/* Prices */}
                   <div className="flex gap-2 mt-2">
-                    <Badge className="bg-gradient-to-r from-green-500 to-green-700 text-white font-semibold px-3 py-1 rounded-full shadow-md flex items-center gap-1 hover:scale-110 transform transition-all">
-                      <FiDollarSign className="w-3 h-3" /> {item.final_price}
+                    <Badge>{item.final_price}</Badge>
+                    <Badge className="line-through">
+                      {item.original_price}
                     </Badge>
-                    <Badge className="bg-gradient-to-r from-red-500 to-red-700 text-white font-semibold px-3 py-1 rounded-full shadow-md line-through flex items-center gap-1 hover:scale-110 transform transition-all">
-                      <FiDollarSign className="w-3 h-3" /> {item.original_price}
+                    {item.discount > 0 && <Badge>-{item.discount}%</Badge>}
+                  </div>
+
+                  {/* Stock */}
+                  <div className="mt-2">
+                    <Badge className="bg-yellow-200 text-yellow-800">
+                      Stock: {item.stock}
                     </Badge>
-                    {item.discount > 0 && (
-                      <Badge className="bg-gradient-to-r from-yellow-400 to-yellow-600 text-white font-bold px-3 py-1 rounded-full shadow-md flex items-center gap-1 hover:scale-110 transform transition-all">
-                        <FiTag className="w-3 h-3" /> -{item.discount}%
+                  </div>
+
+                  {/* Categories */}
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {item.categories?.map((cat: string, i: number) => (
+                      <Badge key={i} className="bg-green-200 text-green-800">
+                        {cat}
                       </Badge>
-                    )}
+                    ))}
+                  </div>
+
+                  {/* Tags */}
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {item.tags?.map((tag: string, i: number) => (
+                      <Badge key={i} className="bg-blue-200 text-blue-800">
+                        #{tag}
+                      </Badge>
+                    ))}
                   </div>
                 </div>
 
-                <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
+                {/* ========== Action Buttons ========== */}
+                <div className="flex flex-col gap-3">
+                  <Button
+                    onClick={() => handleEdit(item)}
+                    className="bg-blue-600 text-white px-4 py-2 rounded-2xl"
+                  >
+                    Edit
+                  </Button>
+
                   <Button
                     onClick={() => handleDelete(item.id)}
-                    className="bg-red-600 text-white hover:bg-red-700 px-4 py-2 rounded-2xl shadow-lg"
+                    className="bg-red-600 text-white px-4 py-2 rounded-2xl"
                   >
                     Delete
                   </Button>
-                </motion.div>
+                </div>
               </Card>
             </motion.div>
           ))}

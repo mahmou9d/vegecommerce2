@@ -144,7 +144,8 @@ export const AddReviews = createAsyncThunk(
   ) => {
     try {
       const state = getState() as RootState;
-      let token = state.auth.access;
+      let token = localStorage.getItem("access"); // ✅ معاك access
+
       // console.log(payload, "handleAddReviews");
       let res = await fetch(
         "https://e-commerce-web-production-ead4.up.railway.app/api/reviews/add/",

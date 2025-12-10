@@ -17,7 +17,7 @@ import {
 import { Rating, RatingButton } from "../components/ui/shadcn-io/rating";
 import { useToast } from "../hooks/use-toast";
 import React from "react";
-import { setEditingProduct } from "../store/editingProductSlice";
+// import { setEditingProduct } from "../store/editingProductSlice";
 
 interface IItem {
   id?: number;
@@ -52,10 +52,10 @@ const ProductComponent = ({ item }: { item: IItem }) => {
   // );
   // ⚡ حالة التوجل الحقيقية
   const [inWishlistState, setInWishlistState] = useState(false);
-const handleEditProduct = (item: IItem) => {
-  dispatch(setEditingProduct(item)); // ضع المنتج في store
-  nav("/admin"); // اذهب للفورم
-};
+// const handleEditProduct = (item: IItem) => {
+//   dispatch(setEditingProduct(item)); // ضع المنتج في store
+//   nav("/admin"); // اذهب للفورم
+// };
   // ⚡ Sync from Redux → local state
   useEffect(() => {
     if (item.id) {

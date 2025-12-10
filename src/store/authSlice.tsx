@@ -37,6 +37,8 @@ export const loginUser = createAsyncThunk(
       }
 
       const data = await res.json();
+            localStorage.setItem("access", data.access);
+            localStorage.setItem("refresh", data.refresh);
       return data;
     } catch (error: any) {
       // console.log(error, "errorlogin");
@@ -49,8 +51,8 @@ export const refreshAccessToken = createAsyncThunk(
   async (_, { getState, rejectWithValue }) => {
     try {
       const state = getState() as RootState;
-      const refreshToken = state.auth.refresh; // ✅ استخدم refresh
-      const accessToken = state.auth.access; // ✅ معاك access
+     const refreshToken = localStorage.getItem("refresh"); // ✅ استخدم refresh
+       const accessToken = localStorage.getItem("access"); // ✅ معاك access
 
       if (!refreshToken || !accessToken) {
         throw new Error("No tokens available");
@@ -72,6 +74,8 @@ export const refreshAccessToken = createAsyncThunk(
       }
 
       const data = await res.json(); // { access: "newAccessToken", refresh?: "newRefresh" }
+      localStorage.setItem("access",data.access)
+      localStorage.setItem("refresh", data.refresh);
       return data;
     } catch (err: any) {
 
@@ -84,8 +88,8 @@ export const Logout = createAsyncThunk(
   async (_, { getState, rejectWithValue, dispatch }) => {
     try {
       const state = getState() as RootState;
-      const refreshToken = state.auth.refresh; // ✅ استخدم refresh
-      const accessToken = state.auth.access; // ✅ معاك access
+      const refreshToken = localStorage.getItem("refresh"); // ✅ استخدم refresh
+      const accessToken = localStorage.getItem("access"); // ✅ معاك access
 
       if (!refreshToken) {
         throw new Error("No tokens available");

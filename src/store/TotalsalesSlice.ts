@@ -18,10 +18,10 @@ export const GetTotalsales = createAsyncThunk<
     number,
     void,
     { state: RootState; dispatch: AppDispatch }
-    >("Totalsales/GetTotalsales", async (_, thunkAPI) => {
+>("Totalsales/GetTotalsales", async (_, thunkAPI) => {
     try {
         const { auth } = thunkAPI.getState();
-        let token = auth.access;
+        let token = localStorage.getItem("access"); // ✅ معاك access
 
         const fetchWishlist = async (token: string) => {
             const res = await fetch(

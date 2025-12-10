@@ -19,10 +19,10 @@ export const GetUsers = createAsyncThunk<
     number,
     void,
     { state: RootState; dispatch: AppDispatch }
-    >("Users/GetUsers", async (_, thunkAPI) => {
+>("Users/GetUsers", async (_, thunkAPI) => {
     try {
         const { auth } = thunkAPI.getState();
-        let token = auth.access;
+        let token = localStorage.getItem("access"); // ✅ معاك access
 
         const fetchWishlist = async (token: string) => {
             const res = await fetch(

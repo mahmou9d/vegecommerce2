@@ -9,7 +9,7 @@ import wishlist from "./wishlistSlice";
 import review from "./reviewSlice";
 import reviewget from "./reviewgetSlice";
 import Getwishlists from "./GetwishlistSlice";
-import editingProduct from "./editingProductSlice";
+// import editingProduct from "./editingProductSlice";
 import OrderLatest from "./OrderLatestSlice";
 import Users from "./SumUsersSlice";
 import Totalsales from "./TotalsalesSlice";
@@ -33,7 +33,7 @@ const rootReducer = combineReducers({
     review,
     Getwishlists,
     reviewget,
-    editingProduct,
+    // editingProduct,
     OrderLatest,
     Users,
     Totalsales,

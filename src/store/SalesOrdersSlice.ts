@@ -3,9 +3,9 @@ import { RootState, AppDispatch } from ".";
 import { refreshAccessToken } from "./authSlice";
 
 type TProduct = {
-    month:string
-    orders:number
-    sales:number
+    month: string
+    orders: number
+    sales: number
 };
 
 
@@ -28,7 +28,7 @@ export const GetSalesOrders = createAsyncThunk<
 >("SalesOrders/GetSalesOrders", async (_, thunkAPI) => {
     try {
         const { auth } = thunkAPI.getState();
-        let token = auth.access;
+        let token = localStorage.getItem("access"); // ✅ معاك access
 
         const fetchWishlist = async (token: string) => {
             const res = await fetch(

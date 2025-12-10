@@ -64,7 +64,8 @@ export const fetchWithRefresh = async (
     rejectWithValue: (v: any) => any;
   }
 ) => {
-  let token = thunkAPI.getState().auth.access;
+  // let token = thunkAPI.getState().auth.access;
+  let token = localStorage.getItem("access"); // ✅ معاك access
 
   let res = await fetch(url, {
     ...options,
