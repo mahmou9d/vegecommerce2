@@ -18,6 +18,7 @@ import {
 } from "../../components/ui/select";
 import { AddProduct } from "../../store/AddProductSlice";
 import { RootState } from "../../store";
+import { DeleteProduct, EditProduct } from "../../store/UpdataProduct";
 
 interface IItem {
   name: string;
@@ -34,9 +35,10 @@ interface IItem {
 export default function EditProductPage() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const {
-    products: items,
-  } = useAppSelector((state: RootState) => state.product);
+  const [editopen, setEditopen] = useState(false);
+  const { products: items } = useAppSelector(
+    (state: RootState) => state.product
+  );
   // ============================
   //   INITIAL FORM STATE
   // ============================
@@ -57,7 +59,8 @@ export default function EditProductPage() {
   // ============================
   // const items = useAppSelector((s) => s.products?.items || []);
 
-  const handleDelete = (id: string) => {
+  const handleDelete = (id: number) => {
+    dispatch(DeleteProduct(id));
     console.log("delete", id);
   };
 
@@ -103,23 +106,37 @@ export default function EditProductPage() {
   // ============================
   //   SUBMIT
   // ============================
-  const handleSubmit = () => {
+const handleSave = () => {
+  if (editopen) {
+    // تحديث المنتج
+    dispatch(EditProduct(form));
+  } else {
+    // إضافة منتج جديد
     dispatch(AddProduct(form));
+  }
+
+  // إعادة تعيين الفورم بعد الحفظ
+  setForm({
+    name: "",
+    description: "",
+    original_price: "",
+    discount: 0,
+    stock: 0,
+    categories: [],
+    tags: [],
+    final_price: "0",
+    img: [],
+  });
+  setEditopen(false);
+};
+  const handleEditClick = (item: any) => {
+    setEditopen(true); // تفعيل وضع التعديل
     setForm({
-      name: "",
-      description: "",
-      original_price: "",
-      discount: 0,
-      stock: 0,
-      categories: [],
-      tags: [],
-      final_price: "0",
-      img: [],
+      ...item,
+      img: [], // الصور الجديدة سيتم رفعها إذا اختار المستخدم
     });
   };
-const handleEdit=()=>{
-  
-}
+
   const categoriesList = [
     "Bestsellers",
     "Breads & Sweats",
@@ -311,24 +328,12 @@ const handleEdit=()=>{
             </div>
 
             {/* Buttons */}
-            <div className="grid grid-cols-2 gap-4 mt-4">
-              <motion.button
-                onClick={handleSubmit}
-                className="py-3 rounded-2xl bg-gradient-to-r from-green-500 to-green-700 text-white text-lg font-semibold shadow-lg"
-              >
-                Save Product
-              </motion.button>
-
-              <motion.button
-                onClick={() => {
-                  navigate("/shop");
-                  window.scrollTo(0, 0);
-                }}
-                className="py-3 rounded-2xl bg-gradient-to-r from-green-500 to-green-700 text-white text-lg font-semibold shadow-lg"
-              >
-                Products
-              </motion.button>
-            </div>
+            <motion.button
+              onClick={handleSave}
+              className="py-3 rounded-2xl bg-gradient-to-r from-green-500 to-green-700 text-white text-lg font-semibold shadow-lg"
+            >
+              {editopen ? "Update Product" : "Save Product"}
+            </motion.button>
           </CardContent>
         </Card>
       </motion.div>
@@ -398,7 +403,7 @@ const handleEdit=()=>{
                 {/* ========== Action Buttons ========== */}
                 <div className="flex flex-col gap-3">
                   <Button
-                    onClick={() => handleEdit(item)}
+                    onClick={() => handleEditClick(item)}
                     className="bg-blue-600 text-white px-4 py-2 rounded-2xl"
                   >
                     Edit
