@@ -67,7 +67,6 @@ export const refreshAccessToken = createAsyncThunk(
           }),
         }
       );
-
       if (!res.ok) {
         throw new Error(`HTTP error! status: ${res.status}`);
       }
@@ -75,6 +74,7 @@ export const refreshAccessToken = createAsyncThunk(
       const data = await res.json(); // { access: "newAccessToken", refresh?: "newRefresh" }
       return data;
     } catch (err: any) {
+
       return rejectWithValue(err.message);
     }
   }
@@ -178,6 +178,12 @@ const authSlice = createSlice({
       )
       .addCase(refreshAccessToken.rejected, (state, action) => {
         state.error = action.payload as string;
+          const error = action.payload as { detail: string; code: string };
+          state.error = error?.detail || "Unknown error";
+
+          if (error?.code === "token_not_valid") {
+            localStorage.clear()
+          }
       });
 
     builder

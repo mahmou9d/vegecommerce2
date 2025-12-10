@@ -10,6 +10,14 @@ import review from "./reviewSlice";
 import reviewget from "./reviewgetSlice";
 import Getwishlists from "./GetwishlistSlice";
 import editingProduct from "./editingProductSlice";
+import OrderLatest from "./OrderLatestSlice";
+import Users from "./SumUsersSlice";
+import Totalsales from "./TotalsalesSlice";
+import TopSelling from "./TopSellingSlice";
+import Totalstock from "./TotalstockSlice";
+import Orders from "./OrderSlice";
+import SalesOrders from "./SalesOrdersSlice";
+import GetSumProducts from "./ProductsSlice";
 const persistConfig = {
     key: "root",
     storage,
@@ -25,7 +33,15 @@ const rootReducer = combineReducers({
     review,
     Getwishlists,
     reviewget,
-    editingProduct
+    editingProduct,
+    OrderLatest,
+    Users,
+    Totalsales,
+    TopSelling,
+    Totalstock,
+    Orders,
+    SalesOrders,
+    GetSumProducts
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

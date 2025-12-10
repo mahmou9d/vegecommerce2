@@ -35,10 +35,13 @@ export const signupUser = createAsyncThunk(
         }
       );
 
+      // if (!res.ok) {
+      //   throw new Error(`HTTP error! status: ${res.status}`);
+      // }
       if (!res.ok) {
-        throw new Error(`HTTP error! status: ${res.status}`);
+        const errorData = await res.json();
+        return rejectWithValue(errorData); // رجع رسالة السيرفر
       }
-
       const data = await res.json();
       return data;
     } catch (error: any) {

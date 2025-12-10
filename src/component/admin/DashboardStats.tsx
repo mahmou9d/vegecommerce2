@@ -1,4 +1,4 @@
-import { useAppSelector } from "../../store/hook";
+import { useAppDispatch, useAppSelector } from "../../store/hook";
 import { Card, CardContent } from "../../components/ui/card";
 import { useEffect, useMemo, useState } from "react";
 import {
@@ -12,7 +12,9 @@ import {
   Bar,
   Legend,
 } from "recharts";
-import { RootState } from "@/store";
+import { RootState } from "../../store";
+// import { GetTotalstockSlice } from "../../store/TotalstockSlice";
+import { GetTopSelling } from "../../store/TopSellingSlice";
 
 interface IItem {
   id: number;
@@ -77,12 +79,20 @@ const items: IItem[] = [
 ];
 
 export default function DashboardStats() {
+  const dispatch = useAppDispatch();
     const { products, loading, error } = useAppSelector(
       (state: RootState) => state.product
     );
+    const { items } = useAppSelector(
+      (state: RootState) => state.TopSelling
+    );
+console.log(items)
+
+
     const [tickFontSize, setTickFontSize] = useState(14);
 
     useEffect(() => {
+      dispatch(GetTopSelling());
       const handleResize = () => {
         if (window.innerWidth < 640) {
           setTickFontSize(10); // شاشة صغيرة
@@ -99,7 +109,7 @@ export default function DashboardStats() {
       return () => window.removeEventListener("resize", handleResize);
     }, []);
     const lowStockProducts = products.filter((p) => p.stock < 20);
-  const totalProducts = items.length;
+  const totalProducts = products.length;
   const [page, setPage] = useState(0);
   const itemsPerPage = 4;
 
@@ -111,7 +121,7 @@ export default function DashboardStats() {
 
   const totalPages = Math.ceil(lowStockProducts.length / itemsPerPage);
   const totalStock = useMemo(
-    () => items.reduce((acc, item) => acc + item.stock, 0),
+    () => products.reduce((acc, item) => acc + item.stock, 0),
     []
   );
 
@@ -127,8 +137,8 @@ export default function DashboardStats() {
 
   const avgPrice = useMemo(() => {
     return (
-      items.reduce((acc, item) => acc + Number(item.final_price), 0) /
-      items.length
+      products.reduce((acc, item) => acc + Number(item.final_price), 0) /
+      products.length
     );
   }, []);
 
@@ -211,7 +221,7 @@ const topSelling = [
             <div className="flex-1">
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart
-                  data={topSelling}
+                  data={items}
                   margin={{ top: 20, right: 20, left: 0, bottom: 20 }}
                 >
                   <XAxis

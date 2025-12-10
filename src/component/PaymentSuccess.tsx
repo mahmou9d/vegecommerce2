@@ -10,9 +10,11 @@ const PaymentSuccess = () => {
 useEffect(() => {
   const clearCart = async () => {
     try {
-      await dispatch(DeleteToCart()).unwrap();
+      if (window.location.pathname === "/payment-success"){
+                await dispatch(DeleteToCart()).unwrap();
       const res = await dispatch(GetToCart()).unwrap();
       console.log("FETCHED CART:", res);
+      }
     } catch (err) {
       console.log("GET CART ERROR:", err);
     }

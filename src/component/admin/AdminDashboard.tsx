@@ -1,14 +1,64 @@
+import { useAppDispatch, useAppSelector } from "../../store/hook";
 import { Card, CardContent } from "../../components/ui/card";
-import { motion } from "framer-motion";
+// import { motion } from "framer-motion";
 import { ShoppingCart, Package, Users, DollarSign } from "lucide-react";
-import { ResponsiveContainer, CartesianGrid, XAxis, YAxis, Tooltip, Legend, Line, LineChart, BarChart, Bar } from "recharts";
+import {
+  ResponsiveContainer,
+  CartesianGrid,
+  XAxis,
+  YAxis,
+  Tooltip,
+  Legend,
+  Line,
+  LineChart,
+  BarChart,
+  Bar,
+} from "recharts";
+import { RootState } from "../../store";
+import { useEffect } from "react";
+import { GetOrder } from "../../store/OrderSlice";
+// import { GetTopSelling } from "../../store/TopSellingSlice";
+import { GetSumProducts } from "../../store/ProductsSlice";
+import { GetUsers } from "../../store/SumUsersSlice";
+import { GetTotalsales } from "../../store/TotalsalesSlice";
+import { GetOrderLatest } from "../../store/OrderLatestSlice";
+import { GetSalesOrders } from "../../store/SalesOrdersSlice";
 
-interface IData{
-  month:string
-  sales:number
-  orders:number
+interface IData {
+  month: string;
+  sales: number;
+  orders: number;
 }
 export default function AdminDashboard() {
+  const dispatch = useAppDispatch();
+  const { total_sales  } = useAppSelector(
+    (state: RootState) => state.Totalsales
+  );
+  
+  const { orders } = useAppSelector(
+    (state: RootState) => state.Orders
+  );
+  const { total_products } = useAppSelector(
+    (state: RootState) => state.GetSumProducts
+  );
+  const { users } = useAppSelector(
+    (state: RootState) => state.Users
+  );
+    const { orderRecent } = useAppSelector(
+      (state: RootState) => state.OrderLatest
+    );
+        const { items } = useAppSelector(
+      (state: RootState) => state.SalesOrders
+    );
+  useEffect(() => {
+    dispatch(GetTotalsales());
+    dispatch(GetOrder());
+    dispatch(GetOrderLatest());
+    dispatch(GetSumProducts());
+    dispatch(GetUsers());
+    dispatch(GetSalesOrders());
+  }, [dispatch]);
+console.log(items);
   const data: IData[] = [
     { month: "Jan", sales: 4000, orders: 2400 },
     { month: "Feb", sales: 3000, orders: 2210 },
@@ -35,25 +85,25 @@ export default function AdminDashboard() {
         {[
           {
             title: "Total Sales",
-            value: "$12,450",
+            value: total_sales,
             Icon: DollarSign,
             gradient: "from-green-400 to-green-600",
           },
           {
             title: "Orders",
-            value: "340",
+            value: orders,
             Icon: ShoppingCart,
             gradient: "from-blue-400 to-blue-600",
           },
           {
             title: "Products",
-            value: "120",
+            value: total_products,
             Icon: Package,
             gradient: "from-yellow-400 to-yellow-600",
           },
           {
             title: "Customers",
-            value: "825",
+            value: users,
             Icon: Users,
             gradient: "from-purple-400 to-purple-600",
           },
@@ -84,7 +134,7 @@ export default function AdminDashboard() {
         </h2>
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
-            data={data}
+            data={items}
             margin={{ top: 0, right: 20, left: 0, bottom: 10 }}
             barCategoryGap="20%"
           >
@@ -137,17 +187,19 @@ export default function AdminDashboard() {
             </tr>
           </thead>
           <tbody className="text-gray-700 text-sm sm:text-base">
-            {[1, 2, 3, 4].map((id) => (
+            {orderRecent.map((orderRecent) => (
               <tr
-                key={id}
+                key={orderRecent.id}
                 className="hover:bg-gray-50 transition border-b last:border-none"
               >
-                <td className="py-2 px-4 font-medium">#{id}002</td>
-                <td className="py-2 px-4">Ahmed Ali</td>
-                <td className="py-2 px-4 font-semibold">$150</td>
+                <td className="py-2 px-4 font-medium">#{orderRecent.id}</td>
+                <td className="py-2 px-4">{orderRecent.customer}</td>
+                <td className="py-2 px-4 font-semibold">
+                  ${orderRecent.total_price}
+                </td>
                 <td className="py-2 px-4">
                   <span className="px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-700 border border-green-200">
-                    Completed
+                    {orderRecent.status}
                   </span>
                 </td>
               </tr>
