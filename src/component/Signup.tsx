@@ -1,16 +1,16 @@
-import { TiHome } from "react-icons/ti";
-import { IoIosArrowForward } from "react-icons/io";
+// import { TiHome } from "react-icons/ti";
+// import { IoIosArrowForward } from "react-icons/io";
 import * as yup from "yup";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useState } from "react";
 import { FaRegEye, FaRegEyeSlash } from "react-icons/fa6";
 import { Button } from "../components/ui/button";
-import { signupUser } from "../store/authSecSlice";
+// import { signupUser } from "../store/authSecSlice";
 import { useAppDispatch, useAppSelector } from "../store/hook";
-import { RootState } from "../store";
+// import { RootState } from "../store";
 import { useNavigate } from "react-router-dom";
-import { loginUser } from "../store/authSlice";
+import { useLoginMutation, useSignupMutation } from "../store/authSlice";
 import { useToast } from "../hooks/use-toast";
 
 // -------------------------------
@@ -51,10 +51,11 @@ const Signup = () => {
   const nav = useNavigate();
 
   // Access signup state from Redux
-  const { loading, message, error } = useAppSelector(
-    (state: RootState) => state.authSec
-  );
-
+  // const { loading, message, error } = useAppSelector(
+  //   (state: RootState) => state.authSec
+  // );
+ const [signup, { isLoading, isSuccess }] = useSignupMutation();
+ const [login] = useLoginMutation();
   // React Hook Form setup with Yup validation
   const {
     register,
@@ -70,14 +71,14 @@ const Signup = () => {
   const onSubmit = async (data: ISignup) => {
     try {
       // First: signup
-      await dispatch(signupUser(data)).unwrap();
+      await signup(data)
 
       // Second: auto-login after signup
       const loginPayload = {
         email: data.email,
         password: data.password1,
       };
-      await dispatch(loginUser(loginPayload)).unwrap();
+      await login(loginPayload);
 localStorage.setItem("username", data.username);
       // Success notification
       toast({

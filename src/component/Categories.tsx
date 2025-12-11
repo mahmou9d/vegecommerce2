@@ -21,24 +21,25 @@ import {
   PaginationPrevious,
 } from "../components/ui/pagination";
 import React from "react";
+import { TProduct } from "../store/UpdataProductSlice";
 
 // ---------------------------
 // Product type
 // ---------------------------
-type TProduct = {
-  id: number;
-  name: string;
-  description: string;
-  original_price: string;
-  final_price: string;
-  discount: number;
-  stock: number;
-  categories: string[];
-  tags: string[];
-  img: string;
-  average_rating: number;
-  img_url: string;
-};
+// type TProduct = {
+//   id?: number;
+//   name: string;
+//   description: string;
+//   original_price: string;
+//   final_price: string;
+//   discount: number;
+//   stock: number;
+//   categories: string[];
+//   tags: string[];
+//   img: string;
+//   average_rating: number;
+//   img_url: string;
+// };
 
 // ---------------------------
 // Static categories list
@@ -82,7 +83,8 @@ const Categories = ({
   // ✅ Memoized sorted products
   const sortedProducts = useMemo(() => {
     return [...filteredProducts].sort((a, b) => {
-      if (sortBy === "Top Rated") return b.average_rating - a.average_rating;
+      if (sortBy === "Top Rated")
+        return (b.average_rating as number) - (a.average_rating ?? 0);
       if (sortBy === "Popular") return b.stock - a.stock;
       if (sortBy === "Featured") return a.discount - b.discount;
       return 0;
@@ -234,134 +236,134 @@ const Categories = ({
             </div> */}
           </div>
           <div className="flex flex-col-reverse xl:flex-row">
-          <div className="flex flex-col p-[10px] ">
-            <div className="flex flex-wrap p-[10px] justify-between gap-y-12">
-              {visibleProducts.map((product) => (
-                <Product key={product.id} item={product} />
-              ))}
-            </div>
-
-            {/* Pagination */}
-            {products.length > perPage && (
-              <Pagination>
-                <PaginationContent>
-                  {page > 1 && (
-                    <PaginationItem>
-                      <PaginationPrevious
-                        href="#"
-                        onClick={() => handleChangePage(page - 1)}
-                        className="rounded-full flex items-center text-[20px] w-12 h-12 border text-black hover:bg-[#122d40] hover:text-[#01e281]"
-                      />
-                    </PaginationItem>
-                  )}
-
-                  {Array.from({ length: totalPages }).map((_, i) => (
-                    <PaginationItem key={i}>
-                      <PaginationLink
-                        href="#"
-                        isActive={page === i + 1}
-                        onClick={() => handleChangePage(i + 1)}
-                        className={`rounded-full border text-black text-[20px] w-12 h-12 hover:bg-[#122d40] hover:text-[#01e281] ${
-                          page === i + 1 ? "bg-[#122d40] text-[#01e281]" : ""
-                        }`}
-                      >
-                        {i + 1}
-                      </PaginationLink>
-                    </PaginationItem>
-                  ))}
-
-                  {page < totalPages && (
-                    <PaginationItem>
-                      <PaginationNext
-                        href="#"
-                        onClick={() => handleChangePage(page + 1)}
-                        className="rounded-full w-12 h-12 border text-[20px] text-black hover:bg-[#122d40] hover:text-[#01e281]"
-                      />
-                    </PaginationItem>
-                  )}
-                </PaginationContent>
-              </Pagination>
-            )}
-          </div>
-          {/* Right content - sidebar */}
-          <div className="flex flex-col gap-10">
-            {/* Filter by price */}
-            <div className="bg-[#f1f2f6] my-6 xl:my-0 container mx-auto w-[95%] xl:w-[450px] p-8 rounded-[50px] flex flex-col justify-center items-center gap-5 pb-14 ">
-              <h2 className="bg-[#01e281] text-[18px] relative flex-col items-center justify-center flex text-[#122d40] h-14 font-bold rounded-full px-6  w-full">
-                Filter by price
-                <span className="block h-[3px] absolute bottom-0 w-6 bg-black mt-1 rounded"></span>
-              </h2>
-              <Slider
-                defaultValue={[20, 80]}
-                value={range}
-                onValueChange={setRange}
-                min={0}
-                max={100}
-                step={1}
-                className="w-full"
-              />
-              <p className="text-gray-700 font-medium">
-                Price: ${range[0]} — ${range[1]}
-              </p>
-              <Button
-                onClick={handleFilter}
-                className="w-3/4 text-[16px] rounded-full bg-[#01e281] hover:bg-[#122d40] text-[#122d40] hover:text-[#01e281] font-bold"
-              >
-                Filter
-              </Button>
-            </div>
-
-            {/* Product categories */}
-            <div className="bg-[#f1f2f6] hidden container mx-auto w-[450px] p-8 rounded-[50px] xl:flex flex-col justify-center gap-5 pb-14 ">
-              <h2 className="bg-[#01e281] text-[18px] relative flex-col items-center justify-center flex text-[#122d40] h-14 font-bold rounded-full px-6  w-full">
-                Product categories
-                <span className="block h-[3px] absolute bottom-0 w-6 bg-black mt-1 rounded"></span>
-              </h2>
-              <ul>
-                {list.map((item, i) => (
-                  <li className="pt-4" key={i}>
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Featured products */}
-            <div className="bg-[#f1f2f6] hidden container mx-auto w-[450px] p-8 rounded-[50px] xl:flex flex-col justify-center gap-5 pb-14 ">
-              <h2 className="bg-[#01e281] text-[18px] relative flex-col items-center justify-center flex text-[#122d40] h-14 font-bold rounded-full px-6  w-full">
-                Featured products
-                <span className="block h-[3px] absolute bottom-0 w-6 bg-black mt-1 rounded"></span>
-              </h2>
-              <div>
-                {products.map((item) => (
-                  <div
-                    key={item.id}
-                    className="p-2 flex items-center mt-3 border-b-slate-200"
-                  >
-                    <img
-                      className="w-28 pr-2 rounded-3xl"
-                      src={item.img_url}
-                      alt={item.name}
-                      loading="lazy"
-                    />
-                    <div>
-                      <p className="font-extrabold">{item.name}</p>
-                      <p className="font-extrabold py-2">
-                        <Rating value={item.average_rating} readOnly>
-                          {Array.from({ length: 5 }).map((_, index) => (
-                            <RatingButton
-                              className="text-yellow-500 text-[14px]"
-                              key={index}
-                            />
-                          ))}
-                        </Rating>
-                      </p>
-                      <p className="text-[14px]">{item.description}</p>
-                    </div>
-                  </div>
+            <div className="flex flex-col p-[10px] ">
+              <div className="flex flex-wrap p-[10px] justify-between gap-y-12">
+                {visibleProducts.map((product) => (
+                  <Product key={product.id} item={product} />
                 ))}
               </div>
+
+              {/* Pagination */}
+              {products.length > perPage && (
+                <Pagination>
+                  <PaginationContent>
+                    {page > 1 && (
+                      <PaginationItem>
+                        <PaginationPrevious
+                          href="#"
+                          onClick={() => handleChangePage(page - 1)}
+                          className="rounded-full flex items-center text-[20px] w-12 h-12 border text-black hover:bg-[#122d40] hover:text-[#01e281]"
+                        />
+                      </PaginationItem>
+                    )}
+
+                    {Array.from({ length: totalPages }).map((_, i) => (
+                      <PaginationItem key={i}>
+                        <PaginationLink
+                          href="#"
+                          isActive={page === i + 1}
+                          onClick={() => handleChangePage(i + 1)}
+                          className={`rounded-full border text-black text-[20px] w-12 h-12 hover:bg-[#122d40] hover:text-[#01e281] ${
+                            page === i + 1 ? "bg-[#122d40] text-[#01e281]" : ""
+                          }`}
+                        >
+                          {i + 1}
+                        </PaginationLink>
+                      </PaginationItem>
+                    ))}
+
+                    {page < totalPages && (
+                      <PaginationItem>
+                        <PaginationNext
+                          href="#"
+                          onClick={() => handleChangePage(page + 1)}
+                          className="rounded-full w-12 h-12 border text-[20px] text-black hover:bg-[#122d40] hover:text-[#01e281]"
+                        />
+                      </PaginationItem>
+                    )}
+                  </PaginationContent>
+                </Pagination>
+              )}
             </div>
+            {/* Right content - sidebar */}
+            <div className="flex flex-col gap-10">
+              {/* Filter by price */}
+              <div className="bg-[#f1f2f6] my-6 xl:my-0 container mx-auto w-[95%] xl:w-[450px] p-8 rounded-[50px] flex flex-col justify-center items-center gap-5 pb-14 ">
+                <h2 className="bg-[#01e281] text-[18px] relative flex-col items-center justify-center flex text-[#122d40] h-14 font-bold rounded-full px-6  w-full">
+                  Filter by price
+                  <span className="block h-[3px] absolute bottom-0 w-6 bg-black mt-1 rounded"></span>
+                </h2>
+                <Slider
+                  defaultValue={[20, 80]}
+                  value={range}
+                  onValueChange={setRange}
+                  min={0}
+                  max={100}
+                  step={1}
+                  className="w-full"
+                />
+                <p className="text-gray-700 font-medium">
+                  Price: ${range[0]} — ${range[1]}
+                </p>
+                <Button
+                  onClick={handleFilter}
+                  className="w-3/4 text-[16px] rounded-full bg-[#01e281] hover:bg-[#122d40] text-[#122d40] hover:text-[#01e281] font-bold"
+                >
+                  Filter
+                </Button>
+              </div>
+
+              {/* Product categories */}
+              <div className="bg-[#f1f2f6] hidden container mx-auto w-[450px] p-8 rounded-[50px] xl:flex flex-col justify-center gap-5 pb-14 ">
+                <h2 className="bg-[#01e281] text-[18px] relative flex-col items-center justify-center flex text-[#122d40] h-14 font-bold rounded-full px-6  w-full">
+                  Product categories
+                  <span className="block h-[3px] absolute bottom-0 w-6 bg-black mt-1 rounded"></span>
+                </h2>
+                <ul>
+                  {list.map((item, i) => (
+                    <li className="pt-4" key={i}>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Featured products */}
+              <div className="bg-[#f1f2f6] hidden container mx-auto w-[450px] p-8 rounded-[50px] xl:flex flex-col justify-center gap-5 pb-14 ">
+                <h2 className="bg-[#01e281] text-[18px] relative flex-col items-center justify-center flex text-[#122d40] h-14 font-bold rounded-full px-6  w-full">
+                  Featured products
+                  <span className="block h-[3px] absolute bottom-0 w-6 bg-black mt-1 rounded"></span>
+                </h2>
+                <div>
+                  {products.map((item) => (
+                    <div
+                      key={item.id}
+                      className="p-2 flex items-center mt-3 border-b-slate-200"
+                    >
+                      <img
+                        className="w-28 pr-2 rounded-3xl"
+                        src={item.img_url}
+                        alt={item.name}
+                        loading="lazy"
+                      />
+                      <div>
+                        <p className="font-extrabold">{item.name}</p>
+                        <p className="font-extrabold py-2">
+                          <Rating value={item.average_rating} readOnly>
+                            {Array.from({ length: 5 }).map((_, index) => (
+                              <RatingButton
+                                className="text-yellow-500 text-[14px]"
+                                key={index}
+                              />
+                            ))}
+                          </Rating>
+                        </p>
+                        <p className="text-[14px]">{item.description}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         </div>

@@ -7,7 +7,7 @@ import { Button } from "../components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../store/hook";
 import { RootState } from "../store";
-import { loginUser } from "../store/authSlice";
+import { useLoginMutation } from "../store/authSlice";
 import { useToast } from "../hooks/use-toast";
 
 // Type for login form inputs
@@ -36,10 +36,10 @@ const Login = () => {
   const dispatch = useAppDispatch();
 
   // Get authentication state from Redux
-  const { loading, access, error } = useAppSelector(
-    (state: RootState) => state.auth
-  );
-
+  // const { loading, access, error } = useAppSelector(
+  //   (state: RootState) => state.auth
+  // );
+const [login, { isLoading, error }] = useLoginMutation();
   // State for toggling password visibility
   const [showPassword, setShowPassword] = useState(false);
 
@@ -56,7 +56,7 @@ const Login = () => {
   const onSubmit = async (data: ILogin) => {
     try {
       // Dispatch login action
-      await dispatch(loginUser(data)).unwrap();
+      await login(data)
 
       // Show success toast
       toast({

@@ -14,7 +14,9 @@ import {
 } from "recharts";
 import { RootState } from "../../store";
 // import { GetTotalstockSlice } from "../../store/TotalstockSlice";
-import { GetTopSelling } from "../../store/TopSellingSlice";
+// import { GetTopSelling } from "../../store/TopSellingSlice";
+import { useGetProductsQuery } from "../../store/UpdataProductSlice";
+import { useGetTopSellingQuery } from "../../store/SalesOrdersSlice";
 
 interface IItem {
   id: number;
@@ -80,35 +82,37 @@ const items: IItem[] = [
 
 export default function DashboardStats() {
   const dispatch = useAppDispatch();
-    const { products, loading, error } = useAppSelector(
-      (state: RootState) => state.product
-    );
-    const { items } = useAppSelector(
-      (state: RootState) => state.TopSelling
-    );
-console.log(items)
+  // const { products, loading, error } = useAppSelector(
+  //   (state: RootState) => state.product
+  // );
+  // const { products  } = useAppSelector(
+  //   (state: RootState) => state.product
+  // );
+  const { data: products = [], isLoading, refetch } = useGetProductsQuery();
+  const { data: items = [], isLoading: l5 } = useGetTopSellingQuery();
+  // const { items } = useAppSelector((state: RootState) => state.TopSelling);
+  console.log(items);
 
+  const [tickFontSize, setTickFontSize] = useState(14);
 
-    const [tickFontSize, setTickFontSize] = useState(14);
+  useEffect(() => {
+    // dispatch(GetTopSelling());
+    const handleResize = () => {
+      if (window.innerWidth < 640) {
+        setTickFontSize(10); // شاشة صغيرة
+      } else if (window.innerWidth < 1024) {
+        setTickFontSize(12); // شاشة متوسطة
+      } else {
+        setTickFontSize(14); // شاشة كبيرة
+      }
+    };
 
-    useEffect(() => {
-      dispatch(GetTopSelling());
-      const handleResize = () => {
-        if (window.innerWidth < 640) {
-          setTickFontSize(10); // شاشة صغيرة
-        } else if (window.innerWidth < 1024) {
-          setTickFontSize(12); // شاشة متوسطة
-        } else {
-          setTickFontSize(14); // شاشة كبيرة
-        }
-      };
+    handleResize(); // initial
+    window.addEventListener("resize", handleResize);
 
-      handleResize(); // initial
-      window.addEventListener("resize", handleResize);
-
-      return () => window.removeEventListener("resize", handleResize);
-    }, []);
-    const lowStockProducts = products.filter((p) => p.stock < 20);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+  const lowStockProducts = products.filter((p) => p.stock < 20);
   const totalProducts = products.length;
   const [page, setPage] = useState(0);
   const itemsPerPage = 4;
@@ -152,11 +156,11 @@ console.log(items)
   //     count: map[Number(key)],
   //   }));
   // }, []);
-const topSelling = [
-  { name: "T-Shirt", sales: 120 },
-  { name: "Sneakers", sales: 90 },
-  { name: "Backpack", sales: 70 },
-];
+  const topSelling = [
+    { name: "T-Shirt", sales: 120 },
+    { name: "Sneakers", sales: 90 },
+    { name: "Backpack", sales: 70 },
+  ];
   return (
     <div className="min-h-screen">
       <div className="mb-8">

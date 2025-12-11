@@ -2,9 +2,10 @@ import { useAppDispatch, useAppSelector } from "../store/hook";
 import { Button } from "../components/ui/button";
 import Product from "./Product";
 import { useEffect } from "react";
-import { productUser } from "../store/productSlice";
+// import { productUser } from "../store/productSlice";
 import { RootState } from "../store";
 import { useNavigate } from "react-router";
+import { useGetProductsQuery } from "../store/UpdataProductSlice";
 
 // Component for displaying Home Products
 const HomeProduct = () => {
@@ -15,10 +16,10 @@ const HomeProduct = () => {
   const nav = useNavigate();
 
   // Select product state from Redux store
-  const { products, loading, error } = useAppSelector(
-    (state: RootState) => state.product
-  );
-
+  // const { products, loading, error } = useAppSelector(
+  //   (state: RootState) => state.product
+  // );
+  const { data: products = [], isLoading, refetch } = useGetProductsQuery();
   // Fetch products on component mount
   // useEffect(() => {
   //   dispatch(productUser());

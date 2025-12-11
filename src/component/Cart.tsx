@@ -23,17 +23,20 @@ import { Progress } from "../components/ui/progress";
 
 // Redux actions
 import {
-  EditCart,
-  GetToCart,
-  RemoveCart,
-  removeItemLocally,
-  rollbackEdit,
-  rollbackRemove,
-  updateQuantityLocally,
+  // EditCart,
+  // GetToCart,
+  // RemoveCart,
+  // removeItemLocally,
+  // rollbackEdit,
+  // rollbackRemove,
+  // updateQuantityLocally,
+  useEditCartMutation,
+  useGetCartQuery,
+  useRemoveFromCartMutation,
 } from "../store/cartSlice";
 import { useAppDispatch, useAppSelector } from "../store/hook";
 import { RootState } from "../store";
-import { productUser } from "../store/productSlice";
+// import { productUser } from "../store/productSlice";
 
 // Components
 import Product from "./Product";
@@ -46,27 +49,30 @@ import { useToast } from "../hooks/use-toast";
 
 // Styles
 import "./Header.css";
+import { useGetProductsQuery } from "../store/UpdataProductSlice";
 
 // ==================== Component ====================
 const Cart = () => {
   const { toast } = useToast(); // Toast hook for notifications
   const nav = useNavigate(); // Navigation hook
   const dispatch = useAppDispatch(); // Redux dispatch
-
+const [editCart] = useEditCartMutation();
   // Get products from Redux store
-  const { products, loading, error } = useAppSelector(
-    (state: RootState) => state.product
-  );
-
+  // const { products, loading, error } = useAppSelector(
+  //   (state: RootState) => state.product
+  // );
+  const { data: products = [], isLoading, refetch } = useGetProductsQuery();
+   const { data: items } = useGetCartQuery();
+   const [removeFromCart] = useRemoveFromCartMutation();
   // Fetch products if not loaded yet
-  useEffect(() => {
-    if (products.length === 0) {
-      dispatch(productUser());
-    }
-  }, [dispatch, products.length]);
+  // useEffect(() => {
+  //   if (products.length === 0) {
+  //     dispatch(productUser());
+  //   }
+  // }, [dispatch, products.length]);
 
   // Get cart items from Redux store
-  const { items, total } = useAppSelector((state) => state.cart);
+  // const { items, total } = useAppSelector((state) => state.cart);
 
   // Fetch cart on mount
   // useEffect(() => {
@@ -108,31 +114,30 @@ const Cart = () => {
     const previousQty = currentQty;
 
     // 🔥 Optimistic Update — update UI immediately
-    dispatch(
-      updateQuantityLocally({
-        product_id,
-        quantity: newQty,
-      })
-    );
-        toast({
-          title: "Cart updated",
-          description: `Quantity ${
-            type === "inc" ? "increased" : "decreased"
-          } successfully.`,
-        });
+    // dispatch(
+    //   updateQuantityLocally({
+    //     product_id,
+    //     quantity: newQty,
+    //   })
+    // );
+    // toast({
+    //   title: "Cart updated",
+    //   description: `Quantity ${
+    //     type === "inc" ? "increased" : "decreased"
+    //   } successfully.`,
+    // });
     // Send request
-    dispatch(EditCart({ product_id, quantity: newQty }))
+    editCart({ product_id, quantity: newQty })
       .unwrap()
-      .then(() => {
-
-      })
+      .then(() => {})
       .catch(() => {
         // ❌ Rollback if failed
-        dispatch(
-          rollbackEdit({
-            product_id, quantity: previousQty
-          })
-        );
+        // dispatch(
+        //   rollbackEdit({
+        //     product_id,
+        //     quantity: previousQty,
+        //   })
+        // );
 
         toast({
           title: "Update failed",
@@ -154,43 +159,43 @@ const Cart = () => {
   //       });
   //     });
   // };
-const removeItem = (product_id: number) => {
-  // احفظ النسخة القديمة للـ rollback
-  const previousCart = [...items]; // cart جاي من useSelector
+  const removeItem = (product_id: number) => {
+    // احفظ النسخة القديمة للـ rollback
+    const previousCart = [...(items?.items ?? [])]; // cart جاي من useSelector
 
-  // 🔥 Optimistic Update — شيّل العنصر من UI فورًا
-  dispatch(
-    removeItemLocally({
-      product_id,
-    })
-  );
-      toast({
-        title: "Removed from cart",
-        description: "The item was successfully removed.",
-      });
-  // إرسال الريكوست
-  dispatch(RemoveCart({ product_id }))
-    .unwrap()
-    .then(() => {
-
-    })
-    .catch(() => {
-      // ❌ Rollback — رجّع الحالة القديمة
-      dispatch(rollbackRemove(previousCart));
-
-      toast({
-        title: "Remove failed",
-        description: "Restored the item.",
-      });
+    // 🔥 Optimistic Update — شيّل العنصر من UI فورًا
+    // dispatch(
+    //   removeItemLocally({
+    //     product_id,
+    //   })
+    // );
+    toast({
+      title: "Removed from cart",
+      description: "The item was successfully removed.",
     });
-};
+    // إرسال الريكوست
+    removeFromCart({ product_id })
+      .unwrap()
+      .then(() => {})
+      .catch(() => {
+        // ❌ Rollback — رجّع الحالة القديمة
+        // dispatch(rollbackRemove(previousCart));
+
+        toast({
+          title: "Remove failed",
+          description: "Restored the item.",
+        });
+      });
+  };
 
   // ==================== Calculate Totals ====================
   const limit = 1000; // Free shipping limit
-  const subtotal = Array.isArray(items)
-    ? items.reduce((sum, item) => sum + Number(item.subtotal), 0)
+  const subtotal = Array.isArray(items?.items)
+    ? items?.items.reduce((sum, item) => sum + Number(item.subtotal), 0)
     : 0;
-
+   const total =
+     items?.items?.reduce((sum, item) => sum + item.price * item.quantity, 0) ??
+     0;
   // Progress bar value for free shipping
   const progress = Math.min((subtotal / limit) * 100, 100);
 
@@ -210,7 +215,7 @@ const removeItem = (product_id: number) => {
       </div>
 
       {/* ==================== If items exist in cart ==================== */}
-      {Array.isArray(items) && items?.length !== 0 ? (
+      {Array.isArray(items?.items) && items?.items.length !== 0 ? (
         <div>
           {/* ==================== Checkout Steps ==================== */}
           <div className="py-24 container hidden xl:flex mx-auto  justify-center gap-x-16">
@@ -266,7 +271,7 @@ const removeItem = (product_id: number) => {
 
               <TableBody>
                 {/* Loop through cart items */}
-                {items.map((item) => (
+                {items?.items.map((item) => (
                   <TableRow key={item.product_id}>
                     {/* Remove Button */}
                     <TableCell>
@@ -412,7 +417,7 @@ const removeItem = (product_id: number) => {
                 </div>
 
                 {/* Loop through items */}
-                {items.map((item, i) => {
+                {(items?.items ?? []).map((item, i) => {
                   return (
                     <div
                       key={i}

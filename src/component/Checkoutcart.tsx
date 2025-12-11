@@ -29,7 +29,14 @@ import {
 
 // Redux store hooks + actions
 import { useAppDispatch, useAppSelector } from "../store/hook";
-import { Checkout, DeleteToCart, GetToCart, RemoveCart } from "../store/cartSlice";
+import {
+  // Checkout,
+  // DeleteToCart,
+  // GetToCart,
+  // RemoveCart,
+  useCheckoutMutation,
+  useGetCartQuery,
+} from "../store/cartSlice";
 
 // Form validation + react-hook-form
 import * as yup from "yup";
@@ -39,7 +46,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 // Navigation and toast hook
 import { Link, useNavigate } from "react-router";
 import { useToast } from "../hooks/use-toast";
-import { checkoutSession } from "../store/checkoutSlice";
+import {  useCreateCheckoutSessionMutation } from "../store/checkoutSlice";
 
 // Dropdown options for countries
 const frameworks = [
@@ -70,6 +77,8 @@ const Checkoutcart = () => {
   const nav = useNavigate();
   // Redux dispatch
   const dispatch = useAppDispatch();
+  const [checkout, { isLoading: isCheckingOut }] = useCheckoutMutation();
+  const [createCheckoutSession] = useCreateCheckoutSessionMutation();
 
   // State for popover open/close
   const [open, setOpen] = React.useState(false);
@@ -82,22 +91,21 @@ const Checkoutcart = () => {
   const [countryValue, setCountryValue] = React.useState("");
 
   // Get items from redux store
-  const { items, order_id } = useAppSelector((state) => state?.cart);
-  console.log(order_id, "order_id");
+  // const { items, order_id } = useAppSelector((state) => state?.cart);
+  const { data: items, isLoading } = useGetCartQuery();
+  // console.log(order_id, "order_id");
   // On mount, fetch cart items
-  useEffect(() => {
-    dispatch(GetToCart());
-  }, [dispatch]);
+  // useEffect(() => {
+  //   dispatch(GetToCart());
+  // }, [dispatch]);
 
   // Calculate total price
-  const total = items.reduce(
-    (sum, item) => sum + Number(item.price) * item.quantity,
-    0
-  );
+  const total =
+    items?.items.reduce((sum, item) => sum + Number(item.price) * item.quantity, 0);
 
   // Free shipping progress
   const limit = 1000;
-  const progress = Math.min((total / limit) * 100, 100);
+  const progress = Math.min((total as number / limit) * 100, 100);
 
   // Clear placeholder after focus delay
   const handleFocus = () => {
@@ -120,14 +128,14 @@ const Checkoutcart = () => {
   const onSubmit = (data: any) => {
     const payload = {
       ...data,
-      items: items.map((item) => ({
+      items: items?.items?.map((item) => ({
         product_id: item.product_id,
         quantity: item.quantity,
       })),
     };
 
     // Dispatch checkout
-    dispatch(Checkout(payload))
+    checkout(payload)
       .unwrap()
       .then((res) => {
         toast({
@@ -135,7 +143,7 @@ const Checkoutcart = () => {
           description: "Your order has been submitted, redirecting...",
         });
         console.log("Checkout response:", res);
-        dispatch(checkoutSession(res.order_id))
+        createCheckoutSession(res.order_id)
           .unwrap()
           .then((res) => {
             console.log("Returned data: ", res);
@@ -143,31 +151,32 @@ const Checkoutcart = () => {
             console.log(res.url);
             console.log(res.session_id);
 
-            window.location.href = res.url;
+            window.location.href = res.url as string;
+
             // useEffect(() => {
-              // if (window.location.pathname === "/payment-success") {
-              //   // Promise.all(
-              //   //   items.map((item) =>
-              //   //     dispatch(
-              //   //       RemoveCart({ product_id: item.product_id })
-              //   //     ).unwrap()
-              //   //   )
-              //   // )
-              //                       dispatch(
-              //                         DeleteToCart()
-              //                       )
-              //                         .unwrap()
-              //                         .then(() => {
-              //                           dispatch(GetToCart());
-              //                         })
-              //                         .catch(() => {
-              //                           toast({
-              //                             title: "Error ❌",
-              //                             description:
-              //                               "Failed to clear your cart, please try again.",
-              //                           });
-              //                         });
-              // }
+            // if (window.location.pathname === "/payment-success") {
+            //   // Promise.all(
+            //   //   items.map((item) =>
+            //   //     dispatch(
+            //   //       RemoveCart({ product_id: item.product_id })
+            //   //     ).unwrap()
+            //   //   )
+            //   // )
+            //                       dispatch(
+            //                         DeleteToCart()
+            //                       )
+            //                         .unwrap()
+            //                         .then(() => {
+            //                           dispatch(GetToCart());
+            //                         })
+            //                         .catch(() => {
+            //                           toast({
+            //                             title: "Error ❌",
+            //                             description:
+            //                               "Failed to clear your cart, please try again.",
+            //                           });
+            //                         });
+            // }
             // }, []);
           })
           .catch((err) => {
@@ -404,7 +413,7 @@ const Checkoutcart = () => {
                   Subtotal
                 </h2>
               </div>
-              {items.map((item, i) => {
+              {items?.items?.map((item, i) => {
                 return (
                   <div className="flex   border-b border-[#a7a7a733]  bg-[#a7a7a71a]">
                     <h1 className="w-3/4 border-r border-[#a7a7a733]  h-full">
@@ -428,7 +437,7 @@ const Checkoutcart = () => {
                   <h2 className="p-6 text-[16px] font-bold">Subtotal</h2>
                 </h1>
                 <h2 className="w-[28%] text-[16px] font-bold p-6">
-                  ${total.toFixed(2)}
+                  ${(total ?? 0).toFixed(2)}
                 </h2>
               </div>
 
@@ -437,7 +446,7 @@ const Checkoutcart = () => {
                 <h1 className="w-3/4 border-r border-[#a7a7a733]  h-full">
                   <h2 className="p-6 text-[16px] font-bold">Total</h2>
                 </h1>
-                <h2 className="w-[28%] p-6">${total.toFixed(2)}</h2>
+                <h2 className="w-[28%] p-6">${(total ?? 0).toFixed(2)}</h2>
               </div>
             </div>
 
@@ -448,7 +457,7 @@ const Checkoutcart = () => {
                 <p className="flex items-center pl-2">
                   Add{" "}
                   <p className="font-bold px-2">
-                    ${(limit - total).toFixed(2)}
+                    ${(limit - (total ?? 0)).toFixed(2)}
                   </p>{" "}
                   more to get free shipping!
                 </p>

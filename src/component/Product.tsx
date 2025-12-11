@@ -3,25 +3,28 @@ import { useNavigate } from "react-router";
 import { GoHeart, GoHeartFill } from "react-icons/go";
 import { RiShoppingCartLine } from "react-icons/ri";
 import { useAppDispatch, useAppSelector } from "../store/hook";
-import {
-  WishlistItems,
-  WishlistRemove,
-} from "../store/wishlistSlice";
-import { addWishlistLocally, GetWishlist, removeWishlistLocally } from "../store/GetwishlistSlice";
-import {
-  addItemLocally,
-  AddToCart,
-  GetToCart,
-  rollbackRemove,
-} from "../store/cartSlice";
+import { useAddToWishlistMutation, useGetWishlistQuery, useRemoveFromWishlistMutation } from "../store/wishlistSlice";
+// import {
+//   addWishlistLocally,
+//   GetWishlist,
+//   removeWishlistLocally,
+// } from "../store/GetwishlistSlice";
+// import {
+//   addItemLocally,
+//   AddToCart,
+//   GetToCart,
+//   rollbackRemove,
+// } from "../store/cartSlice";
 import { Rating, RatingButton } from "../components/ui/shadcn-io/rating";
 import { useToast } from "../hooks/use-toast";
 import React from "react";
+import { TProduct } from "../store/UpdataProductSlice";
+import { useAddToCartMutation, useGetCartQuery } from "../store/cartSlice";
 // import { setEditingProduct } from "../store/editingProductSlice";
 
 interface IItem {
   id?: number;
-  product_id?: number ;
+  product_id?: number;
   name: string;
   description: string;
   original_price: string;
@@ -31,19 +34,25 @@ interface IItem {
   categories: string[];
   tags: string[];
   img: string;
-  average_rating: number;
+  average_rating?: number;
   img_url: string;
 }
 
-const ProductComponent = ({ item }: { item: IItem }) => {
+const ProductComponent = ({ item }: { item: TProduct }) => {
   const { toast } = useToast();
   const nav = useNavigate();
   const dispatch = useAppDispatch();
   // const { items, total } = useAppSelector((state) => state?.cart);
-  const getwishlist = useAppSelector((state) => state.Getwishlists.items);
-  const { access } = useAppSelector((state) => state?.auth);
-  const { items, total } = useAppSelector((state) => state?.cart);
-  const loadingwish = useAppSelector((state) => state.wishlist.loading);
+  // const getwishlist = useAppSelector((state) => state.Getwishlists.items);
+  const { data: getwishlist = [], isLoading: loadingwish } =
+    useGetWishlistQuery();
+    const [removeFromWishlist] = useRemoveFromWishlistMutation();
+    const [addToWishlist] = useAddToWishlistMutation();
+  // const { access } = useAppSelector((state) => state?.auth);
+  // const { items, total } = useAppSelector((state) => state?.cart);
+ const { data: items } = useGetCartQuery();
+ const [addToCart] = useAddToCartMutation();
+  // const loadingwish = useAppSelector((state) => state.wishlist.loading);
   const [wishlistBtnLoading, setWishlistBtnLoading] = useState(false);
   const [cartBtnLoading, setCartBtnLoading] = useState(false);
   // let inWishlist = useMemo(
@@ -52,10 +61,11 @@ const ProductComponent = ({ item }: { item: IItem }) => {
   // );
   // ⚡ حالة التوجل الحقيقية
   const [inWishlistState, setInWishlistState] = useState(false);
-// const handleEditProduct = (item: IItem) => {
-//   dispatch(setEditingProduct(item)); // ضع المنتج في store
-//   nav("/admin"); // اذهب للفورم
-// };
+  const access =localStorage.getItem("access")
+  // const handleEditProduct = (item: IItem) => {
+  //   dispatch(setEditingProduct(item)); // ضع المنتج في store
+  //   nav("/admin"); // اذهب للفورم
+  // };
   // ⚡ Sync from Redux → local state
   useEffect(() => {
     if (item.id) {
@@ -93,48 +103,49 @@ const ProductComponent = ({ item }: { item: IItem }) => {
   //     setCartBtnLoading(false);
   //   }
   // }, [item.id, item.name, dispatch, toast, access]);
-const handleAddToCart = useCallback(async () => {
-  if (!item.id) return;
+  const handleAddToCart = useCallback(async () => {
+    if (!item.id) return;
 
-  setCartBtnLoading(true);
-  const previousCart = [...items]; // للـ rollback
+    setCartBtnLoading(true);
+    const previousCart = [...(items?.items ?? [])]; // للـ rollback
 
-  try {
-    // إضافة محلية سريعة (Optimistic)
+    try {
+      // إضافة محلية سريعة (Optimistic)
 
-    dispatch(addItemLocally({
-      product_id: item.id,
-      product_name: item.name,
-      price: Number(item.final_price),
-      img_url: item.img_url
-    }))
-    
-    if (access) {
+      // dispatch(
+      //   addItemLocally({
+      //     product_id: item.id,
+      //     product_name: item.name,
+      //     price: Number(item.final_price),
+      //     img_url: item.img_url,
+      //   })
+      // );
+
+      // if (access) {
+      //   toast({
+      //     title: "Added to cart 🛒",
+      //     description: `${item.name} has been added to your cart.`,
+      //   });
+      // }
+      setCartBtnLoading(false);
+      // تحديث السلة على السيرفر
+      await addToCart({ product_id: item.id, quantity: 1 }).unwrap();
+    } catch (err) {
+      // ❌ rollback
+      // previousCart.forEach((cartItem) => {
+      //   dispatch(rollbackRemove({ item: cartItem }));
+      // });
+      setCartBtnLoading(false);
       toast({
-        title: "Added to cart 🛒",
-        description: `${item.name} has been added to your cart.`,
+        title: "Error ❌",
+        description: access
+          ? "Failed to add item to cart."
+          : "Please login first",
       });
+    } finally {
+      setCartBtnLoading(false);
     }
-  setCartBtnLoading(false);
-    // تحديث السلة على السيرفر
-    await dispatch(AddToCart({ product_id: item.id, quantity: 1 })).unwrap();
-  } catch (err) {
-    // ❌ rollback
-    previousCart.forEach((cartItem) => {
-      dispatch(rollbackRemove({ item: cartItem }));
-    });
- setCartBtnLoading(false);
-    toast({
-      title: "Error ❌",
-      description: access
-        ? "Failed to add item to cart."
-        : "Please login first",
-    });
-  } finally {
-    setCartBtnLoading(false);
-  }
-}, [item, items, dispatch, toast, access]);
-
+  }, [item, items, dispatch, toast, access]);
 
   // const toggleWishlist = async () => {
 
@@ -192,43 +203,48 @@ const handleAddToCart = useCallback(async () => {
     try {
       if (inWishlistState) {
         // remove locally
-        
-        dispatch(removeWishlistLocally(item.id));
-        setInWishlistState(false);
-            if (access) {
-        toast({
-          title: "Removed ❤️",
-          description: `${item.name} removed from wishlist`,
-        });
-            }
 
-setWishlistBtnLoading(false);
-        await dispatch(WishlistRemove(item.id)).unwrap();
+        // dispatch(removeWishlistLocally(item.id));
+        // setInWishlistState(false);
+        // if (access) {
+        //   toast({
+        //     title: "Removed ❤️",
+        //     description: `${item.name} removed from wishlist`,
+        //   });
+        // }
+
+        setWishlistBtnLoading(false);
+        await removeFromWishlist(item.id).unwrap();
       } else {
         // add locally
-        dispatch(
-          addWishlistLocally({
-            product_id: item.id!,
-            name: item.name,
-            description: item.description,
-            original_price: item.original_price,
-            final_price: item.final_price,
-            discount: item.discount,
-            stock: item.stock,
-            categories: item.categories,
-            tags: item.tags,
-            img: item.img,
-            average_rating: item.average_rating,
-            img_url: item.img_url,
-          })
-        );
+        // dispatch(
+        //   addWishlistLocally({
+        //     product_id: item.id!,
+        //     name: item.name,
+        //     description: item.description,
+        //     original_price: item.original_price,
+        //     final_price: item.final_price as string,
+        //     discount: item.discount,
+        //     stock: item.stock,
+        //     categories: item.categories,
+        //     tags: item.tags,
+        //     img: Array.isArray(item.img)
+        //       ? typeof item.img[0] === "string"
+        //         ? item.img[0]
+        //         : URL.createObjectURL(item.img[0])
+        //       : "",
+
+        //     average_rating: item.average_rating as number,
+        //     img_url: item.img_url as string,
+        //   })
+        // );
         setInWishlistState(true);
-        toast({
-          title: "Added ❤️",
-          description: `${item.name} added to wishlist`,
-        });
-setWishlistBtnLoading(false);
-        await dispatch(WishlistItems(item.id)).unwrap();
+        // toast({
+        //   title: "Added ❤️",
+        //   description: `${item.name} added to wishlist`,
+        // });
+        setWishlistBtnLoading(false);
+        await addToWishlist(item.id).unwrap();
       }
     } catch {
       toast({

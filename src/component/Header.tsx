@@ -42,9 +42,12 @@ import { Progress } from "../components/ui/progress";
 // Import Redux Hooks & Actions
 // =============================
 import { useAppDispatch, useAppSelector } from "../store/hook";
-import { GetToCart, RemoveCart, removeItemLocally, rollbackRemove } from "../store/cartSlice";
-import { Logout } from "../store/authSlice";
-import { WishlistRemove } from "../store/wishlistSlice";
+import {
+  useGetCartQuery,
+  useRemoveFromCartMutation,
+} from "../store/cartSlice";
+import { useLogoutMutation } from "../store/authSlice";
+import { useGetWishlistQuery } from "../store/wishlistSlice";
 
 // =============================
 // Import Custom Hooks
@@ -123,11 +126,13 @@ const Header = () => {
   // Hooks
   const { toast } = useToast();
   const dispatch = useAppDispatch();
-  const { access } = useAppSelector((state) => state?.auth);
-
+  // const { access } = useAppSelector((state) => state?.auth);
+  const [logout, { isLoading }] = useLogoutMutation();
   // Cart Items & Total from Redux
-  const { items, total } = useAppSelector((state) => state?.cart);
-
+  // const { items, total } = useAppSelector((state) => state?.cart);
+  const { data: items } = useGetCartQuery();
+  const [removeFromCart] = useRemoveFromCartMutation();
+  const access =localStorage.getItem("access")
   // Load cart items when component mounts
   // useEffect(() => {
   //   if (access) {
@@ -139,20 +144,21 @@ const Header = () => {
   const [cart, setCart] = useState<Product[]>([]);
 
   // Wishlist Items
-  const { items: items2 } = useAppSelector((state) => state.Getwishlists);
+  const { data: items2 = [] } = useGetWishlistQuery();
+  // const { items: items2 } = useAppSelector((state) => state.Getwishlists);
 
   // Variables
   const limit = 1000; // free shipping limit
   const nav = useNavigate();
 
   // Calculate cart quantity
-  const subquantity = Array.isArray(items)
-    ? items.reduce((sum, item) => sum + Number(item.quantity || 0), 0)
+  const subquantity = Array.isArray(items?.items ?? [])
+    ? items?.items.reduce((sum, item) => sum + Number(item.quantity || 0), 0)
     : 0;
 
   // Calculate cart subtotal
-  const subtotal = Array.isArray(items)
-    ? items.reduce((sum, item) => sum + Number(item.subtotal ||0), 0)
+  const subtotal = Array.isArray(items?.items ?? [])
+    ? (items?.items ??[]).reduce((sum, item) => sum + Number(item.subtotal || 0), 0)
     : 0;
 
   // Progress bar for free shipping
@@ -182,41 +188,41 @@ const Header = () => {
   //       }
   //     });
   // };
-const removeItem = (product_id: number) => {
-  // احفظ النسخة القديمة للـ rollback
-  const previousCart = [...items]; // cart جاي من useSelector
+  const removeItem = (product_id: number) => {
+    // احفظ النسخة القديمة للـ rollback
+    const previousCart = [...(items?.items ?? [])]; // cart جاي من useSelector
 
-  // 🔥 Optimistic Update — شيّل العنصر من UI فورًا
-  dispatch(
-    removeItemLocally({
-      product_id,
-    })
-  );
+    // 🔥 Optimistic Update — شيّل العنصر من UI فورًا
+    // dispatch(
+    //   removeItemLocally({
+    //     product_id,
+    //   })
+    // );
 
-  // إرسال الريكوست
-  dispatch(RemoveCart({ product_id }))
-    .unwrap()
-    .then(() => {
-      toast({
-        title: "Removed from cart",
-        description: "The item was successfully removed.",
+    // إرسال الريكوست
+    removeFromCart({ product_id })
+      .unwrap()
+      .then(() => {
+        toast({
+          title: "Removed from cart",
+          description: "The item was successfully removed.",
+        });
+      })
+      .catch(() => {
+        // ❌ Rollback — رجّع الحالة القديمة
+        // dispatch(rollbackRemove(previousCart));
+
+        toast({
+          title: "Remove failed",
+          description: "Restored the item.",
+        });
       });
-    })
-    .catch(() => {
-      // ❌ Rollback — رجّع الحالة القديمة
-      dispatch(rollbackRemove(previousCart));
-
-      toast({
-        title: "Remove failed",
-        description: "Restored the item.",
-      });
-    });
-};
+  };
   // =============================
   // Logout handler
   // =============================
   const handleLogout = () => {
-    dispatch(Logout())
+    logout()
       .unwrap()
       .then(() => {
         toast({
@@ -225,16 +231,16 @@ const removeItem = (product_id: number) => {
         });
 
         // Remove all cart items & wishlist items on logout
-        Promise.all(
-          items.map((item) =>
-            dispatch(RemoveCart({ product_id: item.product_id })).unwrap()
-          )
-        );
-        Promise.all(
-          items2.map((item) =>
-            dispatch(WishlistRemove(item.product_id)).unwrap()
-          )
-        );
+        // Promise.all(
+        //   items.map((item) =>
+        //     dispatch(RemoveCart({ product_id: item.product_id })).unwrap()
+        //   )
+        // );
+        // Promise.all(
+        //   items2.map((item) =>
+        //     dispatch(WishlistRemove(item.product_id)).unwrap()
+        //   )
+        // );
 
         nav("/");
       })
@@ -242,7 +248,10 @@ const removeItem = (product_id: number) => {
         toast({ title: "Error ❌", description: err || "Logout failed" });
       });
   };
-
+   const total =
+     items?.items?.reduce((sum, item) => sum + item.price * item.quantity, 0) ??
+     0;
+     
   // =============================
   // Return JSX
   // =============================
@@ -557,10 +566,10 @@ const removeItem = (product_id: number) => {
     "
               >
                 <TiArrowSortedUp className="absolute top-[-13px] text-white text-[22px] right-[32px]" />
-                {Array.isArray(items) && items?.length !== 0 ? (
+                {Array.isArray(items?.items) && items?.items.length !== 0 ? (
                   <div>
                     <div className="p-7">
-                      {items.map((item, i) => {
+                      {items?.items.map((item, i) => {
                         return (
                           <div
                             key={i}
@@ -590,7 +599,11 @@ const removeItem = (product_id: number) => {
                             </div>
 
                             <IoClose
-                              onClick={() => removeItem(item.product_id)}
+                              onClick={() =>
+                                removeFromCart({
+                                  product_id: item.product_id,
+                                })
+                              }
                               className="text-[20px]"
                             />
                           </div>
@@ -609,7 +622,7 @@ const removeItem = (product_id: number) => {
                           <p className="flex items-center pl-2">
                             Add{" "}
                             <p className="font-bold px-2">
-                              ${(limit - total).toFixed(2)}
+                              ${(limit - (total ?? 0)).toFixed(2)}
                             </p>{" "}
                             more to get free shipping!
                           </p>

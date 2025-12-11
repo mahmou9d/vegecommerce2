@@ -1,13 +1,13 @@
 import { Suspense, lazy, useEffect, useRef } from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "./store/hook";
-import { RootState } from "./store";
-import { productUser } from "./store/productSlice";
+// import { RootState } from "./store";
+// import { productUser } from "./store/productSlice";
 import ScrollToTop from "./ScrollToTop";
 import { Toaster } from "./components/ui/toaster";
 import Header from "./component/Header";
-import { GetWishlist } from "./store/GetwishlistSlice";
-import { GetToCart } from "./store/cartSlice";
+// import { GetWishlist } from "./store/GetwishlistSlice";
+// import { GetToCart } from "./store/cartSlice";
 import Stats from "./component/admin/AdminDashboard";
 import AdminLayout from "./component/admin/AdminLayout";
 import AddProduct from "./component/admin/EditProductPage";
@@ -17,6 +17,7 @@ import EditProductPage from "./component/admin/EditProductPage";
 import DashboardStats from "./component/admin/DashboardStats";
 import PaymentSuccess from "./component/PaymentSuccess";
 import PaymentCancel from "./component/PaymentCancel";
+import { useGetProductsQuery } from "./store/UpdataProductSlice";
 // import Admin from "./component/Admin ";
 
 // ✅ Lazy load components
@@ -69,16 +70,16 @@ function Layout() {
     "/admin/stats",
     "/admin/add",
   ].includes(location.pathname);
-  const { products, loaded } = useAppSelector((state) => state.product);
-
+  // const { products, loaded } = useAppSelector((state) => state.product);
+const { data: products = [], isLoading, refetch } = useGetProductsQuery();
   const fetchedRef = useRef(false);
 
   useEffect(() => {
     if (!fetchedRef.current) {
       fetchedRef.current = true;
-      dispatch(productUser());
-      dispatch(GetWishlist());
-      dispatch(GetToCart());
+      // dispatch(productUser());
+      // dispatch(GetWishlist());
+      // dispatch(GetToCart());
     }
   }, []);
 
@@ -109,7 +110,7 @@ function Layout() {
           path="/category/:name"
           element={
             <Categories
-              products={mergedFiltered as TProduct[]}
+              products={mergedFiltered}
               title={categoryName}
             />
           }

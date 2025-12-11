@@ -6,8 +6,8 @@ import { IoClose } from "react-icons/io5";
 import { RootState } from "../store";
 import { useAppDispatch, useAppSelector } from "../store/hook";
 import { useCallback, useEffect } from "react";
-import { WishlistRemove } from "../store/wishlistSlice";
-import { addItemLocally, AddToCart, GetToCart } from "../store/cartSlice";
+import { useAddToWishlistMutation, useGetWishlistQuery, useRemoveFromWishlistMutation, WishlistRemove } from "../store/wishlistSlice";
+import { addItemLocally, AddToCart, GetToCart, useAddToCartMutation } from "../store/cartSlice";
 import { Button } from "../components/ui/button";
 import { Link } from "react-router-dom";
 import { GetWishlist, removeWishlistLocally } from "../store/GetwishlistSlice";
@@ -16,11 +16,14 @@ import { useToast } from "../hooks/use-toast";
 const Wishlist = () => {
   const dispatch = useAppDispatch();
   const { toast } = useToast();
-
+  const [addToCart] = useAddToCartMutation();
+     const { data: items = [], isLoading } = useGetWishlistQuery();
+     const [removeFromWishlist] = useRemoveFromWishlistMutation();
   // Select wishlist state from Redux store
-  const { items, loading, error } = useAppSelector(
-    (state: RootState) => state?.Getwishlists
-  );
+  // const { items, loading, error } = useAppSelector(
+  //   (state: RootState) => state?.Getwishlists
+  // );
+
   // console.log(items)
   // Fetch wishlist items when component loads (if empty)
   // useEffect(() => {
@@ -33,15 +36,15 @@ const Wishlist = () => {
    * Remove an item from wishlist
    */
   const removeItem = (product_id: number) => {
-    dispatch(removeWishlistLocally(product_id));
-    toast({
-      title: "Removed ❤️",
-      description: `The item has been removed from your wishlist.`,
-    });
-    dispatch(WishlistRemove(product_id))
+    // dispatch(removeWishlistLocally(product_id));
+    // toast({
+    //   title: "Removed ❤️",
+    //   description: `The item has been removed from your wishlist.`,
+    // });
+    removeFromWishlist(product_id)
       .unwrap()
       .then(() => {
-        dispatch(GetWishlist()); // Refresh wishlist after removing
+        // dispatch(GetWishlist()); // Refresh wishlist after removing
       });
   };
 
@@ -50,19 +53,19 @@ const Wishlist = () => {
    */
   const handleAddToCart = (item: any) => {
     console.log(item);
-    dispatch(
-      addItemLocally({
-        product_id: item.product_id,
-        product_name: item.name || "no",
-        price: Number(item.final_price),
-        img_url: item.img_url,
-      })
-    );
-    toast({
-      title: "Added 🛒",
-      description: `The item has been added to your cart.`,
-    });
-    dispatch(AddToCart({ product_id: item.product_id, quantity: 1 }))
+    // dispatch(
+    //   addItemLocally({
+    //     product_id: item.product_id,
+    //     product_name: item.name || "no",
+    //     price: Number(item.final_price),
+    //     img_url: item.img_url,
+    //   })
+    // );
+    // toast({
+    //   title: "Added 🛒",
+    //   description: `The item has been added to your cart.`,
+    // });
+    addToCart({ product_id: item.product_id, quantity: 1 })
       .unwrap()
       .then(() => {
         // dispatch(GetToCart()); // Refresh cart after adding

@@ -22,17 +22,25 @@ import { Textarea } from "../components/ui/textarea";
 import { Checkbox } from "../components/ui/checkbox";
 import { Label } from "../components/ui/label";
 import { useAppDispatch, useAppSelector } from "../store/hook";
-import { AddReviews } from "../store/reviewSlice";
+import { useAddReviewMutation, useGetRecentReviewsQuery } from "../store/reviewSlice";
 import { useParams } from "react-router-dom";
-import { productUser } from "../store/productSlice";
+// import { productUser } from "../store/productSlice";
 import { RootState } from "../store";
-import { WishlistItems, WishlistRemove } from "../store/wishlistSlice";
-import { GetWishlist } from "../store/GetwishlistSlice";
+import {
+  useAddToWishlistMutation,
+  useGetWishlistQuery,
+  useRemoveFromWishlistMutation,
+} from "../store/wishlistSlice";
+// import { GetWishlist } from "../store/GetwishlistSlice";
 import { GoHeart, GoHeartFill } from "react-icons/go";
-import { AddToCart, EditCart, GetToCart } from "../store/cartSlice";
+import {
+  useAddToCartMutation,
+  useGetCartQuery,
+} from "../store/cartSlice";
 import { useToast } from "../hooks/use-toast";
-import { GetReview } from "../store/reviewgetSlice";
-
+// import { GetReview } from "../store/reviewgetSlice";
+import { useGetProductsQuery } from "../store/UpdataProductSlice";
+import { access } from "fs";
 
 const listfirst = ["brand", "sku", "status", "tags", "categories"];
 const listsecond = [
@@ -70,33 +78,42 @@ const SingleProduct = () => {
     "FAQ",
     "Shopping & Returns",
   ];
-  const { products, loading, error } = useAppSelector(
-    (state: RootState) => state.product
-  );
+  // const { products, loading, error } = useAppSelector(
+  //   (state: RootState) => state.product
+  // );
+  const { data: products = [] } = useGetProductsQuery();
+  const [addToCart] = useAddToCartMutation();
+  const { data: getwishlist = [] } = useGetWishlistQuery();
+  const [addToWishlist] = useAddToWishlistMutation();
+  const [removeFromWishlist] = useRemoveFromWishlistMutation();
+      const { data: items = [], isLoading } = useGetRecentReviewsQuery();
+      const [addReview, { isLoading: isAdding, isSuccess }] =
+        useAddReviewMutation();
+
   const [rating, setRating] = useState(5);
   const [review, setReview] = useState("");
-    const { access } = useAppSelector((state) => state?.auth);
+  // const { access } = useAppSelector((state) => state?.auth);
 
-  useEffect(() => {
-    if (products.length === 0) {
-      dispatch(productUser());
-    }
-  }, [dispatch, products.length]);
-// console.log(products,"hglkjghfhvkgcfhig")
-  const { items } = useAppSelector((state) => state.reviewget);
-    const { error:error2 } = useAppSelector((state) => state.review);
-  useEffect(() => {
-    dispatch(GetReview());
-  }, [dispatch]);
-  console.log(items,"atrtehqeterter");
-const filterProduct = products.filter((item) => item?.id?.toString() === id);
-const firstItem = filterProduct[0];
-// console.log(firstItem,"firstItemuymmytmyt")
-const filterReview = items.filter(
-  (item) => item?.product?.toString() === firstItem?.name
-);
-const firstReview = filterReview;
-console.log(filterReview, "wqgqtetjty/ejtyte");
+  // useEffect(() => {
+  //   if (products.length === 0) {
+  //     dispatch(productUser());
+  //   }
+  // }, [dispatch, products.length]);
+  // console.log(products,"hglkjghfhvkgcfhig")
+  // const { items } = useAppSelector((state) => state.reviewget);
+  // const { error: error2 } = useAppSelector((state) => state.review);
+  // useEffect(() => {
+  //   dispatch(GetReview());
+  // }, [dispatch]);
+  console.log(items, "atrtehqeterter");
+  const filterProduct = products.filter((item) => item?.id?.toString() === id);
+  const firstItem = filterProduct[0];
+  // console.log(firstItem,"firstItemuymmytmyt")
+  const filterReview = items.filter(
+    (item) => item?.product?.toString() === firstItem?.name
+  );
+  const firstReview = filterReview;
+  console.log(filterReview, "wqgqtetjty/ejtyte");
 
   // const handleAddReviews = () => {
   //   dispatch(
@@ -107,126 +124,122 @@ console.log(filterReview, "wqgqtetjty/ejtyte");
   //     })
   //   );
   // };
-const handleAddReviews = () => {
-   const username = localStorage.getItem("username") || "Guest";
-       if (!username) {
-         toast({
-           title: "Login required",
-           description: "Please login first to add a review.",
-         });
-         return;
-       }
-  const hasReviewed = items.some(
-    (item) =>
-      item.product.toString() === firstItem?.name && item.customer === username
-  );
-
-  if (hasReviewed) {
-    toast({
-      title: "❌ Review already submitted",
-      description: "You have already submitted a review for this product.",
-    });
-    return;
-  }
-
-dispatch(
-  AddReviews({
-    product_id: firstItem.id as number,
-    comment: review,
-    rating: rating,
-  })
-)
-  .unwrap()
-  .then(() => {
-    toast({
-      title: "✅ Review submitted",
-      description: "Your review has been added successfully.",
-    });
-    dispatch(GetReview());
-  })
-  .catch((err) => {
-     let message = "Unexpected error";
-     if (typeof err === "string") message = err;
-     else if (err?.error) message = err.error; // <== هنا نأخذ الرسالة من السيرفر
-
-     toast({
-       title: "Error ❌",
-       description: message,
-     });
-  });
-
-};
-
-    const wishlist = useAppSelector((state) => state.wishlist.items);
-    const getwishlist = useAppSelector((state) => state.Getwishlists.items);
-    // console.log(wishlist, "khflhjdjfhs;kjjdhsfg;lkjhfdgdfogkjh");
-    const inWishlist = id
-      ? getwishlist.some((w) => w.product_id === Number(id))
-      : false;
-  
-    const toggleWishlist = () => {
-      if (!id) return;
-  
-  if (inWishlist) {
-            toast({
-          title: "Removed ❤️",
-          description: `${firstItem?.name} has been removed from your wishlist.`,
-          className: "bg-white text-black border shadow-lg", // ستايل بسيط
-        });
-    dispatch(WishlistRemove(Number(id)))
-      .unwrap()
-      .then(() => {
-
+  const handleAddReviews = () => {
+    const username = localStorage.getItem("username") || "Guest";
+    if (!username) {
+      toast({
+        title: "Login required",
+        description: "Please login first to add a review.",
       });
-  } else {
-    dispatch(WishlistItems(Number(id)))
-      .unwrap()
-      .then(() => {
-        toast({
-          title: "Added 💚",
-          description: `${firstItem?.name} has been added to your wishlist.`,
-        });
+      return;
+    }
+    const hasReviewed = items.some(
+      (item) =>
+        item.product.toString() === firstItem?.name &&
+        item.customer === username
+    );
+
+    if (hasReviewed) {
+      toast({
+        title: "❌ Review already submitted",
+        description: "You have already submitted a review for this product.",
       });
-  }
-      dispatch(GetWishlist());
-    };
-    const handleAddToCart = async () => {
-      if (!id) return;
-      await dispatch(AddToCart({ product_id: Number(id), quantity: 1 }));
-      dispatch(GetToCart());
-    };
-  const { items:items3, total } = useAppSelector((state) => state.cart);
-  console.log(items3,"vvvvvvvvvvvvvvvvvvv")
-  useEffect(() => {
-    dispatch(GetToCart());
-  }, [dispatch]);
-      const updateQuantity = () => {
-        dispatch(
-          AddToCart({ product_id: Number(firstItem.id), quantity: edit })
-        )
-          .unwrap()
-          .then(() => {
-            dispatch(GetToCart());
-            setEdit(1);
-            toast({
-              title: "🛒 Added to Cart",
-              description: `${firstItem?.name} (x${edit}) has been added to your cart.`,
-            });
-          })
-          .catch((error) => {
-            if (access) {
-              toast({
-                title: "Error ❌",
-                description: "Failed to add item to cart.",
-              });
-            } else {
-              toast({
-                title: "Error ❌",
-                description: "Please login first",
-              });
-            }
+      return;
+    }
+
+
+      addReview({
+        product_id: firstItem.id as number,
+        comment: review,
+        rating: rating,
+      })
+        .unwrap()
+        .then(() => {
+          toast({
+            title: "✅ Review submitted",
+            description: "Your review has been added successfully.",
           });
-      };
+          // dispatch(GetReview());
+        })
+        .catch((err) => {
+          let message = "Unexpected error";
+          if (typeof err === "string") message = err;
+          else if (err?.error) message = err.error; // <== هنا نأخذ الرسالة من السيرفر
+
+          toast({
+            title: "Error ❌",
+            description: message,
+          });
+        });
+  };
+
+  // const wishlist = useAppSelector((state) => state.wishlist.items);
+  // const getwishlist = useAppSelector((state) => state.Getwishlists.items);
+  // console.log(wishlist, "khflhjdjfhs;kjjdhsfg;lkjhfdgdfogkjh");
+  const inWishlist = id
+    ? getwishlist.some((w) => w.product_id === Number(id))
+    : false;
+
+  const toggleWishlist = () => {
+    if (!id) return;
+
+    if (inWishlist) {
+      toast({
+        title: "Removed ❤️",
+        description: `${firstItem?.name} has been removed from your wishlist.`,
+        className: "bg-white text-black border shadow-lg", // ستايل بسيط
+      });
+      removeFromWishlist(Number(id))
+        .unwrap()
+        .then(() => {});
+    } else {
+      addToWishlist(Number(id))
+        .unwrap()
+        .then(() => {
+          toast({
+            title: "Added 💚",
+            description: `${firstItem?.name} has been added to your wishlist.`,
+          });
+        });
+    }
+    // dispatch(GetWishlist());
+  };
+  const handleAddToCart = async () => {
+    if (!id) return;
+    await addToCart({ product_id: Number(id), quantity: 1 });
+    // dispatch(GetToCart());
+  };
+  // const { items: items3, total } = useAppSelector((state) => state.cart);
+  const { data: items3 } = useGetCartQuery();
+  console.log(items3, "vvvvvvvvvvvvvvvvvvv");
+  useEffect(() => {
+    // dispatch(GetToCart());
+  }, [dispatch]);
+  const updateQuantity = () => {
+    addToCart({ product_id: Number(firstItem.id), quantity: edit })
+      .unwrap()
+      .then(() => {
+        // dispatch(GetToCart());
+        setEdit(1);
+        toast({
+          title: "🛒 Added to Cart",
+          description: `${firstItem?.name} (x${edit}) has been added to your cart.`,
+        });
+      })
+      .catch((error) => {
+        if (localStorage.getItem("access")) {
+          toast({
+            title: "Error ❌",
+            description: "Failed to add item to cart.",
+          });
+        } else {
+          toast({
+            title: "Error ❌",
+            description: "Please login first",
+          });
+        }
+      });
+  };
   return (
     <div>
       <div className="bg-[#f9f9f9] pt-20 pb-10">
@@ -248,7 +261,7 @@ dispatch(
       <div className="container mx-auto px-5 flex flex-col xl:flex-row my-10">
         <div className="xl:w-[50%]">
           <div className="xl:w-[400px] h-[400px]">
-            <img src={firstItem?.img_url} alt={""} loading="lazy"/>
+            <img src={firstItem?.img_url} alt={""} loading="lazy" />
           </div>
         </div>
         <div className="xl:w-[50%]">
@@ -355,7 +368,7 @@ dispatch(
             <img
               src="https://xtratheme.com/wp-content/uploads/2025/07/cards.png"
               alt="payment"
-              className="w-[150px] xl:w-full" 
+              className="w-[150px] xl:w-full"
               loading="lazy"
             />
           </div>

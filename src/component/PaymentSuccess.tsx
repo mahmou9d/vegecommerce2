@@ -1,19 +1,19 @@
 import React, { useEffect } from "react";
 import { CheckCircle } from "lucide-react";
-import { DeleteToCart, GetToCart } from "../store/cartSlice";
+import {  useClearCartMutation } from "../store/cartSlice";
 import { useAppDispatch } from "../store/hook";
 
 const PaymentSuccess = () => {
   const dispatch = useAppDispatch();
-
+const [clearCart] = useClearCartMutation();
 
 useEffect(() => {
   const clearCart = async () => {
     try {
       if (window.location.pathname === "/payment-success"){
-                await dispatch(DeleteToCart()).unwrap();
-      const res = await dispatch(GetToCart()).unwrap();
-      console.log("FETCHED CART:", res);
+                await clearCart()
+      // const res = await dispatch(GetToCart()).unwrap();
+      // console.log("FETCHED CART:", res);
       }
     } catch (err) {
       console.log("GET CART ERROR:", err);
