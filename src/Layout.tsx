@@ -19,6 +19,7 @@ import PaymentSuccess from "./component/PaymentSuccess";
 import PaymentCancel from "./component/PaymentCancel";
 import { useGetProductsQuery } from "./store/UpdataProductSlice";
 import AdminOrder from "./component/admin/AdminOrder";
+import AdminReviews from "./component/admin/AdminReviews";
 // import Admin from "./component/Admin ";
 
 // ✅ Lazy load components
@@ -71,6 +72,7 @@ function Layout() {
     "/admin/stats",
     "/admin/add",
     "/admin/orders",
+    "/admin/reviews",
   ].includes(location.pathname);
   // const { products, loaded } = useAppSelector((state) => state.product);
 const { data: products = [], isLoading, refetch } = useGetProductsQuery();
@@ -119,10 +121,10 @@ const { data: products = [], isLoading, refetch } = useGetProductsQuery();
         {/* <Route path="/admin" element={<Admin />} /> */}
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<AdminDashboard />} /> {/* /admin */}
-          <Route path="stats" element={<DashboardStats />} />{" "}
-          {/* /admin/stats */}
-          <Route path="add" element={<EditProductPage />} /> {/* /admin/add */}
+          <Route path="stats" element={<DashboardStats />} />
+          <Route path="add" element={<EditProductPage />} />
           <Route path="orders" element={<AdminOrder />} />
+          <Route path="reviews" element={<AdminReviews />} />
         </Route>
       </Routes>
       {!hideLayout && <Footer />}
