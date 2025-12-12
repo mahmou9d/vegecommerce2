@@ -60,7 +60,7 @@ console.log("BASE URL:", import.meta.env.VITE_BASE_URL);
 
         {/* Menu */}
         <nav className="">
-          <h1 className="text-2xl font-bold text-center text-green-600 hidden md:block">
+          <h1 className="text-2xl font-bold mb-5 text-green-600 hidden md:block">
             Admin Panel
           </h1>
 
@@ -69,7 +69,7 @@ console.log("BASE URL:", import.meta.env.VITE_BASE_URL);
               key={item.path}
               to={item.path}
               onClick={() => setSidebarOpen(false)}
-              className={`flex items-center gap-3 p-3 rounded-xl font-medium transition
+              className={`flex items-center gap-3 p-3 mb-2 rounded-xl font-medium transition
                 ${
                   location.pathname === item.path
                     ? "bg-green-500 text-white shadow-md"

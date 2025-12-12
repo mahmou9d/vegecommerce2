@@ -24,6 +24,7 @@ import {
 // import { GetOrderLatest } from "../../store/OrderLatestSlice";
 import {  useGetOrdersCountQuery, useGetRecentOrdersQuery, useGetSalesOrdersQuery, useGetTotalSalesQuery, useGetUsersCountQuery } from "../../store/SalesOrdersSlice";
 import { useGetProductsCountQuery } from "../../store/UpdataProductSlice";
+import { Counted } from "../../type/type";
 
 interface IData {
   month: string;
@@ -39,7 +40,8 @@ export default function AdminDashboard() {
   // const { orders } = useAppSelector(
   //   (state: RootState) => state.Orders
   // );
-  const { data: orders = 0 } = useGetOrdersCountQuery();
+  const { data: orders = {} as Counted } = useGetOrdersCountQuery();
+
   // const { total_products } = useAppSelector(
   //   (state: RootState) => state.GetSumProducts
   // );
@@ -53,6 +55,7 @@ export default function AdminDashboard() {
     // );
      const { data: orderRecent = [], isLoading: l1 } =
        useGetRecentOrdersQuery();
+       const orderRecentTopTen =orderRecent.slice(0,10)
     //     const { items } = useAppSelector(
     //   (state: RootState) => state.SalesOrders
     // );
@@ -98,7 +101,7 @@ console.log(items);
           },
           {
             title: "Orders",
-            value: orders,
+            value: orders.orders,
             Icon: ShoppingCart,
             gradient: "from-blue-400 to-blue-600",
           },
@@ -194,7 +197,7 @@ console.log(items);
             </tr>
           </thead>
           <tbody className="text-gray-700 text-sm sm:text-base">
-            {orderRecent.map((orderRecent) => (
+            {orderRecentTopTen.map((orderRecent) => (
               <tr
                 key={orderRecent.id}
                 className="hover:bg-gray-50 transition border-b last:border-none"

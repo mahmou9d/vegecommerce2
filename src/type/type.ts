@@ -107,7 +107,11 @@ export interface OrderRecentResponse {
 }
 
 export interface OrdersCountResponse {
-    orders: number;
+  orders: string;
+  shipped: string;
+  pending: string;
+  delivered: string;
+  cancelled?: string;
 }
 
 export interface UsersCountResponse {
@@ -156,3 +160,12 @@ export interface TProductInput {
 export interface ProductsCountResponse {
     total_products: number;
 }
+export interface Counted {
+    orders: string;
+    shipped: string;
+    pending: string;
+    delivered: string;
+    cancelled?: string;
+    paid?:string
+}
+

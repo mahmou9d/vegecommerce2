@@ -24,6 +24,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../../components/ui/select";
+import { useGetOrdersCountQuery } from "../../store/SalesOrdersSlice";
+import { Counted } from "../../type/type";
 
 // Types
 interface OrderItem {
@@ -47,7 +49,7 @@ interface Order {
 
 type OrderStatus =
   | "pending"
-  | "processing"
+  | "paid"
   | "shipped"
   | "delivered"
   | "cancelled";
@@ -61,6 +63,7 @@ interface StatusOption {
 }
 
 const AdminOrder: React.FC = () => {
+  const { data: Counted = {} as Counted } = useGetOrdersCountQuery();
   const [orders, setOrders] = useState<Order[]>([
     {
       id: 1,
@@ -85,7 +88,7 @@ const AdminOrder: React.FC = () => {
       phone: "+20 109 876 5432",
       items: [{ name: "Product 3", quantity: 3, price: 100 }],
       total: 300,
-      status: "processing",
+      status: "paid",
       date: "2024-12-11",
       address: "Giza, Dokki, Tahrir Street",
     },
@@ -119,8 +122,8 @@ const AdminOrder: React.FC = () => {
       icon: Clock,
     },
     {
-      value: "processing",
-      label: "Processing",
+      value: "paid",
+      label: "paid",
       color: "text-blue-700",
       bgColor: "bg-blue-50 border-blue-200",
       icon: Package,
@@ -204,22 +207,22 @@ const AdminOrder: React.FC = () => {
           {[
             {
               label: "Total Orders",
-              value: orders.length,
+              value: Counted.orders,
               color: "from-blue-500 to-blue-600",
             },
             {
               label: "Pending",
-              value: orders.filter((o) => o.status === "pending").length,
+              value: Counted.pending,
               color: "from-amber-500 to-amber-600",
             },
             {
-              label: "Processing",
-              value: orders.filter((o) => o.status === "processing").length,
+              label: "paid",
+              value: Counted.paid as string,
               color: "from-purple-500 to-purple-600",
             },
             {
               label: "Delivered",
-              value: orders.filter((o) => o.status === "delivered").length,
+              value: Counted.delivered,
               color: "from-green-500 to-green-600",
             },
           ].map((stat, idx) => (

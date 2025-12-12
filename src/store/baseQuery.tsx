@@ -1,12 +1,14 @@
 import { BaseQueryFn, FetchArgs, fetchBaseQuery, FetchBaseQueryError } from "@reduxjs/toolkit/query/react";
 export const baseQuery = fetchBaseQuery({
   baseUrl: import.meta.env.VITE_BASE_URL,
-  prepareHeaders: (headers) => {
+  prepareHeaders: (headers, { type }) => {
     const token = localStorage.getItem("access");
     if (token) {
       headers.set("Authorization", `Bearer ${token}`);
     }
-    headers.set("Content-Type", "application/json");
+    if (type === "query") {
+      headers.set("Content-Type", "application/json");
+    }
     return headers;
   },
 });

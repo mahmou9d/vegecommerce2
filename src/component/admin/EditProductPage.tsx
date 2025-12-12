@@ -1,5 +1,554 @@
+// // ============================================
+// // EditProductPage.tsx - النسخة المحدثة بـ RTK Query
+// // ============================================
+// import { useEffect, useRef, useState } from "react";
+// import { motion, AnimatePresence } from "framer-motion";
+// import { Card, CardContent } from "../../components/ui/card";
+// import { Button } from "../../components/ui/button";
+// import { Input } from "../../components/ui/input";
+// import { Textarea } from "../../components/ui/textarea";
+// import { Badge } from "../../components/ui/badge";
+// import { FiTag, FiDollarSign } from "react-icons/fi";
+// import { useNavigate } from "react-router";
+// import {
+//   Select,
+//   SelectContent,
+//   SelectGroup,
+//   SelectItem,
+//   SelectTrigger,
+//   SelectValue,
+// } from "../../components/ui/select";
+// import {
+//   useAddProductMutation,
+//   useUpdateProductMutation,
+//   useDeleteProductMutation,
+//   useGetProductsQuery,
+// } from "../../store/UpdataProductSlice";
+// // import { useAppSelector } from "../../store/hook";
+// import { RootState } from "../../store";
+
+// interface IItem {
+//   name: string;
+//   description: string;
+//   original_price: string;
+//   discount: number;
+//   stock: number;
+//   categories: string[];
+//   tags: string[];
+//   final_price?: string;
+//   img: File[];
+// }
+
+// export default function EditProductPage() {
+//   const navigate = useNavigate();
+//   const fileInputRef = useRef<HTMLInputElement>(null);
+//   const [editopen, setEditopen] = useState(false);
+//   const [editingId, setEditingId] = useState<number | null>(null);
+//   // const { products: items } = useAppSelector(
+//   //   (state: RootState) => state.product
+//   // );
+//   const { data: items = [], isLoading, refetch } = useGetProductsQuery();
+//   console.log(items)
+//   // 🔥 RTK Query Hooks
+//   const [addProduct, { isLoading: isAdding, isSuccess: isAddSuccess }] =
+//     useAddProductMutation();
+//   const [updateProduct, { isLoading: isUpdating, isSuccess: isUpdateSuccess }] =
+//     useUpdateProductMutation();
+//   const [deleteProduct] = useDeleteProductMutation();
+
+//   // ============================
+//   //   INITIAL FORM STATE
+//   // ============================
+//   const [form, setForm] = useState<IItem>({
+//     name: "",
+//     description: "",
+//     original_price: "",
+//     discount: 0,
+//     stock: 0,
+//     categories: [],
+//     tags: [],
+//     final_price: "0",
+//     img: [],
+//   });
+
+//   // ============================
+//   //   DELETE HANDLER
+//   // ============================
+//   const handleDelete = async (id: number) => {
+//     try {
+//       await deleteProduct(id).unwrap();
+//       console.log("✅ تم حذف المنتج بنجاح");
+//     } catch (error) {
+//       console.error("❌ خطأ في حذف المنتج:", error);
+//     }
+//   };
+
+//   // ============================
+//   //   BASIC TEXT HANDLER
+//   // ============================
+//   const handleChange = (
+//     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+//   ) => {
+//     const { name, value } = e.target;
+//     setForm((prev) => ({ ...prev, [name]: value }));
+//   };
+
+//   // ============================
+//   //   FILE UPLOAD HANDLER
+//   // ============================
+//   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+//     if (e.target.files) {
+//       setForm((prev) => ({ ...prev, img: Array.from(e.target.files!) }));
+//     }
+//   };
+
+//   // ============================
+//   //   PRICE AUTO CALC
+//   // ============================
+//   const handleChangePrice = (
+//     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+//   ) => {
+//     const { name, value } = e.target;
+
+//     setForm((prev) => {
+//       const updated = { ...prev, [name]: value };
+
+//       const original = parseFloat(updated.original_price) || 0;
+//       const discount = parseFloat(updated.discount.toString()) || 0;
+
+//       const final = original - (original * discount) / 100;
+
+//       return { ...updated, final_price: final.toFixed(2) };
+//     });
+//   };
+
+//   // ============================
+//   //   SUBMIT
+//   // ============================
+//   const handleSave = async () => {
+//     try {
+//       if (editopen && editingId) {
+//         // 🔥 تحديث المنتج
+//         await updateProduct({
+//           id: editingId,
+//           data: form,
+//         }).unwrap();
+//         console.log("✅ تم تحديث المنتج بنجاح");
+//       } else {
+//         // 🔥 إضافة منتج جديد
+//         await addProduct(form).unwrap();
+//         console.log("✅ تم إضافة المنتج بنجاح");
+//       }
+
+//       // إعادة تعيين الفورم
+//       setForm({
+//         name: "",
+//         description: "",
+//         original_price: "",
+//         discount: 0,
+//         stock: 0,
+//         categories: [],
+//         tags: [],
+//         final_price: "0",
+//         img: [],
+//       });
+//       if (fileInputRef.current) {
+//         fileInputRef.current.value = "";
+//       }
+//       setEditopen(false);
+//       setEditingId(null);
+//     } catch (error) {
+//       console.error("❌ خطأ في حفظ المنتج:", error);
+//     }
+//   };
+
+//   // ============================
+//   //   EDIT HANDLER
+//   // ============================
+//   const handleEditClick = (item: any) => {
+//     window.scrollTo(0, 0);
+//     setEditopen(true);
+//     setEditingId(item.id);
+//     setForm({
+//       name: item.name,
+//       description: item.description,
+//       original_price: item.original_price,
+//       discount: item.discount,
+//       stock: item.stock,
+//       categories: item.categories || [],
+//       tags: item.tags || [],
+//       final_price: item.final_price,
+//       img: [], // الصور الجديدة سيتم رفعها إذا اختار المستخدم
+//     });
+//   };
+
+//   const categoriesList = [
+//     "Bestsellers",
+//     "Breads & Sweats",
+//     "Cleaning Materials",
+//     "Fishes & Raw Meats",
+//     "Fruits & Vegetables",
+//     "Milks & Proteins",
+//     "Others",
+//     "Supermarket",
+//     "Uncategorized",
+//   ];
+
+//   const tagsList = ["Pasta", "Sauce", "Cowboy", "Steak", "Burgers", "Spray"];
+
+//   return (
+//     <div className="min-h-screen">
+//       {/* ======= HEADER ======= */}
+//       <div className="mb-8">
+//         <h1 className="text-4xl font-extrabold tracking-tight text-gray-900">
+//           Product Admin Dashboard
+//         </h1>
+//         <div className="mt-3 w-24 h-1.5 bg-gradient-to-r from-blue-700 to-green-700 rounded-full"></div>
+//       </div>
+
+//       {/* ======= FORM ======= */}
+//       <motion.div
+//         initial={{ opacity: 0, y: -20 }}
+//         animate={{ opacity: 1, y: 0 }}
+//         transition={{ duration: 0.6 }}
+//       >
+//         <Card className="rounded-3xl shadow-2xl backdrop-blur-md bg-white/40 border border-green-300 mb-10">
+//           <CardContent className="space-y-6 p-6">
+//             <h2 className="text-2xl font-bold text-green-800">
+//               {editopen ? "Edit Product" : "Add Product"}
+//             </h2>
+
+//             {/* Name */}
+//             <div className="space-y-2">
+//               <label className="font-semibold text-green-600">
+//                 Product Name
+//               </label>
+//               <Input
+//                 name="name"
+//                 value={form.name}
+//                 onChange={handleChange}
+//                 placeholder="Product Name"
+//                 className="border-green-400 h-12 rounded-2xl"
+//               />
+//             </div>
+
+//             {/* Description */}
+//             <div className="space-y-2">
+//               <label className="font-semibold text-green-600">
+//                 Description
+//               </label>
+//               <Textarea
+//                 name="description"
+//                 value={form.description}
+//                 onChange={handleChange}
+//                 placeholder="Description..."
+//                 className="border-green-400 h-32 rounded-2xl resize-none"
+//               />
+//             </div>
+
+//             {/* Categories + Tags */}
+//             <div className="grid grid-cols-2 gap-4">
+//               <div>
+//                 <label className="font-semibold text-green-600">
+//                   Categories
+//                 </label>
+//                 <Select
+//                   value={undefined}
+//                   onValueChange={(val) =>
+//                     setForm((prev) => ({
+//                       ...prev,
+//                       categories: prev.categories.includes(val)
+//                         ? prev.categories
+//                         : [...prev.categories, val],
+//                     }))
+//                   }
+//                 >
+//                   <SelectTrigger className="h-12 rounded-2xl border-green-400">
+//                     <SelectValue placeholder="Select Categories" />
+//                   </SelectTrigger>
+//                   <SelectContent>
+//                     <SelectGroup>
+//                       {categoriesList.map((cat) => (
+//                         <SelectItem key={cat} value={cat}>
+//                           {cat}
+//                         </SelectItem>
+//                       ))}
+//                     </SelectGroup>
+//                   </SelectContent>
+//                 </Select>
+//                 {/* عرض الفئات المختارة */}
+//                 <div className="flex flex-wrap gap-2 mt-2">
+//                   {form.categories.map((cat, i) => (
+//                     <Badge
+//                       key={i}
+//                       className="bg-green-200 text-green-800 cursor-pointer"
+//                       onClick={() =>
+//                         setForm((prev) => ({
+//                           ...prev,
+//                           categories: prev.categories.filter((c) => c !== cat),
+//                         }))
+//                       }
+//                     >
+//                       {cat} ×
+//                     </Badge>
+//                   ))}
+//                 </div>
+//               </div>
+
+//               <div>
+//                 <label className="font-semibold text-green-600">Tags</label>
+//                 <Select
+//                   value={undefined}
+//                   onValueChange={(val) =>
+//                     setForm((prev) => ({
+//                       ...prev,
+//                       tags: prev.tags.includes(val)
+//                         ? prev.tags
+//                         : [...prev.tags, val],
+//                     }))
+//                   }
+//                 >
+//                   <SelectTrigger className="h-12 rounded-2xl border-green-400">
+//                     <SelectValue placeholder="Select Tags" />
+//                   </SelectTrigger>
+//                   <SelectContent>
+//                     <SelectGroup>
+//                       {tagsList.map((tag) => (
+//                         <SelectItem key={tag} value={tag}>
+//                           {tag}
+//                         </SelectItem>
+//                       ))}
+//                     </SelectGroup>
+//                   </SelectContent>
+//                 </Select>
+//                 {/* عرض التاجات المختارة */}
+//                 <div className="flex flex-wrap gap-2 mt-2">
+//                   {form.tags.map((tag, i) => (
+//                     <Badge
+//                       key={i}
+//                       className="bg-blue-200 text-blue-800 cursor-pointer"
+//                       onClick={() =>
+//                         setForm((prev) => ({
+//                           ...prev,
+//                           tags: prev.tags.filter((t) => t !== tag),
+//                         }))
+//                       }
+//                     >
+//                       #{tag} ×
+//                     </Badge>
+//                   ))}
+//                 </div>
+//               </div>
+//             </div>
+
+//             {/* Prices */}
+//             <div className="grid grid-cols-2 gap-4">
+//               <div className="space-y-2">
+//                 <label className="font-semibold text-green-600">
+//                   Original Price
+//                 </label>
+//                 <Input
+//                   name="original_price"
+//                   type="number"
+//                   value={form.original_price}
+//                   onChange={handleChangePrice}
+//                   placeholder="Original Price"
+//                   className="border-green-400 h-12 rounded-2xl"
+//                 />
+//               </div>
+
+//               <div className="space-y-2">
+//                 <label className="font-semibold text-green-600">
+//                   Final Price
+//                 </label>
+//                 <Input
+//                   value={form.final_price}
+//                   disabled
+//                   className="border-green-400 bg-gray-100 h-12 rounded-2xl"
+//                 />
+//               </div>
+//             </div>
+
+//             {/* Discount + Stock */}
+//             <div className="grid grid-cols-2 gap-4">
+//               <div className="space-y-2">
+//                 <label className="font-semibold text-green-600">
+//                   Discount (%)
+//                 </label>
+//                 <Input
+//                   name="discount"
+//                   type="number"
+//                   value={form.discount}
+//                   onChange={handleChangePrice}
+//                   placeholder="Discount %"
+//                   className="border-green-400 h-12 rounded-2xl"
+//                 />
+//               </div>
+
+//               <div className="space-y-2">
+//                 <label className="font-semibold text-green-600">Stock</label>
+//                 <Input
+//                   name="stock"
+//                   type="number"
+//                   value={form.stock}
+//                   onChange={handleChange}
+//                   placeholder="Stock"
+//                   className="border-green-400 h-12 rounded-2xl"
+//                 />
+//               </div>
+//             </div>
+
+//             {/* File Upload */}
+//             <div className="space-y-2">
+//               <label className="font-semibold text-green-600">
+//                 Product Image
+//               </label>
+//               <Input
+//                 ref={fileInputRef}
+//                 type="file"
+//                 multiple
+//                 accept="image/*"
+//                 onChange={handleFileChange}
+//                 className="border-green-400 h-12 rounded-2xl"
+//               />
+//               {form.img.length > 0 && (
+//                 <p className="text-sm text-green-600">
+//                   {form.img.length} صورة محددة
+//                 </p>
+//               )}
+//             </div>
+
+//             {/* Buttons */}
+//             <div className="flex gap-3">
+//               <motion.button
+//                 onClick={handleSave}
+//                 disabled={isAdding || isUpdating}
+//                 className="flex-1 py-3 rounded-2xl bg-gradient-to-r from-green-500 to-green-700 text-white text-lg font-semibold shadow-lg disabled:opacity-50"
+//               >
+//                 {isAdding || isUpdating
+//                   ? "جاري الحفظ..."
+//                   : editopen
+//                   ? "Update Product"
+//                   : "Save Product"}
+//               </motion.button>
+
+//               {editopen && (
+//                 <Button
+//                   onClick={() => {
+//                     setEditopen(false);
+//                     setEditingId(null);
+//                     setForm({
+//                       name: "",
+//                       description: "",
+//                       original_price: "",
+//                       discount: 0,
+//                       stock: 0,
+//                       categories: [],
+//                       tags: [],
+//                       final_price: "0",
+//                       img: [],
+//                     });
+//                   }}
+//                   className="px-6 py-3 rounded-2xl bg-gray-500 text-white"
+//                 >
+//                   Cancel
+//                 </Button>
+//               )}
+//             </div>
+
+//           </CardContent>
+//         </Card>
+//       </motion.div>
+
+//       {/* PRODUCTS LIST */}
+//       <div className="grid gap-6">
+//         <AnimatePresence>
+//           {items.map((item: any) => (
+//             <motion.div
+//               key={item.id}
+//               initial={{ opacity: 0, y: 20, scale: 0.95 }}
+//               animate={{ opacity: 1, y: 0, scale: 1 }}
+//               exit={{ opacity: 0, y: 20, scale: 0.95 }}
+//               transition={{ duration: 0.3 }}
+//             >
+//               <Card className="p-6 border border-green-300 bg-white/40 shadow-xl rounded-3xl flex items-center gap-6">
+//                 {/* ========== Image ========== */}
+//                 <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-green-500 relative">
+//                   <img
+//                     src={item.img_url || "/placeholder.png"}
+//                     alt={item.name}
+//                     className="w-full h-full object-cover"
+//                   />
+//                 </div>
+
+//                 {/* ========== Info Section ========== */}
+//                 <div className="flex-1">
+//                   <h3 className="text-xl font-bold text-green-800">
+//                     {item.name}
+//                   </h3>
+//                   <p className="text-green-700 text-sm">{item.description}</p>
+
+//                   {/* Prices */}
+//                   <div className="flex gap-2 mt-2">
+//                     <Badge>{item.final_price}</Badge>
+//                     <Badge className="line-through">
+//                       {item.original_price}
+//                     </Badge>
+//                     {item.discount > 0 && <Badge>-{item.discount}%</Badge>}
+//                   </div>
+
+//                   {/* Stock */}
+//                   <div className="mt-2">
+//                     <Badge className="bg-yellow-200 text-yellow-800">
+//                       Stock: {item.stock}
+//                     </Badge>
+//                   </div>
+
+//                   {/* Categories */}
+//                   <div className="mt-3 flex flex-wrap gap-2">
+//                     {item.categories?.map((cat: string, i: number) => (
+//                       <Badge key={i} className="bg-green-200 text-green-800">
+//                         {cat}
+//                       </Badge>
+//                     ))}
+//                   </div>
+
+//                   {/* Tags */}
+//                   <div className="mt-2 flex flex-wrap gap-2">
+//                     {item.tags?.map((tag: string, i: number) => (
+//                       <Badge key={i} className="bg-blue-200 text-blue-800">
+//                         #{tag}
+//                       </Badge>
+//                     ))}
+//                   </div>
+//                 </div>
+
+//                 {/* ========== Action Buttons ========== */}
+//                 <div className="flex flex-col gap-3">
+//                   <Button
+//                     onClick={() => handleEditClick(item)}
+//                     className="bg-blue-600 text-white px-4 py-2 rounded-2xl"
+//                   >
+//                     Edit
+//                   </Button>
+
+//                   <Button
+//                     onClick={() => handleDelete(item.id)}
+//                     className="bg-red-600 text-white px-4 py-2 rounded-2xl"
+//                   >
+//                     Delete
+//                   </Button>
+//                 </div>
+//               </Card>
+//             </motion.div>
+//           ))}
+//         </AnimatePresence>
+//       </div>
+//     </div>
+//   );
+// }
 // ============================================
-// EditProductPage.tsx - النسخة المحدثة بـ RTK Query
+// EditProductPage.tsx - Enhanced UI Version
 // ============================================
 import { useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -22,8 +571,6 @@ import {
   useDeleteProductMutation,
   useGetProductsQuery,
 } from "../../store/UpdataProductSlice";
-// import { useAppSelector } from "../../store/hook";
-
 
 interface IItem {
   name: string;
@@ -43,16 +590,13 @@ export default function EditProductPage() {
   const [editingId, setEditingId] = useState<number | null>(null);
   const { data: items = [], isLoading, refetch } = useGetProductsQuery();
   console.log(items)
-  // 🔥 RTK Query Hooks
+  
   const [addProduct, { isLoading: isAdding, isSuccess: isAddSuccess }] =
     useAddProductMutation();
   const [updateProduct, { isLoading: isUpdating, isSuccess: isUpdateSuccess }] =
     useUpdateProductMutation();
   const [deleteProduct] = useDeleteProductMutation();
 
-  // ============================
-  //   INITIAL FORM STATE
-  // ============================
   const [form, setForm] = useState<IItem>({
     name: "",
     description: "",
@@ -65,21 +609,15 @@ export default function EditProductPage() {
     img: [],
   });
 
-  // ============================
-  //   DELETE HANDLER
-  // ============================
   const handleDelete = async (id: number) => {
     try {
       await deleteProduct(id).unwrap();
-      console.log("✅ تم حذف المنتج بنجاح");
+      // console.log("✅ تم حذف المنتج بنجاح");
     } catch (error) {
-      console.error("❌ خطأ في حذف المنتج:", error);
+      // console.error("❌ خطأ في حذف المنتج:", error);
     }
   };
 
-  // ============================
-  //   BASIC TEXT HANDLER
-  // ============================
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -87,18 +625,12 @@ export default function EditProductPage() {
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  // ============================
-  //   FILE UPLOAD HANDLER
-  // ============================
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       setForm((prev) => ({ ...prev, img: Array.from(e.target.files!) }));
     }
   };
 
-  // ============================
-  //   PRICE AUTO CALC
-  // ============================
   const handleChangePrice = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -116,25 +648,19 @@ export default function EditProductPage() {
     });
   };
 
-  // ============================
-  //   SUBMIT
-  // ============================
   const handleSave = async () => {
     try {
       if (editopen && editingId) {
-        // 🔥 تحديث المنتج
         await updateProduct({
           id: editingId,
           data: form,
         }).unwrap();
         console.log("✅ تم تحديث المنتج بنجاح");
       } else {
-        // 🔥 إضافة منتج جديد
         await addProduct(form).unwrap();
         console.log("✅ تم إضافة المنتج بنجاح");
       }
 
-      // إعادة تعيين الفورم
       setForm({
         name: "",
         description: "",
@@ -156,9 +682,6 @@ export default function EditProductPage() {
     }
   };
 
-  // ============================
-  //   EDIT HANDLER
-  // ============================
   const handleEditClick = (item: any) => {
     window.scrollTo(0, 0);
     setEditopen(true);
@@ -172,7 +695,7 @@ export default function EditProductPage() {
       categories: item.categories || [],
       tags: item.tags || [],
       final_price: item.final_price,
-      img: [], // الصور الجديدة سيتم رفعها إذا اختار المستخدم
+      img: [],
     });
   };
 
@@ -193,57 +716,82 @@ export default function EditProductPage() {
   return (
     <div className="min-h-screen">
       {/* ======= HEADER ======= */}
-      <div className="mb-8">
-        <h1 className="text-4xl font-extrabold tracking-tight text-gray-900">
+      <motion.div 
+        className="mb-10 text-center"
+        initial={{ opacity: 0, y: -30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+      >
+        <h1 className="text-5xl font-black tracking-tight bg-gradient-to-r from-emerald-700 via-teal-600 to-green-700 bg-clip-text text-transparent mb-3">
           Product Admin Dashboard
         </h1>
-        <div className="mt-3 w-24 h-1.5 bg-gradient-to-r from-green-700 to-green-900 rounded-full"></div>
-      </div>
+        <p className="text-gray-600 text-lg">Manage your products with ease</p>
+        <div className="mt-4 mx-auto w-32 h-1.5 bg-gradient-to-r from-emerald-600 via-teal-500 to-green-600 rounded-full shadow-lg"></div>
+      </motion.div>
 
       {/* ======= FORM ======= */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
+        transition={{ duration: 0.6, delay: 0.2 }}
       >
-        <Card className="rounded-3xl shadow-2xl backdrop-blur-md bg-white/40 border border-green-300 mb-10">
-          <CardContent className="space-y-6 p-6">
-            <h2 className="text-2xl font-bold text-green-800">
-              {editopen ? "Edit Product" : "Add Product"}
+        <Card className="rounded-3xl shadow-2xl backdrop-blur-xl bg-white/90 border-2 border-emerald-200 mb-12 overflow-hidden">
+          <div className="bg-gradient-to-r from-emerald-600 to-teal-600 p-6">
+            <h2 className="text-3xl font-bold text-white flex items-center gap-3">
+              <span className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                {editopen ? "✏️" : "➕"}
+              </span>
+              {editopen ? "Edit Product" : "Add New Product"}
             </h2>
-
+          </div>
+          
+          <CardContent className="space-y-6 p-8">
             {/* Name */}
-            <div className="space-y-2">
-              <label className="font-semibold text-green-600">
+            <motion.div 
+              className="space-y-2"
+              whileHover={{ scale: 1.01 }}
+              transition={{ duration: 0.2 }}
+            >
+              <label className="font-bold text-emerald-700 text-sm uppercase tracking-wide flex items-center gap-2">
+                <span className="w-2 h-2 bg-emerald-600 rounded-full"></span>
                 Product Name
               </label>
               <Input
                 name="name"
                 value={form.name}
                 onChange={handleChange}
-                placeholder="Product Name"
-                className="border-green-400 h-12 rounded-2xl"
+                placeholder="Enter product name..."
+                className="border-2 border-emerald-300 h-14 rounded-2xl focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all"
               />
-            </div>
+            </motion.div>
 
             {/* Description */}
-            <div className="space-y-2">
-              <label className="font-semibold text-green-600">
+            <motion.div 
+              className="space-y-2"
+              whileHover={{ scale: 1.01 }}
+              transition={{ duration: 0.2 }}
+            >
+              <label className="font-bold text-emerald-700 text-sm uppercase tracking-wide flex items-center gap-2">
+                <span className="w-2 h-2 bg-emerald-600 rounded-full"></span>
                 Description
               </label>
               <Textarea
                 name="description"
                 value={form.description}
                 onChange={handleChange}
-                placeholder="Description..."
-                className="border-green-400 h-32 rounded-2xl resize-none"
+                placeholder="Describe your product..."
+                className="border-2 border-emerald-300 h-32 rounded-2xl resize-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all"
               />
-            </div>
+            </motion.div>
 
             {/* Categories + Tags */}
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="font-semibold text-green-600">
+            <div className="grid md:grid-cols-2 gap-6">
+              <motion.div
+                whileHover={{ scale: 1.01 }}
+                transition={{ duration: 0.2 }}
+              >
+                <label className="font-bold text-emerald-700 text-sm uppercase tracking-wide flex items-center gap-2 mb-2">
+                  <span className="w-2 h-2 bg-emerald-600 rounded-full"></span>
                   Categories
                 </label>
                 <Select
@@ -257,7 +805,7 @@ export default function EditProductPage() {
                     }))
                   }
                 >
-                  <SelectTrigger className="h-12 rounded-2xl border-green-400">
+                  <SelectTrigger className="h-14 rounded-2xl border-2 border-emerald-300 focus:border-emerald-500">
                     <SelectValue placeholder="Select Categories" />
                   </SelectTrigger>
                   <SelectContent>
@@ -270,27 +818,38 @@ export default function EditProductPage() {
                     </SelectGroup>
                   </SelectContent>
                 </Select>
-                {/* عرض الفئات المختارة */}
-                <div className="flex flex-wrap gap-2 mt-2">
+                <div className="flex flex-wrap gap-2 mt-3">
                   {form.categories.map((cat, i) => (
-                    <Badge
+                    <motion.div
                       key={i}
-                      className="bg-green-200 text-green-800 cursor-pointer"
-                      onClick={() =>
-                        setForm((prev) => ({
-                          ...prev,
-                          categories: prev.categories.filter((c) => c !== cat),
-                        }))
-                      }
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      exit={{ scale: 0 }}
                     >
-                      {cat} ×
-                    </Badge>
+                      <Badge
+                        className="bg-gradient-to-r from-emerald-500 to-teal-500 text-white cursor-pointer hover:from-emerald-600 hover:to-teal-600 px-4 py-2 text-sm font-semibold shadow-md"
+                        onClick={() =>
+                          setForm((prev) => ({
+                            ...prev,
+                            categories: prev.categories.filter((c) => c !== cat),
+                          }))
+                        }
+                      >
+                        {cat} ×
+                      </Badge>
+                    </motion.div>
                   ))}
                 </div>
-              </div>
+              </motion.div>
 
-              <div>
-                <label className="font-semibold text-green-600">Tags</label>
+              <motion.div
+                whileHover={{ scale: 1.01 }}
+                transition={{ duration: 0.2 }}
+              >
+                <label className="font-bold text-emerald-700 text-sm uppercase tracking-wide flex items-center gap-2 mb-2">
+                  <span className="w-2 h-2 bg-teal-600 rounded-full"></span>
+                  Tags
+                </label>
                 <Select
                   value={undefined}
                   onValueChange={(val) =>
@@ -302,7 +861,7 @@ export default function EditProductPage() {
                     }))
                   }
                 >
-                  <SelectTrigger className="h-12 rounded-2xl border-green-400">
+                  <SelectTrigger className="h-14 rounded-2xl border-2 border-emerald-300 focus:border-emerald-500">
                     <SelectValue placeholder="Select Tags" />
                   </SelectTrigger>
                   <SelectContent>
@@ -315,119 +874,171 @@ export default function EditProductPage() {
                     </SelectGroup>
                   </SelectContent>
                 </Select>
-                {/* عرض التاجات المختارة */}
-                <div className="flex flex-wrap gap-2 mt-2">
+                <div className="flex flex-wrap gap-2 mt-3">
                   {form.tags.map((tag, i) => (
-                    <Badge
+                    <motion.div
                       key={i}
-                      className="bg-blue-200 text-blue-800 cursor-pointer"
-                      onClick={() =>
-                        setForm((prev) => ({
-                          ...prev,
-                          tags: prev.tags.filter((t) => t !== tag),
-                        }))
-                      }
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      exit={{ scale: 0 }}
                     >
-                      #{tag} ×
-                    </Badge>
+                      <Badge
+                        className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white cursor-pointer hover:from-blue-600 hover:to-indigo-600 px-4 py-2 text-sm font-semibold shadow-md"
+                        onClick={() =>
+                          setForm((prev) => ({
+                            ...prev,
+                            tags: prev.tags.filter((t) => t !== tag),
+                          }))
+                        }
+                      >
+                        #{tag} ×
+                      </Badge>
+                    </motion.div>
                   ))}
                 </div>
-              </div>
+              </motion.div>
             </div>
 
             {/* Prices */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label className="font-semibold text-green-600">
+            <div className="grid md:grid-cols-2 gap-6">
+              <motion.div 
+                className="space-y-2"
+                whileHover={{ scale: 1.01 }}
+                transition={{ duration: 0.2 }}
+              >
+                <label className="font-bold text-emerald-700 text-sm uppercase tracking-wide flex items-center gap-2">
+                  <span className="w-2 h-2 bg-emerald-600 rounded-full"></span>
                   Original Price
                 </label>
-                <Input
-                  name="original_price"
-                  type="number"
-                  value={form.original_price}
-                  onChange={handleChangePrice}
-                  placeholder="Original Price"
-                  className="border-green-400 h-12 rounded-2xl"
-                />
-              </div>
+                <div className="relative">
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-600 font-bold text-lg">$</span>
+                  <Input
+                    name="original_price"
+                    type="number"
+                    value={form.original_price}
+                    onChange={handleChangePrice}
+                    placeholder="0.00"
+                    className="border-2 border-emerald-300 h-14 rounded-2xl pl-10 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all"
+                  />
+                </div>
+              </motion.div>
 
-              <div className="space-y-2">
-                <label className="font-semibold text-green-600">
+              <motion.div 
+                className="space-y-2"
+                whileHover={{ scale: 1.01 }}
+                transition={{ duration: 0.2 }}
+              >
+                <label className="font-bold text-emerald-700 text-sm uppercase tracking-wide flex items-center gap-2">
+                  <span className="w-2 h-2 bg-teal-600 rounded-full"></span>
                   Final Price
                 </label>
-                <Input
-                  value={form.final_price}
-                  disabled
-                  className="border-green-400 bg-gray-100 h-12 rounded-2xl"
-                />
-              </div>
+                <div className="relative">
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-teal-600 font-bold text-lg">$</span>
+                  <Input
+                    value={form.final_price}
+                    disabled
+                    className="border-2 border-teal-300 bg-gradient-to-r from-teal-50 to-emerald-50 h-14 rounded-2xl pl-10 font-bold text-teal-700 text-lg"
+                  />
+                </div>
+              </motion.div>
             </div>
 
             {/* Discount + Stock */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label className="font-semibold text-green-600">
+            <div className="grid md:grid-cols-2 gap-6">
+              <motion.div 
+                className="space-y-2"
+                whileHover={{ scale: 1.01 }}
+                transition={{ duration: 0.2 }}
+              >
+                <label className="font-bold text-emerald-700 text-sm uppercase tracking-wide flex items-center gap-2">
+                  <span className="w-2 h-2 bg-orange-600 rounded-full"></span>
                   Discount (%)
                 </label>
-                <Input
-                  name="discount"
-                  type="number"
-                  value={form.discount}
-                  onChange={handleChangePrice}
-                  placeholder="Discount %"
-                  className="border-green-400 h-12 rounded-2xl"
-                />
-              </div>
+                <div className="relative">
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-orange-600 font-bold text-lg">%</span>
+                  <Input
+                    name="discount"
+                    type="number"
+                    value={form.discount}
+                    onChange={handleChangePrice}
+                    placeholder="0"
+                    className="border-2 border-orange-300 h-14 rounded-2xl pr-10 focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition-all"
+                  />
+                </div>
+              </motion.div>
 
-              <div className="space-y-2">
-                <label className="font-semibold text-green-600">Stock</label>
+              <motion.div 
+                className="space-y-2"
+                whileHover={{ scale: 1.01 }}
+                transition={{ duration: 0.2 }}
+              >
+                <label className="font-bold text-emerald-700 text-sm uppercase tracking-wide flex items-center gap-2">
+                  <span className="w-2 h-2 bg-purple-600 rounded-full"></span>
+                  Stock
+                </label>
                 <Input
                   name="stock"
                   type="number"
                   value={form.stock}
                   onChange={handleChange}
-                  placeholder="Stock"
-                  className="border-green-400 h-12 rounded-2xl"
+                  placeholder="Available quantity"
+                  className="border-2 border-purple-300 h-14 rounded-2xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all"
                 />
-              </div>
+              </motion.div>
             </div>
 
             {/* File Upload */}
-            <div className="space-y-2">
-              <label className="font-semibold text-green-600">
-                Product Image
+            <motion.div 
+              className="space-y-2"
+              whileHover={{ scale: 1.01 }}
+              transition={{ duration: 0.2 }}
+            >
+              <label className="font-bold text-emerald-700 text-sm uppercase tracking-wide flex items-center gap-2">
+                <span className="w-2 h-2 bg-pink-600 rounded-full"></span>
+                Product Images
               </label>
-              <Input
-                ref={fileInputRef}
-                type="file"
-                multiple
-                accept="image/*"
-                onChange={handleFileChange}
-                className="border-green-400 h-12 rounded-2xl"
-              />
+              <div className="relative">
+                <Input
+                  ref={fileInputRef}
+                  type="file"
+                  multiple
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  className="border-2 border-pink-300 h-14 rounded-2xl focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition-all file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-pink-100 file:text-pink-700 file:font-semibold hover:file:bg-pink-200"
+                />
+              </div>
               {form.img.length > 0 && (
-                <p className="text-sm text-green-600">
-                  {form.img.length} صورة محددة
-                </p>
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="flex items-center gap-2 text-sm text-emerald-600 bg-emerald-50 p-3 rounded-xl border border-emerald-200"
+                >
+                  <span className="w-8 h-8 bg-emerald-200 rounded-full flex items-center justify-center font-bold text-emerald-700">
+                    {form.img.length}
+                  </span>
+                  <span className="font-semibold">صورة محددة</span>
+                </motion.div>
               )}
-            </div>
+            </motion.div>
 
             {/* Buttons */}
-            <div className="flex gap-3">
+            <div className="flex gap-4 pt-4">
               <motion.button
                 onClick={handleSave}
                 disabled={isAdding || isUpdating}
-                className="flex-1 py-3 rounded-2xl bg-gradient-to-r from-green-500 to-green-700 text-white text-lg font-semibold shadow-lg disabled:opacity-50"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="flex-1 py-4 rounded-2xl bg-gradient-to-r from-emerald-600 via-teal-600 to-green-600 text-white text-lg font-bold shadow-xl hover:shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed transition-all"
               >
                 {isAdding || isUpdating
-                  ? "جاري الحفظ..."
+                  ? "⏳ جاري الحفظ..."
                   : editopen
-                  ? "Update Product"
-                  : "Save Product"}
+                  ? "✓ Update Product"
+                  : "✓ Save Product"}
               </motion.button>
 
               {editopen && (
-                <Button
+                <motion.button
                   onClick={() => {
                     setEditopen(false);
                     setEditingId(null);
@@ -443,111 +1054,133 @@ export default function EditProductPage() {
                       img: [],
                     });
                   }}
-                  className="px-6 py-3 rounded-2xl bg-gray-500 text-white"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="px-8 py-4 rounded-2xl bg-gradient-to-r from-gray-500 to-gray-600 text-white font-bold shadow-lg hover:shadow-xl transition-all"
                 >
-                  Cancel
-                </Button>
+                  ✕ Cancel
+                </motion.button>
               )}
             </div>
-
-            {/* Success Messages */}
-            {isAddSuccess && (
-              <p className="text-green-600 font-semibold">
-                ✅ تم إضافة المنتج بنجاح!
-              </p>
-            )}
-            {isUpdateSuccess && (
-              <p className="text-blue-600 font-semibold">
-                ✅ تم تحديث المنتج بنجاح!
-              </p>
-            )}
           </CardContent>
         </Card>
       </motion.div>
 
       {/* PRODUCTS LIST */}
-      <div className="grid gap-6">
-        <AnimatePresence>
-          {items.map((item: any) => (
-            <motion.div
-              key={item.id}
-              initial={{ opacity: 0, y: 20, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 20, scale: 0.95 }}
-              transition={{ duration: 0.3 }}
-            >
-              <Card className="p-6 border border-green-300 bg-white/40 shadow-xl rounded-3xl flex items-center gap-6">
-                {/* ========== Image ========== */}
-                <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-green-500 relative">
-                  <img
-                    src={item.img_url || "/placeholder.png"}
-                    alt={item.name}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-
-                {/* ========== Info Section ========== */}
-                <div className="flex-1">
-                  <h3 className="text-xl font-bold text-green-800">
-                    {item.name}
-                  </h3>
-                  <p className="text-green-700 text-sm">{item.description}</p>
-
-                  {/* Prices */}
-                  <div className="flex gap-2 mt-2">
-                    <Badge>{item.final_price}</Badge>
-                    <Badge className="line-through">
-                      {item.original_price}
-                    </Badge>
-                    {item.discount > 0 && <Badge>-{item.discount}%</Badge>}
-                  </div>
-
-                  {/* Stock */}
-                  <div className="mt-2">
-                    <Badge className="bg-yellow-200 text-yellow-800">
-                      Stock: {item.stock}
-                    </Badge>
-                  </div>
-
-                  {/* Categories */}
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    {item.categories?.map((cat: string, i: number) => (
-                      <Badge key={i} className="bg-green-200 text-green-800">
-                        {cat}
-                      </Badge>
-                    ))}
-                  </div>
-
-                  {/* Tags */}
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    {item.tags?.map((tag: string, i: number) => (
-                      <Badge key={i} className="bg-blue-200 text-blue-800">
-                        #{tag}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-
-                {/* ========== Action Buttons ========== */}
-                <div className="flex flex-col gap-3">
-                  <Button
-                    onClick={() => handleEditClick(item)}
-                    className="bg-blue-600 text-white px-4 py-2 rounded-2xl"
+      <div className="space-y-4">
+        <h2 className="text-3xl font-bold text-emerald-800 mb-6 flex items-center gap-3">
+          <span className="w-10 h-10 bg-emerald-600 text-white rounded-full flex items-center justify-center">📦</span>
+          Products List
+        </h2>
+        
+        <div className="grid gap-6">
+          <AnimatePresence>
+            {items.map((item: any) => (
+              <motion.div
+                key={item.id}
+                initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 20, scale: 0.95 }}
+                whileHover={{ scale: 1.01, y: -4 }}
+                transition={{ duration: 0.3 }}
+              >
+                <Card className="p-6 border-2 border-emerald-200 bg-white/95 shadow-xl hover:shadow-2xl rounded-3xl flex flex-col md:flex-row items-center gap-6 backdrop-blur-sm transition-all">
+                  {/* ========== Image ========== */}
+                  <motion.div 
+                    className="w-28 h-28 rounded-2xl overflow-hidden border-4 border-emerald-400 shadow-lg relative flex-shrink-0"
+                    whileHover={{ scale: 1.1, rotate: 2 }}
+                    transition={{ duration: 0.3 }}
                   >
-                    Edit
-                  </Button>
+                    <img
+                      src={item.img_url || "/placeholder.png"}
+                      alt={item.name}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
+                  </motion.div>
 
-                  <Button
-                    onClick={() => handleDelete(item.id)}
-                    className="bg-red-600 text-white px-4 py-2 rounded-2xl"
-                  >
-                    Delete
-                  </Button>
-                </div>
-              </Card>
-            </motion.div>
-          ))}
-        </AnimatePresence>
+                  {/* ========== Info Section ========== */}
+                  <div className="flex-1 space-y-3">
+                    <h3 className="text-2xl font-black text-emerald-800 flex items-center gap-2">
+                      {item.name}
+                      {item.stock < 10 && (
+                        <span className="text-xs bg-red-500 text-white px-2 py-1 rounded-full">Low Stock!</span>
+                      )}
+                    </h3>
+                    <p className="text-gray-600 text-sm leading-relaxed">{item.description}</p>
+
+                    {/* Prices */}
+                    <div className="flex flex-wrap gap-2">
+                      <Badge className="bg-gradient-to-r from-emerald-600 to-teal-600 text-white px-4 py-2 text-base font-bold shadow-md">
+                        ${item.final_price}
+                      </Badge>
+                      <Badge className="bg-gray-300 text-gray-600 line-through px-4 py-2 text-base">
+                        ${item.original_price}
+                      </Badge>
+                      {item.discount > 0 && (
+                        <Badge className="bg-gradient-to-r from-orange-500 to-red-500 text-white px-4 py-2 text-base font-bold shadow-md">
+                          -{item.discount}%
+                        </Badge>
+                      )}
+                    </div>
+
+                    {/* Stock */}
+                    <div>
+                      <Badge className={`px-4 py-2 text-sm font-bold ${
+                        item.stock > 50 
+                          ? 'bg-green-200 text-green-800' 
+                          : item.stock > 10 
+                          ? 'bg-yellow-200 text-yellow-800' 
+                          : 'bg-red-200 text-red-800'
+                      }`}>
+                        📦 Stock: {item.stock}
+                      </Badge>
+                    </div>
+
+                    {/* Categories */}
+                    <div className="flex flex-wrap gap-2">
+                      {item.categories?.map((cat: string, i: number) => (
+                        <Badge key={i} className="bg-gradient-to-r from-emerald-100 to-teal-100 text-emerald-800 px-3 py-1 border border-emerald-300">
+                          {cat}
+                        </Badge>
+                      ))}
+                    </div>
+
+                    {/* Tags */}
+                    <div className="flex flex-wrap gap-2">
+                      {item.tags?.map((tag: string, i: number) => (
+                        <Badge key={i} className="bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-800 px-3 py-1 border border-blue-300">
+                          #{tag}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* ========== Action Buttons ========== */}
+                  <div className="flex flex-col gap-3 flex-shrink-0">
+                    <motion.button
+                      onClick={() => handleEditClick(item)}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-2xl font-bold shadow-lg hover:shadow-xl transition-all"
+                    >
+                      ✏️ Edit
+                    </motion.button>
+
+                    <motion.button
+                      onClick={() => handleDelete(item.id)}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      className="bg-gradient-to-r from-red-600 to-pink-600 text-white px-6 py-3 rounded-2xl font-bold shadow-lg hover:shadow-xl transition-all"
+                    >
+                      🗑️ Delete
+                    </motion.button>
+                  </div>
+                </Card>
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        </div>
       </div>
     </div>
   );
