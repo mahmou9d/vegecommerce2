@@ -84,7 +84,7 @@ console.log(items);
         <p className="text-xs md:text-sm text-gray-500 mt-1 md:mt-2">
           Quick summary of your store performance
         </p>
-        <div className="mt-2 w-16 h-1.5 rounded-full bg-gradient-to-r from-blue-700 to-green-700"></div>
+        <div className="mt-2 w-16 h-1.5 rounded-full bg-gradient-to-r from-green-700 to-green-900"></div>
       </div>
 
       {/* Stats Cards */}

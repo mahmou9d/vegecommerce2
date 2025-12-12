@@ -173,7 +173,7 @@ export default function DashboardStats() {
           Products Statistics
         </h1>
         {/* Underline Accent */}
-        <div className="mt-3 w-24 h-1.5 bg-gradient-to-r from-blue-700 to-green-700 rounded-full"></div>
+        <div className="mt-3 w-24 h-1.5 bg-gradient-to-r from-green-700 to-green-900 rounded-full"></div>
       </div>
       {/* <h1 className="text-4xl font-extrabold text-green-700 mb-8 text-center drop-shadow-md">
         Products Statistics

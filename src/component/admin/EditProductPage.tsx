@@ -203,7 +203,7 @@ export default function EditProductPage() {
         <h1 className="text-4xl font-extrabold tracking-tight text-gray-900">
           Product Admin Dashboard
         </h1>
-        <div className="mt-3 w-24 h-1.5 bg-gradient-to-r from-blue-700 to-green-700 rounded-full"></div>
+        <div className="mt-3 w-24 h-1.5 bg-gradient-to-r from-green-700 to-green-900 rounded-full"></div>
       </div>
 
       {/* ======= FORM ======= */}
