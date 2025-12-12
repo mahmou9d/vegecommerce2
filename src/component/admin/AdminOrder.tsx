@@ -194,7 +194,7 @@ const AdminOrder: React.FC = () => {
               <p className="text-sm text-gray-600 mt-1">
                 Track and manage all your orders in one place
               </p>
-              <div className="mt-3 h-1.5 bg-gradient-to-r from-green-700 to-green-900 rounded-full"></div>
+              <div className="mt-3 h-1.5 w-24 bg-gradient-to-r from-green-700 to-green-900 rounded-full"></div>
             </div>
           </div>
         </div>
