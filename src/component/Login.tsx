@@ -28,7 +28,7 @@ const schema = yup.object().shape({
 const Login = () => {
   // Toast hook for showing notifications
   const { toast } = useToast();
-
+console.log("BASE URL:", import.meta.env.VITE_BASE_URL);
   // Navigation hook
   const nav = useNavigate();
 
