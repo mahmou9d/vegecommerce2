@@ -5,7 +5,7 @@ import { useState } from "react";
 import { FaRegEye, FaRegEyeSlash } from "react-icons/fa6";
 import { Button } from "../components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { useAppDispatch, useAppSelector } from "../store/hook";
+// import { useAppDispatch, useAppSelector } from "../store/hook";
 import { RootState } from "../store";
 import { useLoginMutation } from "../store/authSlice";
 import { useToast } from "../hooks/use-toast";
@@ -33,7 +33,7 @@ const Login = () => {
   const nav = useNavigate();
 
   // Redux dispatch
-  const dispatch = useAppDispatch();
+  // const dispatch = useAppDispatch();
 
   // Get authentication state from Redux
   // const { loading, access, error } = useAppSelector(

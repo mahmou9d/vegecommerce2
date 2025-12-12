@@ -2,7 +2,7 @@ import { useEffect, useMemo, useCallback, useState } from "react";
 import { useNavigate } from "react-router";
 import { GoHeart, GoHeartFill } from "react-icons/go";
 import { RiShoppingCartLine } from "react-icons/ri";
-import { useAppDispatch, useAppSelector } from "../store/hook";
+// import { useAppDispatch, useAppSelector } from "../store/hook";
 import { useAddToWishlistMutation, useGetWishlistQuery, useRemoveFromWishlistMutation } from "../store/wishlistSlice";
 // import {
 //   addWishlistLocally,
@@ -41,7 +41,7 @@ interface IItem {
 const ProductComponent = ({ item }: { item: TProduct }) => {
   const { toast } = useToast();
   const nav = useNavigate();
-  const dispatch = useAppDispatch();
+  // const dispatch = useAppDispatch();
   // const { items, total } = useAppSelector((state) => state?.cart);
   // const getwishlist = useAppSelector((state) => state.Getwishlists.items);
   const { data: getwishlist = [], isLoading: loadingwish } =
@@ -145,7 +145,7 @@ const ProductComponent = ({ item }: { item: TProduct }) => {
     } finally {
       setCartBtnLoading(false);
     }
-  }, [item, items, dispatch, toast, access]);
+  }, [item, items, toast, access]);
 
   // const toggleWishlist = async () => {
 

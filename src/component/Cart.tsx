@@ -34,7 +34,7 @@ import {
   useGetCartQuery,
   useRemoveFromCartMutation,
 } from "../store/cartSlice";
-import { useAppDispatch, useAppSelector } from "../store/hook";
+// import { useAppDispatch, useAppSelector } from "../store/hook";
 import { RootState } from "../store";
 // import { productUser } from "../store/productSlice";
 
@@ -55,7 +55,7 @@ import { useGetProductsQuery } from "../store/UpdataProductSlice";
 const Cart = () => {
   const { toast } = useToast(); // Toast hook for notifications
   const nav = useNavigate(); // Navigation hook
-  const dispatch = useAppDispatch(); // Redux dispatch
+  // const dispatch = useAppDispatch(); // Redux dispatch
 const [editCart] = useEditCartMutation();
   // Get products from Redux store
   // const { products, loading, error } = useAppSelector(

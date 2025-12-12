@@ -21,7 +21,7 @@ import { useEffect, useState } from "react";
 import { Textarea } from "../components/ui/textarea";
 import { Checkbox } from "../components/ui/checkbox";
 import { Label } from "../components/ui/label";
-import { useAppDispatch, useAppSelector } from "../store/hook";
+// import { useAppDispatch, useAppSelector } from "../store/hook";
 import { useAddReviewMutation, useGetRecentReviewsQuery } from "../store/reviewSlice";
 import { useParams } from "react-router-dom";
 // import { productUser } from "../store/productSlice";
@@ -68,7 +68,7 @@ const SingleProduct = () => {
   const { toast } = useToast();
   const [edit, setEdit] = useState(1);
   const { id } = useParams();
-  const dispatch = useAppDispatch();
+  // const dispatch = useAppDispatch();
   const [activeTab, setActiveTab] = useState("Description");
   const tabs = [
     "Description",
@@ -212,9 +212,9 @@ const SingleProduct = () => {
   // const { items: items3, total } = useAppSelector((state) => state.cart);
   const { data: items3 } = useGetCartQuery();
   console.log(items3, "vvvvvvvvvvvvvvvvvvv");
-  useEffect(() => {
+  // useEffect(() => {
     // dispatch(GetToCart());
-  }, [dispatch]);
+  // }, [dispatch]);
   const updateQuantity = () => {
     addToCart({ product_id: Number(firstItem.id), quantity: edit })
       .unwrap()

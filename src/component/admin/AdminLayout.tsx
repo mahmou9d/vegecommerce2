@@ -18,12 +18,11 @@ const [sidebarOpen, setSidebarOpen] = useState(false);
     { name: "Statistics", icon: <BarChart size={20} />, path: "/admin/stats" },
     // { name: "Products", icon: <Package size={20} />, path: "/admin/products" },
     { name: "Edit Product", icon: <PlusSquare size={20} />, path: "/admin/add" },
-    
-    // {
-    //   name: "Orders",
-    //   icon: <ClipboardList size={20} />,
-    //   path: "/admin/orders",
-    // },
+    {
+      name: "Orders",
+      icon: <ClipboardList size={20} />,
+      path: "/admin/orders",
+    },
   ];
 
   return (

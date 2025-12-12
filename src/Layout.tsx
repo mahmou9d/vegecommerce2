@@ -1,6 +1,6 @@
 import { Suspense, lazy, useEffect, useRef } from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
-import { useAppDispatch, useAppSelector } from "./store/hook";
+// import { useAppDispatch, useAppSelector } from "./store/hook";
 // import { RootState } from "./store";
 // import { productUser } from "./store/productSlice";
 import ScrollToTop from "./ScrollToTop";
@@ -18,6 +18,7 @@ import DashboardStats from "./component/admin/DashboardStats";
 import PaymentSuccess from "./component/PaymentSuccess";
 import PaymentCancel from "./component/PaymentCancel";
 import { useGetProductsQuery } from "./store/UpdataProductSlice";
+import AdminOrder from "./component/admin/AdminOrder";
 // import Admin from "./component/Admin ";
 
 // ✅ Lazy load components
@@ -61,7 +62,7 @@ type TProduct = {
 
 function Layout() {
   const location = useLocation();
-  const dispatch = useAppDispatch();
+  // const dispatch = useAppDispatch();
     // { name: "Products", icon: <Package size={20} />, path: "/admin/products" },
   const hideLayout = [
     "/login",
@@ -69,6 +70,7 @@ function Layout() {
     "/admin",
     "/admin/stats",
     "/admin/add",
+    "/admin/orders",
   ].includes(location.pathname);
   // const { products, loaded } = useAppSelector((state) => state.product);
 const { data: products = [], isLoading, refetch } = useGetProductsQuery();
@@ -109,20 +111,19 @@ const { data: products = [], isLoading, refetch } = useGetProductsQuery();
         <Route
           path="/category/:name"
           element={
-            <Categories
-              products={mergedFiltered}
-              title={categoryName}
-            />
+            <Categories products={mergedFiltered} title={categoryName} />
           }
         />
         <Route path="/checkout" element={<Checkoutcart />} />
         <Route path="/singleproduct/:id" element={<SingleProduct />} />
         {/* <Route path="/admin" element={<Admin />} /> */}
-<Route path="/admin" element={<AdminLayout />}>
-  <Route index element={<AdminDashboard />} />              {/* /admin */}
-  <Route path="stats" element={<DashboardStats />} />        {/* /admin/stats */}
-  <Route path="add" element={<EditProductPage />} />         {/* /admin/add */}
-</Route>
+        <Route path="/admin" element={<AdminLayout />}>
+          <Route index element={<AdminDashboard />} /> {/* /admin */}
+          <Route path="stats" element={<DashboardStats />} />{" "}
+          {/* /admin/stats */}
+          <Route path="add" element={<EditProductPage />} /> {/* /admin/add */}
+          <Route path="orders" element={<AdminOrder />} />
+        </Route>
       </Routes>
       {!hideLayout && <Footer />}
       <ScrollToTop />

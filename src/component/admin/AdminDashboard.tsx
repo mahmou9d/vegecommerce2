@@ -1,4 +1,4 @@
-import { useAppDispatch, useAppSelector } from "../../store/hook";
+// import { useAppDispatch, useAppSelector } from "../../store/hook";
 import { Card, CardContent } from "../../components/ui/card";
 // import { motion } from "framer-motion";
 import { ShoppingCart, Package, Users, DollarSign } from "lucide-react";
@@ -31,7 +31,7 @@ interface IData {
   orders: number;
 }
 export default function AdminDashboard() {
-  const dispatch = useAppDispatch();
+  // const dispatch = useAppDispatch();
   // const { total_sales  } = useAppSelector(
   //   (state: RootState) => state.Totalsales
   // );

@@ -1,4 +1,4 @@
-import { useAppDispatch, useAppSelector } from "../../store/hook";
+// import { useAppDispatch, useAppSelector } from "../../store/hook";
 import { Card, CardContent } from "../../components/ui/card";
 import { useEffect, useMemo, useState } from "react";
 import {
@@ -81,7 +81,7 @@ const items: IItem[] = [
 ];
 
 export default function DashboardStats() {
-  const dispatch = useAppDispatch();
+  // const dispatch = useAppDispatch();
   // const { products, loading, error } = useAppSelector(
   //   (state: RootState) => state.product
   // );

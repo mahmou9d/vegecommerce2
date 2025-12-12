@@ -41,7 +41,7 @@ import { Progress } from "../components/ui/progress";
 // =============================
 // Import Redux Hooks & Actions
 // =============================
-import { useAppDispatch, useAppSelector } from "../store/hook";
+// import { useAppDispatch, useAppSelector } from "../store/hook";
 import {
   useGetCartQuery,
   useRemoveFromCartMutation,
@@ -125,7 +125,7 @@ interface Product {
 const Header = () => {
   // Hooks
   const { toast } = useToast();
-  const dispatch = useAppDispatch();
+  // const dispatch = useAppDispatch();
   // const { access } = useAppSelector((state) => state?.auth);
   const [logout, { isLoading }] = useLogoutMutation();
   // Cart Items & Total from Redux
@@ -223,13 +223,13 @@ const Header = () => {
   // =============================
   const handleLogout = () => {
     logout()
-      .unwrap()
       .then(() => {
         toast({
           title: "Logged out ✅",
           description: "You have been logged out successfully.",
         });
-
+      localStorage.removeItem("access");
+      localStorage.removeItem("refresh");
         // Remove all cart items & wishlist items on logout
         // Promise.all(
         //   items.map((item) =>

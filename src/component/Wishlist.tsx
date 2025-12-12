@@ -4,21 +4,23 @@ import { RiShoppingCartLine } from "react-icons/ri";
 import { TiHome } from "react-icons/ti";
 import { IoClose } from "react-icons/io5";
 import { RootState } from "../store";
-import { useAppDispatch, useAppSelector } from "../store/hook";
-import { useCallback, useEffect } from "react";
-import { useAddToWishlistMutation, useGetWishlistQuery, useRemoveFromWishlistMutation, WishlistRemove } from "../store/wishlistSlice";
-import { addItemLocally, AddToCart, GetToCart, useAddToCartMutation } from "../store/cartSlice";
+// import { useAppDispatch, useAppSelector } from "../store/hook";
+import {
+  useGetWishlistQuery,
+  useRemoveFromWishlistMutation,
+} from "../store/wishlistSlice";
+import { useAddToCartMutation } from "../store/cartSlice";
 import { Button } from "../components/ui/button";
 import { Link } from "react-router-dom";
-import { GetWishlist, removeWishlistLocally } from "../store/GetwishlistSlice";
+// import { GetWishlist, removeWishlistLocally } from "../store/GetwishlistSlice";
 import { useToast } from "../hooks/use-toast";
 
 const Wishlist = () => {
-  const dispatch = useAppDispatch();
+  // const dispatch = useAppDispatch();
   const { toast } = useToast();
   const [addToCart] = useAddToCartMutation();
-     const { data: items = [], isLoading } = useGetWishlistQuery();
-     const [removeFromWishlist] = useRemoveFromWishlistMutation();
+  const { data: items = [], isLoading } = useGetWishlistQuery();
+  const [removeFromWishlist] = useRemoveFromWishlistMutation();
   // Select wishlist state from Redux store
   // const { items, loading, error } = useAppSelector(
   //   (state: RootState) => state?.Getwishlists

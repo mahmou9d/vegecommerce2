@@ -7,7 +7,7 @@ import { useState } from "react";
 import { FaRegEye, FaRegEyeSlash } from "react-icons/fa6";
 import { Button } from "../components/ui/button";
 // import { signupUser } from "../store/authSecSlice";
-import { useAppDispatch, useAppSelector } from "../store/hook";
+// import { useAppDispatch, useAppSelector } from "../store/hook";
 // import { RootState } from "../store";
 import { useNavigate } from "react-router-dom";
 import { useLoginMutation, useSignupMutation } from "../store/authSlice";
@@ -47,7 +47,7 @@ const Signup = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const dispatch = useAppDispatch();
+  // const dispatch = useAppDispatch();
   const nav = useNavigate();
 
   // Access signup state from Redux

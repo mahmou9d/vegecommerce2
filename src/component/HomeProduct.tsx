@@ -1,4 +1,4 @@
-import { useAppDispatch, useAppSelector } from "../store/hook";
+// import { useAppDispatch, useAppSelector } from "../store/hook";
 import { Button } from "../components/ui/button";
 import Product from "./Product";
 import { useEffect } from "react";
@@ -10,7 +10,7 @@ import { useGetProductsQuery } from "../store/UpdataProductSlice";
 // Component for displaying Home Products
 const HomeProduct = () => {
   // Redux dispatch hook
-  const dispatch = useAppDispatch();
+  // const dispatch = useAppDispatch();
 
   // React Router navigation hook
   const nav = useNavigate();

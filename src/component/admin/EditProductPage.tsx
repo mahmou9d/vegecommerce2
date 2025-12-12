@@ -24,7 +24,7 @@ import {
   useDeleteProductMutation,
   useGetProductsQuery,
 } from "../../store/UpdataProductSlice";
-import { useAppSelector } from "../../store/hook";
+// import { useAppSelector } from "../../store/hook";
 import { RootState } from "../../store";
 
 interface IItem {

@@ -28,7 +28,7 @@ import {
 } from "../components/ui/command";
 
 // Redux store hooks + actions
-import { useAppDispatch, useAppSelector } from "../store/hook";
+// import { useAppDispatch, useAppSelector } from "../store/hook";
 import {
   // Checkout,
   // DeleteToCart,
@@ -76,7 +76,7 @@ const Checkoutcart = () => {
   // Router navigation
   const nav = useNavigate();
   // Redux dispatch
-  const dispatch = useAppDispatch();
+  // const dispatch = useAppDispatch();
   const [checkout, { isLoading: isCheckingOut }] = useCheckoutMutation();
   const [createCheckoutSession] = useCreateCheckoutSessionMutation();
 

@@ -1,10 +1,10 @@
 import React, { useEffect } from "react";
 import { CheckCircle } from "lucide-react";
 import {  useClearCartMutation } from "../store/cartSlice";
-import { useAppDispatch } from "../store/hook";
+// import { useAppDispatch } from "../store/hook";
 
 const PaymentSuccess = () => {
-  const dispatch = useAppDispatch();
+  // const dispatch = useAppDispatch();
 const [clearCart] = useClearCartMutation();
 
 useEffect(() => {

@@ -4,7 +4,7 @@ import React, { useEffect } from "react";
 import Categories from "./Categories";
 
 // Redux hooks & store
-import { useAppDispatch, useAppSelector } from "../store/hook";
+// import { useAppDispatch, useAppSelector } from "../store/hook";
 import { RootState } from "../store";
 // import { productUser } from "../store/productSlice";
 import { TProduct, useGetProductsQuery } from "../store/UpdataProductSlice";
@@ -31,7 +31,7 @@ import { TProduct, useGetProductsQuery } from "../store/UpdataProductSlice";
 // Shop Component
 // -------------------------------
 const Shop = () => {
-  const dispatch = useAppDispatch();
+  // const dispatch = useAppDispatch();
 
   // Select product state from Redux
   // const { products, loading, error } = useAppSelector(
