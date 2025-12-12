@@ -13,6 +13,7 @@ import { useState } from "react";
 export default function AdminLayout() {
   const location = useLocation();
 const [sidebarOpen, setSidebarOpen] = useState(false);
+console.log("BASE URL:", import.meta.env.VITE_BASE_URL);
   const menu = [
     { name: "Dashboard", icon: <LayoutDashboard size={20} />, path: "/admin" },
     { name: "Statistics", icon: <BarChart size={20} />, path: "/admin/stats" },
