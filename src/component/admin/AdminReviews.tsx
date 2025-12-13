@@ -8,73 +8,46 @@ import {
   TrendingUp,
   MessageSquare,
 } from "lucide-react";
+import { useGetRecentReviewsQuery } from "../../store/reviewSlice";
 
 const AdminReviews = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterRating, setFilterRating] = useState("all");
+const { data: reviews = [], isLoading } = useGetRecentReviewsQuery();
 
-  const reviews = [
-    {
-      id: 1,
-      userName: "Ahmed Hassan",
-      userEmail: "ahmed@example.com",
-      userAvatar: "AH",
-      productName: "Wireless Headphones Pro",
-      rating: 5,
-      comment:
-        "Amazing quality! The sound is crystal clear and battery life is excellent.",
-      date: "2024-12-10",
-    },
-    {
-      id: 2,
-      userName: "Sara Mohamed",
-      userEmail: "sara@example.com",
-      userAvatar: "SM",
-      productName: "Smart Watch Elite",
-      rating: 4,
-      comment:
-        "Great product overall, but could use better battery optimization.",
-      date: "2024-12-09",
-    },
-    {
-      id: 3,
-      userName: "Omar Ali",
-      userEmail: "omar@example.com",
-      userAvatar: "OA",
-      productName: "Laptop Stand Adjustable",
-      rating: 5,
-      comment:
-        "Perfect for my home office setup. Very sturdy and well-designed.",
-      date: "2024-12-08",
-    },
-    {
-      id: 4,
-      userName: "Layla Ibrahim",
-      userEmail: "layla@example.com",
-      userAvatar: "LI",
-      productName: "USB-C Hub 7-in-1",
-      rating: 3,
-      comment: "Works as expected but gets a bit warm during heavy use.",
-      date: "2024-12-07",
-    },
-  ];
+const averageRating =
+  reviews.length > 0
+    ? (
+        reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length
+      ).toFixed(1)
+    : "0.0";
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
 
+    const thisMonthCount = reviews.filter((review) => {
+      const reviewDate = new Date(review.created);
+      return (
+        reviewDate.getMonth() === currentMonth &&
+        reviewDate.getFullYear() === currentYear
+      );
+    }).length;
   const stats = [
     {
       label: "Total Reviews",
-      value: "1,234",
+      value: reviews.length,
       icon: MessageSquare,
       color: "bg-blue-500",
     },
     {
       label: "Average Rating",
-      value: "4.6",
+      value: averageRating,
       icon: Star,
       color: "bg-yellow-500",
     },
     {
       label: "This Month",
-      value: "+124",
+      value: thisMonthCount,
       icon: TrendingUp,
       color: "bg-green-500",
     },
@@ -82,8 +55,8 @@ const AdminReviews = () => {
 
   const filteredReviews = reviews.filter((review) => {
     const matchesSearch =
-      review.userName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      review.productName.toLowerCase().includes(searchTerm.toLowerCase());
+      review.customer.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      review.product.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesRating =
       filterRating === "all" || review.rating === parseInt(filterRating);
     return matchesSearch && matchesRating;
@@ -176,13 +149,13 @@ const AdminReviews = () => {
                 {/* User Info */}
                 <div className="flex items-center gap-4 md:w-64">
                   <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold text-lg shadow-lg">
-                    {review.userAvatar}
+                    {/* {review.customer} */}
                   </div>
                   <div className="flex-1">
                     <p className="font-semibold text-gray-900">
-                      {review.userName}
+                      {review.customer}
                     </p>
-                    <p className="text-sm text-gray-500">{review.userEmail}</p>
+                    {/* <p className="text-sm text-gray-500">{review.}</p> */}
                   </div>
                 </div>
 
@@ -190,7 +163,7 @@ const AdminReviews = () => {
                 <div className="flex-1 space-y-3">
                   <div className="flex flex-wrap items-center gap-4">
                     <p className="font-medium text-gray-900">
-                      {review.productName}
+                      {review.product}
                     </p>
                     <div className="flex items-center gap-1">
                       {[...Array(5)].map((_, i) => (
@@ -217,7 +190,7 @@ const AdminReviews = () => {
                   <div className="flex items-center gap-2 text-sm text-gray-500">
                     <Calendar size={16} />
                     <span>
-                      {new Date(review.date).toLocaleDateString("en-US", {
+                      {new Date(review.created).toLocaleDateString("en-US", {
                         year: "numeric",
                         month: "long",
                         day: "numeric",

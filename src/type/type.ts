@@ -56,54 +56,77 @@ export interface RemoveCartRequest {
   product_id: number;
 }
 export interface CheckoutSessionRequest {
-    order_id: number;
+  order_id: number;
 }
 
 export interface CheckoutSessionResponse {
-    url?: string;
-    session_id?: string;
-    // عدّل حسب الـ response الفعلي من الـ API
+  url?: string;
+  session_id?: string;
+  // عدّل حسب الـ response الفعلي من الـ API
 }
 export interface TReview {
-    id: number;
-    comment: string;
-    rating: number;
-    customer: string;
-    created: string;
-    product: string;
+  id: number;
+  comment: string;
+  rating: number;
+  customer: string;
+  created: string;
+  product: string;
 }
 
 export interface ReviewsResponse {
-    reviews: TReview[];
+  reviews: TReview[];
 }
 
 export interface AddReviewRequest {
-    product_id: number;
-    comment: string;
-    rating: number;
-}
-export interface OrderRecent {
-    id: number;
-    customer: string;
-    status: string;
-    total_price: number;
+  product_id: number;
+  comment: string;
+  rating: number;
 }
 
+type OrderItem = {
+  id: number;
+  product_name: string;
+  price: string;
+  quantity: number;
+  subtotal: number;
+};
+
+export type OrderStatus =
+  | "pending"
+  | "paid"
+  | "shipped"
+  | "delivered"
+  | "cancelled";
+
+export type OrderRecent = {
+  id: number;
+  customer: string;
+  full_name: string;
+  email: string;
+  phone_number: string;
+  full_address: string;
+  country: string;
+  status: OrderStatus;
+  order_notes: string;
+  total_price: number;
+  created: string; // يمكن تحويلها لاحقًا إلى Date إذا أحببت
+  items: OrderItem[];
+};
 export interface SalesOrder {
-    month: string;
-    orders: number;
-    sales: number;
+  month: string;
+  orders: number;
+  sales: number;
 }
 
 export interface TopSellingProduct {
-    id: number;
-    name: string;
-    sales: number;
+  id: number;
+  name: string;
+  sales: number;
 }
 
 // Response Types
 export interface OrderRecentResponse {
-    orders: OrderRecent[];
+  orders: OrderRecent[];
 }
 
 export interface OrdersCountResponse {
@@ -115,57 +138,57 @@ export interface OrdersCountResponse {
 }
 
 export interface UsersCountResponse {
-    users: number;
+  users: number;
 }
 
 export interface TotalSalesResponse {
-    total_sales: number;
+  total_sales: number;
 }
 
 export interface TopSellingResponse {
-    topSelling: TopSellingProduct[];
+  topSelling: TopSellingProduct[];
 }
 export interface TProduct {
   id?: number;
-    product_id?: number;
-    name: string;
-    description: string;
-    original_price: string;
-    final_price?: string;
-    discount: number;
-    stock: number;
-    categories: string[];
-    tags: string[];
-    img?: string;
-    average_rating?: number;
-    img_url?: string;
+  product_id?: number;
+  name: string;
+  description: string;
+  original_price: string;
+  final_price?: string;
+  discount: number;
+  stock: number;
+  categories: string[];
+  tags: string[];
+  img?: string;
+  average_rating?: number;
+  img_url?: string;
 }
 
 export interface WishlistResponse {
-    wishlist: {
-        products: TProduct[];
-    };
+  wishlist: {
+    products: TProduct[];
+  };
 }
 export interface TProductInput {
-    name: string;
-    description: string;
-    original_price: string;
-    discount: number;
-    stock: number;
-    categories: string[];
-    tags: string[];
-    img: File[];
+  name: string;
+  description: string;
+  original_price: string;
+  discount: number;
+  stock: number;
+  categories: string[];
+  tags: string[];
+  img: File[];
 }
 
 export interface ProductsCountResponse {
-    total_products: number;
+  total_products: number;
 }
 export interface Counted {
-    orders: string;
-    shipped: string;
-    pending: string;
-    delivered: string;
-    cancelled?: string;
-    paid?:string
+  orders: string;
+  shipped: string;
+  pending: string;
+  delivered: string;
+  cancelled?: string;
+  paid?: string
 }
 

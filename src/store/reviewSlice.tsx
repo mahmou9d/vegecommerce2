@@ -11,6 +11,13 @@ export const reviewApi = createApi({
   baseQuery: baseQueryWithReauth,
   tagTypes: ["Review"],
   endpoints: (builder) => ({
+    getReviews: builder.query<TReview[], void>({
+      query: () => "/reviews/",
+      transformResponse: (response: ReviewsResponse) => {
+        return response.reviews || [];
+      },
+      providesTags: ["Review"],
+    }),
     getRecentReviews: builder.query<TReview[], void>({
       query: () => "/reviews/recent/",
       transformResponse: (response: ReviewsResponse) => {
@@ -35,4 +42,8 @@ export const reviewApi = createApi({
 });
 
 // 🔹 Export hooks
-export const { useGetRecentReviewsQuery, useAddReviewMutation } = reviewApi;
+export const {
+  useGetRecentReviewsQuery,
+  useGetReviewsQuery,
+  useAddReviewMutation,
+} = reviewApi;

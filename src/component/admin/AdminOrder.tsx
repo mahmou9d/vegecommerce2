@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Search,
   Eye,
@@ -24,8 +24,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../../components/ui/select";
-import { useGetOrdersCountQuery } from "../../store/SalesOrdersSlice";
-import { Counted } from "../../type/type";
+import {
+  useGetOrdersCountQuery,
+  useGetRecentOrdersQuery,
+  usePatchOrdersMutation,
+} from "../../store/SalesOrdersSlice";
+import { Counted, OrderRecent } from "../../type/type";
 
 // Types
 interface OrderItem {
@@ -47,12 +51,7 @@ interface Order {
   address: string;
 }
 
-type OrderStatus =
-  | "pending"
-  | "paid"
-  | "shipped"
-  | "delivered"
-  | "cancelled";
+type OrderStatus = "pending" | "paid" | "shipped" | "delivered" | "cancelled";
 
 interface StatusOption {
   value: OrderStatus;
@@ -64,54 +63,19 @@ interface StatusOption {
 
 const AdminOrder: React.FC = () => {
   const { data: Counted = {} as Counted } = useGetOrdersCountQuery();
-  const [orders, setOrders] = useState<Order[]>([
-    {
-      id: 1,
-      orderNumber: "ORD-001",
-      customerName: "Ahmed Mohamed",
-      email: "ahmed@example.com",
-      phone: "+20 101 234 5678",
-      items: [
-        { name: "Product 1", quantity: 2, price: 150 },
-        { name: "Product 2", quantity: 1, price: 200 },
-      ],
-      total: 500,
-      status: "pending",
-      date: "2024-12-10",
-      address: "Cairo, Nasr City, Al Nozha Street",
-    },
-    {
-      id: 2,
-      orderNumber: "ORD-002",
-      customerName: "Sara Ali",
-      email: "sara@example.com",
-      phone: "+20 109 876 5432",
-      items: [{ name: "Product 3", quantity: 3, price: 100 }],
-      total: 300,
-      status: "paid",
-      date: "2024-12-11",
-      address: "Giza, Dokki, Tahrir Street",
-    },
-    {
-      id: 3,
-      orderNumber: "ORD-003",
-      customerName: "Mahmoud Hassan",
-      email: "mahmoud@example.com",
-      phone: "+20 112 345 6789",
-      items: [
-        { name: "Product 4", quantity: 1, price: 350 },
-        { name: "Product 5", quantity: 2, price: 125 },
-      ],
-      total: 600,
-      status: "shipped",
-      date: "2024-12-09",
-      address: "Alexandria, Smouha, Fawzy Moaz Street",
-    },
-  ]);
-
-  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const { data: orderRecent = [], isLoading: l1 } = useGetRecentOrdersQuery();
+  const [patchOrders] = usePatchOrdersMutation();
+  const [selectedOrder, setSelectedOrder] = useState<OrderRecent | null>(null);
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [filterStatus, setFilterStatus] = useState<OrderStatus | "all">("all");
+  const [status, setStatus] = useState<OrderStatus>("pending");
+
+  // Update status when selectedOrder changes
+  useEffect(() => {
+    if (selectedOrder) {
+      setStatus(selectedOrder.status as OrderStatus);
+    }
+  }, [selectedOrder]);
 
   const statusOptions: StatusOption[] = [
     {
@@ -155,24 +119,20 @@ const AdminOrder: React.FC = () => {
     return statusOptions.find((s) => s.value === status) || statusOptions[0];
   };
 
-  const handleStatusChange = (
-    orderId: number,
-    newStatus: OrderStatus
-  ): void => {
-    setOrders(
-      orders.map((order) =>
-        order.id === orderId ? { ...order, status: newStatus } : order
-      )
-    );
-    if (selectedOrder?.id === orderId) {
-      setSelectedOrder({ ...selectedOrder, status: newStatus });
+  const handleStatusChange = async (id: number, newStatus: OrderStatus) => {
+    try {
+      await patchOrders({
+        id,
+        status: newStatus,
+      }).unwrap();
+    } catch (error) {
+      console.error("Failed to update order status:", error);
     }
   };
 
-  const filteredOrders = orders.filter((order) => {
+  const filteredOrders = orderRecent.filter((order) => {
     const matchesSearch =
-      order.orderNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      order.customer.toLowerCase().includes(searchTerm.toLowerCase()) ||
       order.email.toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesStatus =
@@ -306,7 +266,7 @@ const AdminOrder: React.FC = () => {
               </div>
             ) : (
               filteredOrders.map((order) => {
-                const statusInfo = getStatusInfo(order.status);
+                const statusInfo = getStatusInfo(order?.status as OrderStatus);
                 const StatusIcon = statusInfo.icon;
 
                 return (
@@ -323,7 +283,7 @@ const AdminOrder: React.FC = () => {
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-2">
                           <span className="text-lg font-bold text-gray-900">
-                            {order.orderNumber}
+                            {order.id}
                           </span>
                           <span
                             className={`px-3 py-1.5 rounded-full text-xs font-semibold border-2 flex items-center gap-1.5 ${statusInfo.bgColor} ${statusInfo.color}`}
@@ -334,13 +294,11 @@ const AdminOrder: React.FC = () => {
                         </div>
                         <div className="flex items-center gap-2 text-sm text-gray-600 mb-1">
                           <User size={14} />
-                          <span className="font-medium">
-                            {order.customerName}
-                          </span>
+                          <span className="font-medium">{order.customer}</span>
                         </div>
                         <div className="flex items-center gap-2 text-xs text-gray-500">
                           <Calendar size={12} />
-                          <span>{order.date}</span>
+                          <span>{order.created}</span>
                         </div>
                       </div>
                     </div>
@@ -354,7 +312,7 @@ const AdminOrder: React.FC = () => {
                         </span>
                       </div>
                       <div className="text-2xl font-bold bg-gradient-to-r from-green-600 to-green-600 bg-clip-text text-transparent">
-                        ${order.total}
+                        ${order.total_price}
                       </div>
                     </div>
                   </div>
@@ -366,7 +324,7 @@ const AdminOrder: React.FC = () => {
           {/* Order Details */}
           <div className="lg:col-span-1">
             {selectedOrder ? (
-              <div className="bg-white rounded-2xl shadow-lg p-6 sticky top-6 border-2 border-gray-100">
+              <div className="bg-white sticky overflow-y-scroll h-[calc(100vh-3rem)] rounded-2xl shadow-lg p-6 top-6 border-2 border-gray-100">
                 <div className="flex items-center gap-3 mb-6 pb-4 border-b-2 border-gray-100">
                   <div className="p-2.5 bg-gradient-to-br from-green-500 to-green-600 rounded-lg">
                     <Eye className="text-white" size={22} />
@@ -383,7 +341,7 @@ const AdminOrder: React.FC = () => {
                       Order Number
                     </label>
                     <p className="font-bold text-xl text-gray-900">
-                      {selectedOrder.orderNumber}
+                      {selectedOrder.id}
                     </p>
                   </div>
 
@@ -394,7 +352,7 @@ const AdminOrder: React.FC = () => {
                         Date
                       </label>
                       <p className="font-semibold text-gray-900">
-                        {selectedOrder.date}
+                        {selectedOrder.created}
                       </p>
                     </div>
                   </div>
@@ -407,7 +365,7 @@ const AdminOrder: React.FC = () => {
                           Customer Name
                         </label>
                         <p className="font-semibold text-gray-900">
-                          {selectedOrder.customerName}
+                          {selectedOrder.full_name}
                         </p>
                       </div>
                     </div>
@@ -431,7 +389,7 @@ const AdminOrder: React.FC = () => {
                           Phone
                         </label>
                         <p className="font-medium text-gray-700">
-                          {selectedOrder.phone}
+                          {selectedOrder.phone_number}
                         </p>
                       </div>
                     </div>
@@ -443,7 +401,7 @@ const AdminOrder: React.FC = () => {
                           Address
                         </label>
                         <p className="font-medium text-gray-700 text-sm">
-                          {selectedOrder.address}
+                          {selectedOrder.full_address}
                         </p>
                       </div>
                     </div>
@@ -464,14 +422,14 @@ const AdminOrder: React.FC = () => {
                       >
                         <div>
                           <p className="font-semibold text-gray-900">
-                            {item.name}
+                            {item.product_name}
                           </p>
                           <p className="text-sm text-gray-600">
                             Quantity: {item.quantity}
                           </p>
                         </div>
                         <p className="font-bold text-lg text-gray-900">
-                          ${item.price * item.quantity}
+                          ${+item.price * item.quantity}
                         </p>
                       </div>
                     ))}
@@ -481,7 +439,7 @@ const AdminOrder: React.FC = () => {
                       Total
                     </span>
                     <span className="font-bold text-2xl bg-gradient-to-r from-green-600 to-green-600 bg-clip-text text-transparent">
-                      ${selectedOrder.total}
+                      ${selectedOrder.total_price}
                     </span>
                   </div>
                 </div>
@@ -492,22 +450,33 @@ const AdminOrder: React.FC = () => {
                     <Package size={18} className="text-green-600" />
                     Update Order Status
                   </label>
+
                   <select
-                    value={selectedOrder.status}
-                    onChange={(e) =>
-                      handleStatusChange(
-                        selectedOrder.id,
-                        e.target.value as OrderStatus
-                      )
-                    }
-                    className="w-full px-4 py-3 border-2 border-green-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 font-medium bg-white transition-all hover:border-green-400"
+                    value={status}
+                    onChange={(e) => setStatus(e.target.value as OrderStatus)}
+                    className="w-full px-4 py-3 border-2 border-green-200 rounded-xl
+             focus:ring-2 focus:ring-green-500 focus:border-green-500
+             font-medium bg-white transition-all hover:border-green-400"
                   >
-                    {statusOptions.map((status) => (
-                      <option key={status.value} value={status.value}>
-                        {status.label}
+                    {statusOptions.map((statusOption) => (
+                      <option
+                        key={statusOption.value}
+                        value={statusOption.value}
+                      >
+                        {statusOption.label}
                       </option>
                     ))}
                   </select>
+
+                  <button
+                    onClick={() =>
+                      selectedOrder &&
+                      handleStatusChange(selectedOrder.id, status)
+                    }
+                    className="mt-4 w-full px-4 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-colors font-semibold shadow-md hover:shadow-lg"
+                  >
+                    Save Changes
+                  </button>
                 </div>
               </div>
             ) : (

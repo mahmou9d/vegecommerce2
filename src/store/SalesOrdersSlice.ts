@@ -2,7 +2,7 @@
 // dashboardApi.ts - RTK Query (كامل)
 // ============================================
 import { createApi } from '@reduxjs/toolkit/query/react';
-import { OrderRecent, OrderRecentResponse, OrdersCountResponse, UsersCountResponse, TotalSalesResponse, TopSellingProduct, TopSellingResponse, SalesOrder, Counted } from '../type/type';
+import { OrderRecent, OrderRecentResponse, OrdersCountResponse, UsersCountResponse, TotalSalesResponse, TopSellingProduct, TopSellingResponse, SalesOrder, Counted, OrderStatus } from '../type/type';
 import { baseQueryWithReauth } from './baseQuery';
 
 
@@ -57,6 +57,17 @@ export const dashboardApi = createApi({
             query: () => '/charts/sales-orders/',
             providesTags: ['Sales', 'Orders'],
         }),
+        patchOrders: builder.mutation<Counted,{ id: number; status: OrderStatus }>({
+            query: ({ id, status }) => ({
+                url: `/dashboard/order/${id}/`,
+                method: "PATCH",
+                body: { status },
+            }),
+            invalidatesTags: ["Orders"],
+        })
+
+
+
     }),
 });
 
@@ -68,5 +79,6 @@ export const {
     useGetTotalSalesQuery,
     useGetTopSellingQuery,
     useGetSalesOrdersQuery,
+    usePatchOrdersMutation,
 } = dashboardApi;
 
