@@ -1,5 +1,5 @@
 import { Suspense, lazy, useEffect, useRef } from "react";
-import { Routes, Route, useLocation } from "react-router-dom";
+import { Routes, Route, useLocation, Navigate } from "react-router-dom";
 // import { useAppDispatch, useAppSelector } from "./store/hook";
 // import { RootState } from "./store";
 // import { productUser } from "./store/productSlice";
@@ -61,7 +61,19 @@ type TProduct = {
   average_rating: number;
   img_url: string;
 };
+const ProtectedAdminRoute = ({ children }: { children: React.ReactNode }) => {
+  const { data, isLoading } = useGetRoleQuery();
 
+  if (isLoading) {
+    return <Loader />;
+  }
+
+  if (!data?.is_admin) {
+    return <Navigate to="/" replace />;
+  }
+
+  return <>{children}</>;
+};
 function Layout() {
   const location = useLocation();
   // const dispatch = useAppDispatch();
@@ -78,8 +90,6 @@ function Layout() {
   // const { products, loaded } = useAppSelector((state) => state.product);
   const { data: products = [], isLoading, refetch } = useGetProductsQuery();
   const fetchedRef = useRef(false);
-  const { data } = useGetRoleQuery();
-  
   useEffect(() => {
     if (!fetchedRef.current) {
       fetchedRef.current = true;
@@ -121,15 +131,14 @@ function Layout() {
         <Route path="/checkout" element={<Checkoutcart />} />
         <Route path="/singleproduct/:id" element={<SingleProduct />} />
         {/* <Route path="/admin" element={<Admin />} /> */}
-        {data?.is_admin && (
-          <Route path="/admin" element={<AdminLayout />}>
-            <Route index element={<AdminDashboard />} /> {/* /admin */}
-            <Route path="stats" element={<DashboardStats />} />
-            <Route path="add" element={<EditProductPage />} />
-            <Route path="orders" element={<AdminOrder />} />
-            <Route path="reviews" element={<AdminReviews />} />
+          <Route path="/admin" element={<ProtectedAdminRoute><AdminLayout /></ProtectedAdminRoute>}>
+            <Route index element={<ProtectedAdminRoute><AdminDashboard /></ProtectedAdminRoute>} /> {/* /admin */}
+            <Route path="stats" element={<ProtectedAdminRoute><DashboardStats /></ProtectedAdminRoute>} />
+            <Route path="add" element={<ProtectedAdminRoute><EditProductPage /></ProtectedAdminRoute>} />
+            <Route path="orders" element={<ProtectedAdminRoute><AdminOrder /></ProtectedAdminRoute>} />
+            <Route path="reviews" element={<ProtectedAdminRoute><AdminReviews /></ProtectedAdminRoute>} />
           </Route>
-        )}
+        
       </Routes>
       {!hideLayout && <Footer />}
       <ScrollToTop />
