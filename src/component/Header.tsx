@@ -280,6 +280,14 @@ const Header = () => {
             </div>
           </div>
           <div className="relative flex gap-[6px] lg:hidden">
+            {data?.is_admin && (
+              <Link
+                className="w-[45px] h-[45px] p-[10px] text-white text-[20px] border text-center flex justify-center items-center font-semibold border-[#ffffff26] rounded-full"
+                to={"/admin"}
+              >
+                AM
+              </Link>
+            )}
             {access ? (
               <button
                 onClick={handleLogout}
