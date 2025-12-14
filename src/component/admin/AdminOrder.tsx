@@ -434,7 +434,7 @@ const AdminOrder: React.FC = () => {
             </motion.button>
 
             <span className="px-6 py-3 bg-emerald-100 text-emerald-700 rounded-2xl font-black border-2 border-emerald-300">
-              Page {Math.ceil(count/10)}
+              Page {page}
             </span>
 
             <motion.button
