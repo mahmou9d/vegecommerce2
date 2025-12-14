@@ -60,6 +60,7 @@ export const productsApi = createApi({
                     url: '/dashboard/products/add/',
                     method: 'POST',
                     body: formData,
+                    formData: true,
                 };
             },
             invalidatesTags: [{ type: 'Product', id: 'LIST' }],
@@ -93,6 +94,7 @@ export const productsApi = createApi({
                     url: `/dashboard/products/${id}/`,
                     method: 'PUT',
                     body: formData,
+                    formData: true,
                 };
             },
             invalidatesTags: (result, error, { id }) => [

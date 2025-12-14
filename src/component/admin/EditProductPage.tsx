@@ -650,6 +650,7 @@ export default function EditProductPage() {
 
   const handleSave = async () => {
     try {
+      console.log(form)
       if (editopen && editingId) {
         await updateProduct({
           id: editingId,
@@ -1007,18 +1008,7 @@ export default function EditProductPage() {
                   className="border-2 border-pink-300 h-14 rounded-2xl focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition-all file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-pink-100 file:text-pink-700 file:font-semibold hover:file:bg-pink-200"
                 />
               </div>
-              {form.img.length > 0 && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="flex items-center gap-2 text-sm text-emerald-600 bg-emerald-50 p-3 rounded-xl border border-emerald-200"
-                >
-                  <span className="w-8 h-8 bg-emerald-200 rounded-full flex items-center justify-center font-bold text-emerald-700">
-                    {form.img.length}
-                  </span>
-                  <span className="font-semibold">صورة محددة</span>
-                </motion.div>
-              )}
+              
             </motion.div>
 
             {/* Buttons */}
@@ -1031,7 +1021,7 @@ export default function EditProductPage() {
                 className="flex-1 py-4 rounded-2xl bg-gradient-to-r from-emerald-600 via-teal-600 to-green-600 text-white text-lg font-bold shadow-xl hover:shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed transition-all"
               >
                 {isAdding || isUpdating
-                  ? "⏳ جاري الحفظ..."
+                  ? "⏳ loading..."
                   : editopen
                   ? "✓ Update Product"
                   : "✓ Save Product"}

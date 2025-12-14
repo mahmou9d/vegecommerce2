@@ -63,21 +63,16 @@ const Loader = () => (
 // };
 const ProtectedAdminRoute = ({ children }: { children: React.ReactNode }) => {
   const { data, isLoading } = useGetRoleQuery();
-
   if (isLoading) {
     return <Loader />;
   }
-
   if (!data?.is_admin) {
     return <Navigate to="/" replace />;
   }
-
   return <>{children}</>;
 };
 function Layout() {
   const location = useLocation();
-  // const dispatch = useAppDispatch();
-  // { name: "Products", icon: <Package size={20} />, path: "/admin/products" },
   const hideLayout = [
     "/login",
     "/signup",
@@ -87,15 +82,12 @@ function Layout() {
     "/admin/orders",
     "/admin/reviews",
   ].includes(location.pathname);
-  // const { products, loaded } = useAppSelector((state) => state.product);
   const { data: products = [], isLoading, refetch } = useGetProductsQuery();
+
   const fetchedRef = useRef(false);
   useEffect(() => {
     if (!fetchedRef.current) {
       fetchedRef.current = true;
-      // dispatch(productUser());
-      // dispatch(GetWishlist());
-      // dispatch(GetToCart());
     }
   }, []);
 

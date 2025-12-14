@@ -14,7 +14,7 @@ export const baseQuery = fetchBaseQuery({
     if (token) {
       headers.set("Authorization", `Bearer ${token}`);
     }
-    headers.set("Content-Type", "application/json");
+    // headers.set("Content-Type", "application/json");
     return headers;
   },
 });
@@ -24,6 +24,13 @@ export const baseQueryWithReauth: BaseQueryFn<
   unknown,
   FetchBaseQueryError
 > = async (args, api, extraOptions) => {
+if (typeof args !== "string" && !(args.body instanceof FormData)) {
+  args.headers = {
+    ...(args.headers as Record<string, string>),
+    "Content-Type": "application/json",
+  };
+}
+
   let result = await baseQuery(args, api, extraOptions);
 
   const isRefreshRequest =

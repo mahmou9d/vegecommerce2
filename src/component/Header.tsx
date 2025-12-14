@@ -125,28 +125,16 @@ interface Product {
 const Header = () => {
   // Hooks
   const { toast } = useToast();
-  // const dispatch = useAppDispatch();
-  // const { access } = useAppSelector((state) => state?.auth);
   const [logout, { isLoading }] = useLogoutMutation();
-  // Cart Items & Total from Redux
-  // const { items, total } = useAppSelector((state) => state?.cart);
   const { data: items } = useGetCartQuery();
   const [removeFromCart] = useRemoveFromCartMutation();
   const access =localStorage.getItem("access")
-  // Load cart items when component mounts
-  // useEffect(() => {
-  //   if (access) {
-  //     dispatch(GetToCart());
-  //   }
-  // }, [access]);
-
   // Local cart state
   const [cart, setCart] = useState<Product[]>([]);
 
   // Wishlist Items
   const { data: items2 = [] } = useGetWishlistQuery();
   const { data } = useGetRoleQuery();
-  // const { items: items2 } = useAppSelector((state) => state.Getwishlists);
 
   // Variables
   const limit = 1000; // free shipping limit
