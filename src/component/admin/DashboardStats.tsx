@@ -11,12 +11,14 @@ import {
   BarChart,
   Bar,
   Legend,
+  CartesianGrid,
 } from "recharts";
 import { RootState } from "../../store";
 // import { GetTotalstockSlice } from "../../store/TotalstockSlice";
 // import { GetTopSelling } from "../../store/TopSellingSlice";
 import { useGetProductsQuery } from "../../store/UpdataProductSlice";
 import { useGetTopSellingQuery } from "../../store/SalesOrdersSlice";
+import { motion } from "framer-motion";
 
 interface IItem {
   id: number;
@@ -163,229 +165,385 @@ export default function DashboardStats() {
   ];
   return (
     <div className="min-h-screen">
-      <div className="mb-8">
-        <h1
-          className="
-    text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight 
-    text-gray-900
-  "
-        >
+      {/* ======= HEADER ======= */}
+      <motion.div
+        className="mb-10 text-center"
+        initial={{ opacity: 0, y: -30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+      >
+        <h1 className="text-5xl font-black tracking-tight bg-gradient-to-r from-emerald-700 via-teal-600 to-green-700 bg-clip-text text-transparent mb-3">
           Products Statistics
         </h1>
-        {/* Underline Accent */}
-        <div className="mt-3 w-24 h-1.5 bg-gradient-to-r from-green-700 to-green-900 rounded-full"></div>
-      </div>
-      {/* <h1 className="text-4xl font-extrabold text-green-700 mb-8 text-center drop-shadow-md">
-        Products Statistics
-      </h1> */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <p className="text-gray-600 text-lg">
+          Comprehensive overview of your inventory
+        </p>
+        <div className="mt-4 mx-auto w-32 h-1.5 bg-gradient-to-r from-emerald-600 via-teal-500 to-green-600 rounded-full shadow-lg"></div>
+      </motion.div>
+
+      {/* ======= STATS CARDS ======= */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
         {[
           {
             title: "Total Products",
             value: totalProducts,
             icon: "📦",
-            gradient: "from-green-400 to-green-600",
+            gradient: "from-emerald-500 to-teal-600",
+            iconBg: "bg-emerald-100",
+            iconColor: "text-emerald-700",
           },
           {
             title: "Total Stock",
             value: totalStock,
             icon: "📊",
-            gradient: "from-yellow-400 to-yellow-600",
+            gradient: "from-orange-500 to-yellow-600",
+            iconBg: "bg-orange-100",
+            iconColor: "text-orange-700",
           },
           {
             title: "Price of the Goods",
             value: `$${avgPrice.toFixed(2)}`,
             icon: "💰",
-            gradient: "from-blue-400 to-blue-600",
+            gradient: "from-blue-500 to-indigo-600",
+            iconBg: "bg-blue-100",
+            iconColor: "text-blue-700",
           },
         ].map((card, index) => (
-          <Card
+          <motion.div
             key={index}
-            className={`p-2 md:p-6 rounded-3xl bg-gradient-to-r ${card.gradient} text-white shadow-2xl hover:shadow-3xl transition-shadow duration-500`}
+            initial={{ opacity: 0, y: 20, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: 0.4, delay: index * 0.1 }}
+            whileHover={{ scale: 1.03, y: -4 }}
           >
-            <CardContent className="text-center space-y-4">
-              <h2 className="text-2xl font-semibold flex items-center justify-center space-x-2">
-                <span>{card.icon}</span>
-                <span>{card.title}</span>
-              </h2>
-              <p className="text-4xl md:text-5xl font-extrabold">
-                {card.value}
-              </p>
-            </CardContent>
-          </Card>
+            <Card
+              className={`p-6 rounded-3xl bg-gradient-to-br ${card.gradient} shadow-xl hover:shadow-2xl transition-all border-0 overflow-hidden relative`}
+            >
+              <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16"></div>
+              <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full -ml-12 -mb-12"></div>
+
+              <CardContent className="relative z-10">
+                <div className="flex items-center justify-between mb-4">
+                  <div
+                    className={`w-14 h-14 ${card.iconBg} rounded-2xl flex items-center justify-center shadow-lg`}
+                  >
+                    <span className="text-3xl">{card.icon}</span>
+                  </div>
+                </div>
+
+                <h2 className="text-white/90 text-lg font-bold mb-2 tracking-wide">
+                  {card.title}
+                </h2>
+                <p className="text-4xl md:text-5xl font-black text-white">
+                  {card.value}
+                </p>
+              </CardContent>
+            </Card>
+          </motion.div>
         ))}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
-        <Card className="p-2 md:p-6 shadow-2xl rounded-3xl bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 flex flex-col">
-          <CardContent className="flex-1 flex flex-col">
-            <h2 className="text-xl font-bold text-blue-900">
-              Top Selling Products
-            </h2>
-            <div className="flex-1">
+      {/* ======= CHARTS SECTION ======= */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+        {/* Top Selling Products */}
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.6, delay: 0.3 }}
+        >
+          <Card className="rounded-3xl shadow-2xl backdrop-blur-xl bg-white/90 border-2 border-blue-200 overflow-hidden h-full">
+            <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-6">
+              <h2 className="text-2xl md:text-3xl font-bold text-white flex items-center gap-3">
+                <span className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                  🏆
+                </span>
+                Top Selling Products
+              </h2>
+            </div>
+
+            <CardContent className="p-8">
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart
                   data={items}
-                  margin={{ top: 20, right: 20, left: 0, bottom: 20 }}
+                  margin={{ top: 10, right: 20, left: 0, bottom: 10 }}
                 >
+                  <defs>
+                    <linearGradient
+                      id="blueGradient"
+                      x1="0"
+                      y1="0"
+                      x2="0"
+                      y2="1"
+                    >
+                      <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.9} />
+                      <stop
+                        offset="100%"
+                        stopColor="#1e40af"
+                        stopOpacity={0.7}
+                      />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke="#e5e7eb"
+                    vertical={false}
+                  />
                   <XAxis
                     dataKey="name"
-                    tick={{ fontSize: tickFontSize, fill: "#1e3a8a" }}
+                    tick={{
+                      fontSize: tickFontSize,
+                      fill: "#1e40af",
+                      fontWeight: 600,
+                    }}
                     tickLine={false}
+                    axisLine={{ stroke: "#3b82f6", strokeWidth: 2 }}
                   />
                   <YAxis
-                    tick={{ fontSize: 14, fill: "#1e3a8a" }}
-                    axisLine={{ stroke: "#3b82f6" }}
+                    tick={{ fontSize: 14, fill: "#1e40af", fontWeight: 600 }}
+                    axisLine={false}
+                    tickLine={false}
                   />
                   <Tooltip
                     contentStyle={{
-                      backgroundColor: "#f0f9ff",
-                      borderRadius: 10,
+                      backgroundColor: "white",
+                      border: "2px solid #3b82f6",
+                      borderRadius: "12px",
+                      boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
                     }}
                     itemStyle={{ color: "#1e40af", fontWeight: "bold" }}
                   />
                   <Legend
                     verticalAlign="top"
-                    wrapperStyle={{ paddingBottom: 10 }}
+                    height={36}
+                    iconType="circle"
+                    wrapperStyle={{ paddingBottom: "10px" }}
                   />
                   <Bar
                     dataKey="sales"
-                    fill="#3b82f6"
+                    fill="url(#blueGradient)"
                     radius={[10, 10, 0, 0]}
                     barSize={30}
                   />
                 </BarChart>
               </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        {/* Low Stock Products */}
+        <motion.div
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.6, delay: 0.4 }}
+        >
+          <Card className="rounded-3xl shadow-2xl backdrop-blur-xl bg-white/90 border-2 border-red-200 overflow-hidden h-full">
+            <div className="bg-gradient-to-r from-red-600 to-pink-600 p-6">
+              <h2 className="text-2xl md:text-3xl font-bold text-white flex items-center justify-between">
+                <span className="flex items-center gap-3">
+                  <span className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                    ⚠️
+                  </span>
+                  Low Stock Alert
+                </span>
+                <span className="text-lg bg-white/20 px-3 py-1 rounded-full">
+                  Stock &lt; 20
+                </span>
+              </h2>
             </div>
-          </CardContent>
-        </Card>
 
-        <Card className="p-2 md:p-6 shadow-2xl rounded-3xl bg-gradient-to-br from-red-50 to-red-100 border border-red-200 flex flex-col">
-          <CardContent className="flex-1 flex flex-col">
-            <h2 className="text-xl font-bold text-red-700 flex justify-between">
-              <span>Products Low in Stock</span>
-              <span>{`Stock < 20`}</span>
-            </h2>
-
-            <div className="flex-1">
+            <CardContent className="p-8">
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart
                   data={paginatedProducts}
-                  margin={{ top: 20, right: 20, left: 0, bottom: 20 }}
+                  margin={{ top: 10, right: 20, left: 0, bottom: 10 }}
                 >
+                  <defs>
+                    <linearGradient
+                      id="redGradient"
+                      x1="0"
+                      y1="0"
+                      x2="0"
+                      y2="1"
+                    >
+                      <stop offset="0%" stopColor="#ef4444" stopOpacity={0.9} />
+                      <stop
+                        offset="100%"
+                        stopColor="#b91c1c"
+                        stopOpacity={0.7}
+                      />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke="#e5e7eb"
+                    vertical={false}
+                  />
                   <XAxis
                     dataKey="name"
-                    tick={{ fontSize: tickFontSize, fill: "#b91c1c" }}
+                    tick={{
+                      fontSize: tickFontSize,
+                      fill: "#b91c1c",
+                      fontWeight: 600,
+                    }}
                     tickLine={false}
+                    axisLine={{ stroke: "#ef4444", strokeWidth: 2 }}
                     interval={0}
                   />
                   <YAxis
-                    tick={{ fontSize: 14, fill: "#b91c1c" }}
-                    axisLine={{ stroke: "#ef4444" }}
+                    tick={{ fontSize: 14, fill: "#b91c1c", fontWeight: 600 }}
+                    axisLine={false}
+                    tickLine={false}
                   />
                   <Tooltip
                     contentStyle={{
-                      backgroundColor: "#fee2e2",
-                      borderRadius: 10,
+                      backgroundColor: "white",
+                      border: "2px solid #ef4444",
+                      borderRadius: "12px",
+                      boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
                     }}
                     itemStyle={{ color: "#991b1b", fontWeight: "bold" }}
                   />
                   <Bar
                     dataKey="stock"
-                    fill="#ef4444"
+                    fill="url(#redGradient)"
                     radius={[10, 10, 0, 0]}
                     barSize={30}
                   />
                 </BarChart>
               </ResponsiveContainer>
-            </div>
 
-            {/* Pagination Buttons */}
-            <div className="flex justify-center mt-4 space-x-2">
-              <button
-                className="px-3 py-1 bg-red-200 text-red-700 rounded disabled:opacity-50"
-                onClick={() => setPage((prev) => Math.max(prev - 1, 0))}
-                disabled={page === 0}
-              >
-                Prev
-              </button>
-              <span className="px-3 py-1 text-red-700 font-semibold">
-                {page + 1} / {totalPages}
+              {/* Pagination */}
+              <div className="flex justify-center items-center gap-3 mt-6">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="px-4 py-2 bg-gradient-to-r from-red-500 to-pink-500 text-white rounded-xl font-bold shadow-md disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                  onClick={() => setPage((prev) => Math.max(prev - 1, 0))}
+                  disabled={page === 0}
+                >
+                  ← Prev
+                </motion.button>
+                <span className="px-4 py-2 bg-red-100 text-red-700 rounded-xl font-bold border-2 border-red-300">
+                  {page + 1} / {totalPages}
+                </span>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="px-4 py-2 bg-gradient-to-r from-red-500 to-pink-500 text-white rounded-xl font-bold shadow-md disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                  onClick={() =>
+                    setPage((prev) => Math.min(prev + 1, totalPages - 1))
+                  }
+                  disabled={page === totalPages - 1}
+                >
+                  Next →
+                </motion.button>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+      </div>
+
+      {/* ======= PRODUCTS STOCK CHART ======= */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.5 }}
+      >
+        <Card className="rounded-3xl shadow-2xl backdrop-blur-xl bg-white/90 border-2 border-yellow-200 overflow-hidden">
+          <div className="bg-gradient-to-r from-yellow-600 to-orange-600 p-6">
+            <h2 className="text-3xl font-bold text-white flex items-center gap-3">
+              <span className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                📈
               </span>
-              <button
-                className="px-3 py-1 bg-red-200 text-red-700 rounded disabled:opacity-50"
-                onClick={() =>
-                  setPage((prev) => Math.min(prev + 1, totalPages - 1))
-                }
-                disabled={page === totalPages - 1}
+              Products Stock Overview
+            </h2>
+          </div>
+
+          <CardContent className="p-8">
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart
+                data={paginatedProductsSec}
+                margin={{ top: 10, right: 20, left: 0, bottom: 10 }}
               >
-                Next
-              </button>
+                <defs>
+                  <linearGradient
+                    id="yellowGradient"
+                    x1="0"
+                    y1="0"
+                    x2="0"
+                    y2="1"
+                  >
+                    <stop offset="0%" stopColor="#f59e0b" stopOpacity={0.9} />
+                    <stop offset="100%" stopColor="#d97706" stopOpacity={0.7} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  stroke="#e5e7eb"
+                  vertical={false}
+                />
+                <XAxis
+                  dataKey="name"
+                  tick={{
+                    fontSize: tickFontSize,
+                    fill: "#92400e",
+                    fontWeight: 600,
+                  }}
+                  tickLine={false}
+                  axisLine={{ stroke: "#f59e0b", strokeWidth: 2 }}
+                />
+                <YAxis
+                  tick={{ fontSize: 14, fill: "#92400e", fontWeight: 600 }}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "white",
+                    border: "2px solid #f59e0b",
+                    borderRadius: "12px",
+                    boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
+                  }}
+                  itemStyle={{ color: "#92400e", fontWeight: "bold" }}
+                />
+                <Bar
+                  dataKey="stock"
+                  fill="url(#yellowGradient)"
+                  radius={[10, 10, 0, 0]}
+                  barSize={30}
+                />
+              </BarChart>
+            </ResponsiveContainer>
+
+            {/* Pagination */}
+            <div className="flex justify-center items-center gap-3 mt-6">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="px-4 py-2 bg-gradient-to-r from-yellow-500 to-orange-500 text-white rounded-xl font-bold shadow-md disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                onClick={() => setPageSec((prev) => Math.max(prev - 1, 0))}
+                disabled={pageSec === 0}
+              >
+                ← Prev
+              </motion.button>
+              <span className="px-4 py-2 bg-yellow-100 text-yellow-800 rounded-xl font-bold border-2 border-yellow-300">
+                {pageSec + 1} / {totalPagesSec}
+              </span>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="px-4 py-2 bg-gradient-to-r from-yellow-500 to-orange-500 text-white rounded-xl font-bold shadow-md disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                onClick={() =>
+                  setPageSec((prev) => Math.min(prev + 1, totalPagesSec - 1))
+                }
+                disabled={pageSec === totalPagesSec - 1}
+              >
+                Next →
+              </motion.button>
             </div>
           </CardContent>
         </Card>
-      </div>
-
-      <Card className="p-2 md:p-6 mt-10 shadow-2xl rounded-3xl bg-gradient-to-br from-yellow-50 to-yellow-100 border border-yellow-200">
-        <CardContent>
-          <h2 className="text-xl font-bold text-yellow-800">Products Stock</h2>
-
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart
-              data={paginatedProductsSec}
-              margin={{ top: 20, right: 20, left: 0, bottom: 20 }}
-            >
-              <XAxis
-                dataKey="name"
-                tick={{ fontSize: tickFontSize, fill: "#b45309" }}
-                tickLine={false}
-              />
-              <YAxis
-                tick={{ fontSize: 14, fill: "#b45309" }}
-                axisLine={{ stroke: "#f59e0b" }}
-              />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: "#fef3c7", // لون الخلفية اللي انت عايزه
-                  border: "none", // الغي البوردر الأسود
-                  boxShadow: "none", // الغي أي ظل
-                  borderRadius: 10, // الزوايا مدورة لو تحب
-                }}
-                itemStyle={{ color: "#92400e", fontWeight: "bold" }}
-              />
-              <Bar
-                dataKey="stock"
-                fill="#f59e0b"
-                radius={[10, 10, 0, 0]}
-                barSize={30}
-              />
-            </BarChart>
-          </ResponsiveContainer>
-
-          {/* Pagination Buttons */}
-          <div className="flex justify-center mt-4 space-x-2">
-            <button
-              className="px-3 py-1 bg-yellow-200 text-yellow-800 rounded disabled:opacity-50"
-              onClick={() => setPageSec((prev) => Math.max(prev - 1, 0))}
-              disabled={pageSec === 0}
-            >
-              Prev
-            </button>
-            <span className="px-3 py-1 text-yellow-800 font-semibold">
-              {pageSec + 1} / {totalPagesSec}
-            </span>
-            <button
-              className="px-3 py-1 bg-yellow-200 text-yellow-800 rounded disabled:opacity-50"
-              onClick={() =>
-                setPageSec((prev) => Math.min(prev + 1, totalPagesSec - 1))
-              }
-              disabled={pageSec === totalPagesSec - 1}
-            >
-              Next
-            </button>
-          </div>
-        </CardContent>
-      </Card>
+      </motion.div>
     </div>
   );
 }

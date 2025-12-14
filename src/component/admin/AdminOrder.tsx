@@ -30,6 +30,8 @@ import {
   usePatchOrdersMutation,
 } from "../../store/SalesOrdersSlice";
 import { Counted, OrderRecent } from "../../type/type";
+import { Card, CardContent } from "../../components/ui/card";
+import { motion, AnimatePresence } from "framer-motion";
 
 // Types
 interface OrderItem {
@@ -119,17 +121,34 @@ const AdminOrder: React.FC = () => {
     return statusOptions.find((s) => s.value === status) || statusOptions[0];
   };
 
-  const handleStatusChange = async (id: number, newStatus: OrderStatus) => {
-    try {
-      await patchOrders({
-        id,
-        status: newStatus,
-      }).unwrap();
-    } catch (error) {
-      console.error("Failed to update order status:", error);
-    }
-  };
+  // const handleStatusChange = async (id: number, newStatus: OrderStatus) => {
+  //   try {
+  //     await patchOrders({
+  //       id,
+  //       status: newStatus,
+  //     }).unwrap();
+  //   } catch (error) {
+  //     console.error("Failed to update order status:", error);
+  //   }
+  // };
+const handleStatusChange = async (id: number, newStatus: OrderStatus) => {
+  try {
+    await patchOrders({
+      id,
+      status: newStatus,
+    }).unwrap();
 
+    const orderElement = document.getElementById(`order-${id}`);
+    if (orderElement) {
+      orderElement.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    }
+  } catch (error) {
+    console.error("Failed to update order status:", error);
+  }
+};
   const filteredOrders = orderRecent.filter((order) => {
     const matchesSearch =
       order.customer.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -140,359 +159,500 @@ const AdminOrder: React.FC = () => {
 
     return matchesSearch && matchesStatus;
   });
-
   return (
     <div className="min-h-screen">
-      <div className="mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="p-3 bg-gradient-to-br from-green-600 to-green-600 rounded-xl shadow-lg">
-              <ShoppingBag className="text-white" size={28} />
-            </div>
-            <div>
-              <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-green-700 to-green-700 bg-clip-text text-transparent">
-                Order Management
-              </h1>
-              <p className="text-sm text-gray-600 mt-1">
-                Track and manage all your orders in one place
-              </p>
-              <div className="mt-3 h-1.5 w-24 bg-gradient-to-r from-green-700 to-green-900 rounded-full"></div>
-            </div>
-          </div>
-        </div>
+      {/* ======= HEADER ======= */}
+      <motion.div
+        className="mb-10 text-center"
+        initial={{ opacity: 0, y: -30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+      >
+        <h1 className="text-5xl font-black tracking-tight bg-gradient-to-r from-emerald-700 via-teal-600 to-green-700 bg-clip-text text-transparent mb-3">
+          Order Management
+        </h1>
+        <p className="text-gray-600 text-lg">
+          Track and manage all your orders in one place
+        </p>
+        <div className="mt-4 mx-auto w-32 h-1.5 bg-gradient-to-r from-emerald-600 via-teal-500 to-green-600 rounded-full shadow-lg"></div>
+      </motion.div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-          {[
-            {
-              label: "Total Orders",
-              value: Counted.orders,
-              color: "from-blue-500 to-blue-600",
-            },
-            {
-              label: "Pending",
-              value: Counted.pending,
-              color: "from-amber-500 to-amber-600",
-            },
-            {
-              label: "paid",
-              value: Counted.paid as string,
-              color: "from-purple-500 to-purple-600",
-            },
-            {
-              label: "Delivered",
-              value: Counted.delivered,
-              color: "from-green-500 to-green-600",
-            },
-          ].map((stat, idx) => (
-            <div
-              key={idx}
-              className="bg-white rounded-2xl shadow-md p-5 border border-gray-100 hover:shadow-xl transition-all duration-300"
-            >
+      {/* ======= STATS CARDS ======= */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
+        {[
+          {
+            label: "Total Orders",
+            value: Counted.orders,
+            color: "from-blue-500 to-indigo-600",
+            icon: "📦",
+            iconBg: "bg-blue-100",
+          },
+          {
+            label: "Pending",
+            value: Counted.pending,
+            color: "from-amber-500 to-orange-600",
+            icon: "⏳",
+            iconBg: "bg-amber-100",
+          },
+          {
+            label: "Paid",
+            value: Counted.paid as string,
+            color: "from-purple-500 to-pink-600",
+            icon: "💳",
+            iconBg: "bg-purple-100",
+          },
+          {
+            label: "Delivered",
+            value: Counted.delivered,
+            color: "from-emerald-500 to-teal-600",
+            icon: "✓",
+            iconBg: "bg-emerald-100",
+          },
+        ].map((stat, idx) => (
+          <motion.div
+            key={idx}
+            initial={{ opacity: 0, y: 20, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: 0.4, delay: idx * 0.1 }}
+            whileHover={{ scale: 1.05, y: -4 }}
+          >
+            <div className="bg-white rounded-3xl shadow-xl p-6 border-2 border-gray-100 hover:shadow-2xl transition-all overflow-hidden relative">
+              <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br opacity-10 rounded-full -mr-10 -mt-10"></div>
+
               <div
-                className={`text-3xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent mb-1`}
+                className={`w-12 h-12 ${stat.iconBg} rounded-2xl flex items-center justify-center shadow-md mb-3`}
+              >
+                <span className="text-2xl">{stat.icon}</span>
+              </div>
+
+              <div
+                className={`text-4xl font-black bg-gradient-to-r ${stat.color} bg-clip-text text-transparent mb-1`}
               >
                 {stat.value}
               </div>
-              <div className="text-sm text-gray-600 font-medium">
+              <div className="text-sm text-gray-600 font-bold uppercase tracking-wide">
                 {stat.label}
               </div>
             </div>
-          ))}
-        </div>
+          </motion.div>
+        ))}
+      </div>
 
-        {/* Filters */}
-        <div className="bg-white rounded-2xl shadow-lg p-6 mb-6 border border-gray-100">
-          <div className="flex items-center gap-2 mb-4">
-            <Filter className="text-green-600" size={20} />
-            <h3 className="font-semibold text-gray-800">Filter Orders</h3>
+      {/* ======= FILTERS SECTION ======= */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.4 }}
+      >
+        <Card className="rounded-3xl shadow-2xl backdrop-blur-xl bg-white/90 border-2 border-emerald-200 mb-12 overflow-hidden">
+          <div className="bg-gradient-to-r from-emerald-600 to-teal-600 p-6">
+            <h2 className="text-2xl md:text-3xl font-bold text-white flex items-center gap-3">
+              <span className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                <Filter size={22} />
+              </span>
+              Filter Orders
+            </h2>
           </div>
-          <div className="flex flex-col md:flex-row gap-4">
-            {/* Search */}
-            <div className="flex-1 relative">
-              <Search
-                className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
-                size={20}
-              />
-              <input
-                type="text"
-                placeholder="Search orders, customers, or emails..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-12 pr-4 py-3.5 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 bg-gray-50 hover:bg-white"
-              />
+
+          <CardContent className="p-8">
+            <div className="flex flex-col md:flex-row gap-4">
+              {/* Search */}
+              <div className="flex-1 relative">
+                <Search
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-600"
+                  size={22}
+                />
+                <input
+                  type="text"
+                  placeholder="Search orders, customers, or emails..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-14 pr-4 py-4 border-2 border-emerald-300 rounded-2xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200 bg-white hover:border-emerald-400 font-medium"
+                />
+              </div>
+
+              {/* Status Filter */}
+              <Select
+                value={filterStatus}
+                onValueChange={(value: string) =>
+                  setFilterStatus(value as OrderStatus | "all")
+                }
+              >
+                <SelectTrigger className="md:w-56 h-[56px] rounded-2xl border-2 border-emerald-300 hover:border-emerald-400 transition-all font-bold">
+                  <SelectValue placeholder="All Statuses" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectItem value="all">All Statuses</SelectItem>
+                    {statusOptions.map((status) => (
+                      <SelectItem key={status.value} value={status.value}>
+                        <div className="flex items-center gap-2">
+                          <status.icon size={16} className={status.color} />
+                          {status.label}
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
             </div>
+          </CardContent>
+        </Card>
+      </motion.div>
 
-            {/* Status Filter */}
-            <Select
-              value={filterStatus}
-              onValueChange={(value: string) =>
-                setFilterStatus(value as OrderStatus | "all")
-              }
+      {/* ======= ORDERS GRID ======= */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Orders List */}
+        <div className="lg:col-span-2 space-y-4">
+          {filteredOrders.length === 0 ? (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.4 }}
             >
-              <SelectTrigger className="md:w-48 h-[50px] rounded-xl border-2 border-gray-200 hover:border-green-400 transition-all">
-                <SelectValue placeholder="All Statuses" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  <SelectItem value="all">All Statuses</SelectItem>
-                  {statusOptions.map((status) => (
-                    <SelectItem key={status.value} value={status.value}>
-                      <div className="flex items-center gap-2">
-                        <status.icon size={16} className={status.color} />
-                        {status.label}
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Orders List */}
-          <div className="lg:col-span-2 space-y-4">
-            {filteredOrders.length === 0 ? (
-              <div className="bg-white rounded-2xl shadow-lg p-12 text-center border border-gray-100">
-                <Package className="mx-auto text-gray-300 mb-4" size={64} />
-                <p className="text-gray-500 text-lg font-medium">
+              <Card className="rounded-3xl shadow-2xl p-12 text-center border-2 border-gray-200">
+                <div className="w-24 h-24 bg-gradient-to-br from-gray-200 to-gray-300 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <Package className="text-gray-400" size={48} />
+                </div>
+                <p className="text-gray-500 text-xl font-bold mb-2">
                   No orders found
                 </p>
-                <p className="text-gray-400 text-sm mt-2">
+                <p className="text-gray-400 text-sm">
                   Try adjusting your filters
                 </p>
-              </div>
-            ) : (
-              filteredOrders.map((order) => {
+              </Card>
+            </motion.div>
+          ) : (
+            <AnimatePresence>
+              {filteredOrders.map((order, index) => {
                 const statusInfo = getStatusInfo(order?.status as OrderStatus);
                 const StatusIcon = statusInfo.icon;
+                const isSelected = selectedOrder?.id === order.id;
 
                 return (
-                  <div
+                  <motion.div
                     key={order.id}
-                    className={`bg-white rounded-2xl shadow-md p-6 cursor-pointer transition-all duration-300 border-2 hover:shadow-xl hover:-translate-y-1 ${
-                      selectedOrder?.id === order.id
-                        ? "border-green-500 shadow-xl ring-4 ring-green-100"
-                        : "border-gray-100 hover:border-green-300"
-                    }`}
-                    onClick={() => setSelectedOrder(order)}
+                    id={`order-${order.id}`}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{ duration: 0.3, delay: index * 0.05 }}
+                    whileHover={{ scale: 1.02, y: -4 }}
+                    whileTap={{ scale: 0.98 }}
                   >
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
-                          <span className="text-lg font-bold text-gray-900">
-                            {order.id}
-                          </span>
-                          <span
-                            className={`px-3 py-1.5 rounded-full text-xs font-semibold border-2 flex items-center gap-1.5 ${statusInfo.bgColor} ${statusInfo.color}`}
-                          >
-                            <StatusIcon size={14} />
-                            {statusInfo.label}
-                          </span>
+                    <Card
+                      className={`rounded-3xl shadow-xl p-6 cursor-pointer transition-all duration-300 border-2 ${
+                        isSelected
+                          ? "border-emerald-500 shadow-2xl ring-4 ring-emerald-100 bg-gradient-to-br from-emerald-50 to-teal-50"
+                          : "border-gray-200 hover:border-emerald-300 bg-white"
+                      }`}
+                      onClick={() => {
+                        setSelectedOrder(order);
+                        window.scrollTo(0, 666);
+                      }}
+                    >
+                      <CardContent>
+                        <div className="flex items-start justify-between mb-4">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-3">
+                              <span className="text-xl font-black text-gray-900 bg-gray-100 px-3 py-1 rounded-xl">
+                                #{order.id}
+                              </span>
+                              <span
+                                className={`px-4 py-2 rounded-full text-xs font-bold border-2 flex items-center gap-2 ${statusInfo.bgColor} ${statusInfo.color}`}
+                              >
+                                <StatusIcon size={16} />
+                                {statusInfo.label}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2 text-sm text-gray-700 mb-2 bg-gray-100 px-3 py-2 rounded-lg w-fit">
+                              <User size={16} className="text-emerald-600" />
+                              <span className="font-bold">
+                                {order.customer}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2 text-xs text-gray-500 bg-gray-50 px-3 py-1.5 rounded-lg w-fit">
+                              <Calendar size={14} />
+                              <span className="font-semibold">
+                                {order.created}
+                              </span>
+                            </div>
+                          </div>
                         </div>
-                        <div className="flex items-center gap-2 text-sm text-gray-600 mb-1">
-                          <User size={14} />
-                          <span className="font-medium">{order.customer}</span>
+
+                        <div className="flex items-center justify-between pt-4 border-t-2 border-gray-200">
+                          <div className="flex items-center gap-2 text-sm">
+                            <div className="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center">
+                              <Package size={18} className="text-emerald-600" />
+                            </div>
+                            <span className="font-bold text-gray-700">
+                              {order.items.length}{" "}
+                              {order.items.length === 1 ? "item" : "items"}
+                            </span>
+                          </div>
+                          <div className="text-3xl font-black bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
+                            ${order.total_price}
+                          </div>
                         </div>
-                        <div className="flex items-center gap-2 text-xs text-gray-500">
-                          <Calendar size={12} />
-                          <span>{order.created}</span>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                );
+              })}
+            </AnimatePresence>
+          )}
+        </div>
+
+        {/* Order Details */}
+        <div className="lg:col-span-1">
+          <AnimatePresence mode="wait">
+            {selectedOrder ? (
+              <motion.div
+                key={selectedOrder.id}
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.3 }}
+              >
+                <Card className="sticky overflow-y-auto h-[calc(100vh-3rem)] rounded-3xl shadow-2xl top-6 border-2 border-emerald-200 bg-white">
+                  <div className="bg-gradient-to-r from-emerald-600 to-teal-600 p-6">
+                    <h2 className="text-2xl font-bold text-white flex items-center gap-3">
+                      <span className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                        <Eye size={22} />
+                      </span>
+                      Order Details
+                    </h2>
+                  </div>
+
+                  <CardContent className="p-6 space-y-6">
+                    {/* Order Info */}
+                    <div className="space-y-4">
+                      <div className="bg-gradient-to-br from-emerald-100 to-teal-100 p-5 rounded-2xl border-2 border-emerald-300">
+                        <label className="text-xs font-bold text-emerald-700 uppercase tracking-wider block mb-2 flex items-center gap-2">
+                          <span className="w-2 h-2 bg-emerald-600 rounded-full"></span>
+                          Order Number
+                        </label>
+                        <p className="font-black text-2xl text-gray-900">
+                          #{selectedOrder.id}
+                        </p>
+                      </div>
+
+                      <div className="flex items-center gap-3 p-4 bg-gray-100 rounded-2xl">
+                        <div className="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center">
+                          <Calendar size={20} className="text-emerald-600" />
                         </div>
+                        <div className="flex-1">
+                          <label className="text-xs font-bold text-gray-500 uppercase tracking-wide block">
+                            Date
+                          </label>
+                          <p className="font-bold text-gray-900">
+                            {selectedOrder.created}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="pt-4 border-t-2 border-gray-200 space-y-3">
+                        <motion.div
+                          className="flex items-start gap-3 p-4 bg-gray-100 rounded-2xl hover:bg-gradient-to-r hover:from-emerald-50 hover:to-teal-50 transition-all"
+                          whileHover={{ scale: 1.02 }}
+                        >
+                          <div className="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                            <User size={20} className="text-emerald-600" />
+                          </div>
+                          <div className="flex-1">
+                            <label className="text-xs font-bold text-gray-500 uppercase tracking-wide block">
+                              Customer Name
+                            </label>
+                            <p className="font-bold text-gray-900">
+                              {selectedOrder.full_name}
+                            </p>
+                          </div>
+                        </motion.div>
+
+                        <motion.div
+                          className="flex items-start gap-3 p-4 bg-gray-100 rounded-2xl hover:bg-gradient-to-r hover:from-emerald-50 hover:to-teal-50 transition-all"
+                          whileHover={{ scale: 1.02 }}
+                        >
+                          <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                            <Mail size={20} className="text-blue-600" />
+                          </div>
+                          <div className="flex-1">
+                            <label className="text-xs font-bold text-gray-500 uppercase tracking-wide block">
+                              Email
+                            </label>
+                            <p className="font-semibold text-gray-700 text-sm break-all">
+                              {selectedOrder.email}
+                            </p>
+                          </div>
+                        </motion.div>
+
+                        <motion.div
+                          className="flex items-start gap-3 p-4 bg-gray-100 rounded-2xl hover:bg-gradient-to-r hover:from-emerald-50 hover:to-teal-50 transition-all"
+                          whileHover={{ scale: 1.02 }}
+                        >
+                          <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                            <Phone size={20} className="text-purple-600" />
+                          </div>
+                          <div className="flex-1">
+                            <label className="text-xs font-bold text-gray-500 uppercase tracking-wide block">
+                              Phone
+                            </label>
+                            <p className="font-semibold text-gray-700">
+                              {selectedOrder.phone_number}
+                            </p>
+                          </div>
+                        </motion.div>
+
+                        <motion.div
+                          className="flex items-start gap-3 p-4 bg-gray-100 rounded-2xl hover:bg-gradient-to-r hover:from-emerald-50 hover:to-teal-50 transition-all"
+                          whileHover={{ scale: 1.02 }}
+                        >
+                          <div className="w-10 h-10 bg-red-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                            <MapPin size={20} className="text-red-600" />
+                          </div>
+                          <div className="flex-1">
+                            <label className="text-xs font-bold text-gray-500 uppercase tracking-wide block">
+                              Address
+                            </label>
+                            <p className="font-semibold text-gray-700 text-sm">
+                              {selectedOrder.full_address}
+                            </p>
+                          </div>
+                        </motion.div>
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-between pt-4 border-t-2 border-gray-100">
-                      <div className="flex items-center gap-2 text-sm text-gray-600">
-                        <Package size={16} className="text-gray-400" />
-                        <span className="font-medium">
-                          {order.items.length}{" "}
-                          {order.items.length === 1 ? "item" : "items"}
+                    {/* Items */}
+                    <div className="border-t-2 border-gray-200 pt-6">
+                      <h3 className="font-black text-gray-900 mb-4 flex items-center gap-2 text-lg">
+                        <div className="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center">
+                          <Package size={18} className="text-emerald-600" />
+                        </div>
+                        Order Items
+                      </h3>
+                      <div className="space-y-3">
+                        {selectedOrder.items.map((item, index) => (
+                          <motion.div
+                            key={index}
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: index * 0.05 }}
+                            whileHover={{ scale: 1.02 }}
+                          >
+                            <div className="flex justify-between items-center p-4 bg-gradient-to-br from-emerald-50 to-teal-50 rounded-2xl border-2 border-emerald-200 hover:shadow-lg transition-all">
+                              <div>
+                                <p className="font-bold text-gray-900 mb-1">
+                                  {item.product_name}
+                                </p>
+                                <p className="text-sm text-gray-600 bg-white px-3 py-1 rounded-lg w-fit font-semibold">
+                                  Qty: {item.quantity}
+                                </p>
+                              </div>
+                              <p className="font-black text-xl bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
+                                ${(+item.price * item.quantity).toFixed(2)}
+                              </p>
+                            </div>
+                          </motion.div>
+                        ))}
+                      </div>
+                      <div className="flex justify-between items-center mt-6 pt-6 border-t-2 border-emerald-200 bg-gradient-to-r from-emerald-50 to-teal-50 p-4 rounded-2xl">
+                        <span className="font-black text-gray-900 text-xl">
+                          Total
+                        </span>
+                        <span className="font-black text-3xl bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
+                          ${selectedOrder.total_price}
                         </span>
                       </div>
-                      <div className="text-2xl font-bold bg-gradient-to-r from-green-600 to-green-600 bg-clip-text text-transparent">
-                        ${order.total_price}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })
-            )}
-          </div>
-
-          {/* Order Details */}
-          <div className="lg:col-span-1">
-            {selectedOrder ? (
-              <div className="bg-white sticky overflow-y-scroll h-[calc(100vh-3rem)] rounded-2xl shadow-lg p-6 top-6 border-2 border-gray-100">
-                <div className="flex items-center gap-3 mb-6 pb-4 border-b-2 border-gray-100">
-                  <div className="p-2.5 bg-gradient-to-br from-green-500 to-green-600 rounded-lg">
-                    <Eye className="text-white" size={22} />
-                  </div>
-                  <h2 className="text-xl font-bold text-gray-900">
-                    Order Details
-                  </h2>
-                </div>
-
-                {/* Order Info */}
-                <div className="space-y-4 mb-6">
-                  <div className="bg-gradient-to-br from-green-50 to-green-50 p-4 rounded-xl border border-green-100">
-                    <label className="text-xs font-semibold text-green-700 uppercase tracking-wide block mb-1">
-                      Order Number
-                    </label>
-                    <p className="font-bold text-xl text-gray-900">
-                      {selectedOrder.id}
-                    </p>
-                  </div>
-
-                  <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
-                    <Calendar size={18} className="text-gray-500" />
-                    <div className="flex-1">
-                      <label className="text-xs font-medium text-gray-500 block">
-                        Date
-                      </label>
-                      <p className="font-semibold text-gray-900">
-                        {selectedOrder.created}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="pt-4 border-t-2 border-gray-100 space-y-3">
-                    <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
-                      <User size={18} className="text-gray-500 mt-0.5" />
-                      <div className="flex-1">
-                        <label className="text-xs font-medium text-gray-500 block">
-                          Customer Name
-                        </label>
-                        <p className="font-semibold text-gray-900">
-                          {selectedOrder.full_name}
-                        </p>
-                      </div>
                     </div>
 
-                    <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
-                      <Mail size={18} className="text-gray-500 mt-0.5" />
-                      <div className="flex-1">
-                        <label className="text-xs font-medium text-gray-500 block">
-                          Email
-                        </label>
-                        <p className="font-medium text-gray-700 text-sm break-all">
-                          {selectedOrder.email}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
-                      <Phone size={18} className="text-gray-500 mt-0.5" />
-                      <div className="flex-1">
-                        <label className="text-xs font-medium text-gray-500 block">
-                          Phone
-                        </label>
-                        <p className="font-medium text-gray-700">
-                          {selectedOrder.phone_number}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
-                      <MapPin size={18} className="text-gray-500 mt-0.5" />
-                      <div className="flex-1">
-                        <label className="text-xs font-medium text-gray-500 block">
-                          Address
-                        </label>
-                        <p className="font-medium text-gray-700 text-sm">
-                          {selectedOrder.full_address}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Items */}
-                <div className="mb-6">
-                  <h3 className="font-bold text-gray-900 mb-3 flex items-center gap-2">
-                    <Package size={18} className="text-green-600" />
-                    Order Items
-                  </h3>
-                  <div className="space-y-2">
-                    {selectedOrder.items.map((item, index) => (
-                      <div
-                        key={index}
-                        className="flex justify-between items-center p-4 bg-gradient-to-br from-gray-50 to-green-50 rounded-xl border border-gray-200 hover:shadow-md transition-all"
-                      >
-                        <div>
-                          <p className="font-semibold text-gray-900">
-                            {item.product_name}
-                          </p>
-                          <p className="text-sm text-gray-600">
-                            Quantity: {item.quantity}
-                          </p>
+                    {/* Status Update */}
+                    <div className="bg-gradient-to-br from-emerald-100 to-teal-100 p-6 rounded-2xl border-2 border-emerald-300">
+                      <label className="block text-sm font-black text-gray-900 mb-4 flex items-center gap-2">
+                        <div className="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center">
+                          <Package size={18} className="text-white" />
                         </div>
-                        <p className="font-bold text-lg text-gray-900">
-                          ${+item.price * item.quantity}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="flex justify-between items-center mt-4 pt-4 border-t-2 border-gray-200">
-                    <span className="font-bold text-gray-700 text-lg">
-                      Total
-                    </span>
-                    <span className="font-bold text-2xl bg-gradient-to-r from-green-600 to-green-600 bg-clip-text text-transparent">
-                      ${selectedOrder.total_price}
-                    </span>
-                  </div>
-                </div>
+                        Update Order Status
+                      </label>
 
-                {/* Status Update */}
-                <div className="bg-gradient-to-br from-green-50 to-green-50 p-4 rounded-xl border-2 border-green-100">
-                  <label className="block text-sm font-bold text-gray-900 mb-3 flex items-center gap-2">
-                    <Package size={18} className="text-green-600" />
-                    Update Order Status
-                  </label>
-
-                  <select
-                    value={status}
-                    onChange={(e) => setStatus(e.target.value as OrderStatus)}
-                    className="w-full px-4 py-3 border-2 border-green-200 rounded-xl
-             focus:ring-2 focus:ring-green-500 focus:border-green-500
-             font-medium bg-white transition-all hover:border-green-400"
-                  >
-                    {statusOptions.map((statusOption) => (
-                      <option
-                        key={statusOption.value}
-                        value={statusOption.value}
+                      {/* <select
+                        value={status}
+                        onChange={(e) =>
+                          setStatus(e.target.value as OrderStatus)
+                        }
+                        className="w-full px-4 py-4 border-2 border-emerald-300 rounded-2xl
+                 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500
+                 font-bold bg-white transition-all hover:border-emerald-400 text-gray-900"
                       >
-                        {statusOption.label}
-                      </option>
-                    ))}
-                  </select>
-
-                  <button
-                    onClick={() =>
-                      selectedOrder &&
-                      handleStatusChange(selectedOrder.id, status)
-                    }
-                    className="mt-4 w-full px-4 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-colors font-semibold shadow-md hover:shadow-lg"
-                  >
-                    Save Changes
-                  </button>
-                </div>
-              </div>
+                        {statusOptions.map((statusOption) => (
+                          <option
+                            key={statusOption.value}
+                            value={statusOption.value}
+                          >
+                            {statusOption.label}
+                          </option>
+                        ))}
+                      </select> */}
+                      <Select
+                        value={status}
+                        onValueChange={(value) =>
+                          setStatus(value as OrderStatus)
+                        }
+                      >
+                        <SelectTrigger className="w-full h-[56px] rounded-2xl border-2 border-emerald-300 hover:border-emerald-400 focus:ring-2 focus:ring-emerald-500 transition-all font-bold bg-white text-gray-900">
+                          <SelectValue placeholder="Select Status" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectGroup>
+                            {statusOptions.map((statusOption) => (
+                              <SelectItem
+                                key={statusOption.value}
+                                value={statusOption.value}
+                                className="font-bold"
+                              >
+                                <div className="flex items-center gap-2">
+                                  <statusOption.icon size={18} />
+                                  {statusOption.label}
+                                </div>
+                              </SelectItem>
+                            ))}
+                          </SelectGroup>
+                        </SelectContent>
+                      </Select>
+                      <motion.button
+                        onClick={() =>
+                          selectedOrder &&
+                          handleStatusChange(selectedOrder.id, status)
+                        }
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        className="mt-4 w-full px-6 py-4 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-2xl hover:from-emerald-700 hover:to-teal-700 transition-all font-black text-lg shadow-xl hover:shadow-2xl"
+                      >
+                        ✓ Save Changes
+                      </motion.button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
             ) : (
-              <div className="bg-white rounded-2xl shadow-lg p-12 text-center sticky top-6 border-2 border-gray-100">
-                <div className="bg-gradient-to-br from-green-100 to-green-100 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <Eye className="text-green-600" size={48} />
-                </div>
-                <p className="text-gray-600 font-medium text-lg mb-2">
-                  No Order Selected
-                </p>
-                <p className="text-gray-400 text-sm">
-                  Click on an order to view details
-                </p>
-              </div>
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.4 }}
+              >
+                <Card className="rounded-3xl shadow-2xl p-12 text-center sticky top-6 border-2 border-gray-200">
+                  <div className="w-24 h-24 bg-gradient-to-br from-emerald-100 to-teal-100 rounded-full flex items-center justify-center mx-auto mb-6 border-4 border-emerald-200">
+                    <Eye className="text-emerald-600" size={48} />
+                  </div>
+                  <p className="text-gray-700 font-black text-xl mb-2">
+                    No Order Selected
+                  </p>
+                  <p className="text-gray-500 text-sm font-semibold">
+                    Click on an order to view details
+                  </p>
+                </Card>
+              </motion.div>
             )}
-          </div>
+          </AnimatePresence>
         </div>
       </div>
     </div>
