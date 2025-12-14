@@ -7,7 +7,7 @@ import { Button } from "../components/ui/button";
 import { useNavigate } from "react-router-dom";
 // import { useAppDispatch, useAppSelector } from "../store/hook";
 import { RootState } from "../store";
-import { useLoginMutation } from "../store/authSlice";
+import { useGetRoleQuery, useLoginMutation } from "../store/authSlice";
 import { useToast } from "../hooks/use-toast";
 
 // Type for login form inputs
@@ -28,7 +28,7 @@ const schema = yup.object().shape({
 const Login = () => {
   // Toast hook for showing notifications
   const { toast } = useToast();
-console.log("BASE URL:", import.meta.env.VITE_BASE_URL);
+// console.log("BASE URL:", import.meta.env.VITE_BASE_URL);
   // Navigation hook
   const nav = useNavigate();
 
@@ -40,6 +40,7 @@ console.log("BASE URL:", import.meta.env.VITE_BASE_URL);
   //   (state: RootState) => state.auth
   // );
 const [login, { isLoading, error }] = useLoginMutation();
+
   // State for toggling password visibility
   const [showPassword, setShowPassword] = useState(false);
 

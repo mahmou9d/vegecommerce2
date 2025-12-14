@@ -46,7 +46,7 @@ import {
   useGetCartQuery,
   useRemoveFromCartMutation,
 } from "../store/cartSlice";
-import { useLogoutMutation } from "../store/authSlice";
+import { useGetRoleQuery, useLogoutMutation } from "../store/authSlice";
 import { useGetWishlistQuery } from "../store/wishlistSlice";
 
 // =============================
@@ -145,6 +145,7 @@ const Header = () => {
 
   // Wishlist Items
   const { data: items2 = [] } = useGetWishlistQuery();
+  const { data } = useGetRoleQuery();
   // const { items: items2 } = useAppSelector((state) => state.Getwishlists);
 
   // Variables
@@ -683,6 +684,14 @@ const Header = () => {
             ) : (
               <Link to={"/login"}>
                 <GoPerson className="w-[45px] h-[45px] p-[10px] text-white text-[20px] border border-[#ffffff26] rounded-full" />
+              </Link>
+            )}
+            {data?.is_admin && (
+              <Link
+                className="w-[45px] h-[45px] p-[10px] text-white text-[20px] border text-center flex justify-center items-center font-semibold border-[#ffffff26] rounded-full"
+                to={"/admin"}
+              >
+                AM
               </Link>
             )}
           </div>

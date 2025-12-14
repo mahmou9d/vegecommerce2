@@ -20,6 +20,7 @@ import PaymentCancel from "./component/PaymentCancel";
 import { useGetProductsQuery } from "./store/UpdataProductSlice";
 import AdminOrder from "./component/admin/AdminOrder";
 import AdminReviews from "./component/admin/AdminReviews";
+import { useGetRoleQuery } from "./store/authSlice";
 // import Admin from "./component/Admin ";
 
 // ✅ Lazy load components
@@ -64,7 +65,7 @@ type TProduct = {
 function Layout() {
   const location = useLocation();
   // const dispatch = useAppDispatch();
-    // { name: "Products", icon: <Package size={20} />, path: "/admin/products" },
+  // { name: "Products", icon: <Package size={20} />, path: "/admin/products" },
   const hideLayout = [
     "/login",
     "/signup",
@@ -75,9 +76,10 @@ function Layout() {
     "/admin/reviews",
   ].includes(location.pathname);
   // const { products, loaded } = useAppSelector((state) => state.product);
-const { data: products = [], isLoading, refetch } = useGetProductsQuery();
+  const { data: products = [], isLoading, refetch } = useGetProductsQuery();
   const fetchedRef = useRef(false);
-
+  const { data } = useGetRoleQuery();
+  
   useEffect(() => {
     if (!fetchedRef.current) {
       fetchedRef.current = true;
@@ -119,13 +121,15 @@ const { data: products = [], isLoading, refetch } = useGetProductsQuery();
         <Route path="/checkout" element={<Checkoutcart />} />
         <Route path="/singleproduct/:id" element={<SingleProduct />} />
         {/* <Route path="/admin" element={<Admin />} /> */}
-        <Route path="/admin" element={<AdminLayout />}>
-          <Route index element={<AdminDashboard />} /> {/* /admin */}
-          <Route path="stats" element={<DashboardStats />} />
-          <Route path="add" element={<EditProductPage />} />
-          <Route path="orders" element={<AdminOrder />} />
-          <Route path="reviews" element={<AdminReviews />} />
-        </Route>
+        {data?.is_admin && (
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route index element={<AdminDashboard />} /> {/* /admin */}
+            <Route path="stats" element={<DashboardStats />} />
+            <Route path="add" element={<EditProductPage />} />
+            <Route path="orders" element={<AdminOrder />} />
+            <Route path="reviews" element={<AdminReviews />} />
+          </Route>
+        )}
       </Routes>
       {!hideLayout && <Footer />}
       <ScrollToTop />

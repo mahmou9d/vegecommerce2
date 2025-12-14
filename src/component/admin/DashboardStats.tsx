@@ -202,7 +202,7 @@ export default function DashboardStats() {
           },
           {
             title: "Price of the Goods",
-            value: `$${avgPrice.toFixed(2)}`,
+            value: `$${Number(avgPrice).toFixed(2) || 0}`,
             icon: "💰",
             gradient: "from-blue-500 to-indigo-600",
             iconBg: "bg-blue-100",

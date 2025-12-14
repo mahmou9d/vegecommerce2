@@ -109,7 +109,7 @@ console.log(items);
           },
           {
             title: "Orders",
-            value: orders.orders,
+            value: orders.orders ??0,
             Icon: ShoppingCart,
             gradient: "from-blue-500 to-indigo-600",
             iconBg: "bg-blue-100",
