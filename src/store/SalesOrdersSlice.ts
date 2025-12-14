@@ -2,7 +2,7 @@
 // dashboardApi.ts - RTK Query (كامل)
 // ============================================
 import { createApi } from '@reduxjs/toolkit/query/react';
-import { OrderRecent, OrderRecentResponse, OrdersCountResponse, UsersCountResponse, TotalSalesResponse, TopSellingProduct, TopSellingResponse, SalesOrder, Counted, OrderStatus } from '../type/type';
+import { OrderRecent, OrderRecentResponse, OrdersCountResponse, UsersCountResponse, TotalSalesResponse, TopSellingProduct, TopSellingResponse, SalesOrder, Counted, OrderStatus, RecentOrdersData, RecentOrdersDatares } from '../type/type';
 import { baseQueryWithReauth } from './baseQuery';
 
 
@@ -13,13 +13,18 @@ export const dashboardApi = createApi({
     tagTypes: ['Orders', 'Users', 'Sales', 'Products'],
     endpoints: (builder) => ({
 
-        getRecentOrders: builder.query<OrderRecent[], void>({
-            query: () => '/dashboard/orders/recent/',
-            transformResponse: (response: OrderRecentResponse) => {
-                return response.orders || [];
-            },
-            providesTags: ['Orders'],
+        getRecentOrders: builder.query<RecentOrdersData, number | void>({
+            query: (page = 1) => `/dashboard/orders/recent/?page=${page}`,
+            transformResponse: (response: RecentOrdersDatares) => ({
+                orders: response.results || [],
+                count: response.count,
+                next: response.next,
+                previous: response.previous,
+            }),
+            providesTags: ["Orders"],
+            keepUnusedDataFor: 60,
         }),
+
 
         getOrdersCount: builder.query<Counted, void>({
             query: () => '/dashboard/orders/',

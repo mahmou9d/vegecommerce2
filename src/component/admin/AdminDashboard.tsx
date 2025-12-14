@@ -22,7 +22,13 @@ import {
 // import { GetUsers } from "../../store/SumUsersSlice";
 // import { GetTotalsales } from "../../store/TotalsalesSlice";
 // import { GetOrderLatest } from "../../store/OrderLatestSlice";
-import {  useGetOrdersCountQuery, useGetRecentOrdersQuery, useGetSalesOrdersQuery, useGetTotalSalesQuery, useGetUsersCountQuery } from "../../store/SalesOrdersSlice";
+import {
+  useGetOrdersCountQuery,
+  useGetRecentOrdersQuery,
+  useGetSalesOrdersQuery,
+  useGetTotalSalesQuery,
+  useGetUsersCountQuery,
+} from "../../store/SalesOrdersSlice";
 import { useGetProductsCountQuery } from "../../store/UpdataProductSlice";
 import { Counted } from "../../type/type";
 import { motion, AnimatePresence } from "framer-motion";
@@ -33,51 +39,14 @@ interface IData {
   orders: number;
 }
 export default function AdminDashboard() {
-  // const dispatch = useAppDispatch();
-  // const { total_sales  } = useAppSelector(
-  //   (state: RootState) => state.Totalsales
-  // );
   const { data: total_sales = 0 } = useGetTotalSalesQuery();
-  // const { orders } = useAppSelector(
-  //   (state: RootState) => state.Orders
-  // );
   const { data: orders = {} as Counted } = useGetOrdersCountQuery();
-
-  // const { total_products } = useAppSelector(
-  //   (state: RootState) => state.GetSumProducts
-  // );
   const { data: total_products = 0 } = useGetProductsCountQuery();
   const { data: users = 0 } = useGetUsersCountQuery();
-  // const { users } = useAppSelector(
-  //   (state: RootState) => state.Users
-  // );
-    // const { orderRecent } = useAppSelector(
-    //   (state: RootState) => state.OrderLatest
-    // );
-     const { data: orderRecent = [], isLoading: l1 } =
-       useGetRecentOrdersQuery();
-       const orderRecentTopTen =orderRecent.slice(0,10)
-    //     const { items } = useAppSelector(
-    //   (state: RootState) => state.SalesOrders
-    // );
-    const { data: items = [], isLoading: l6 } = useGetSalesOrdersQuery();
-  // useEffect(() => {
-    // dispatch(GetTotalsales());
-    // dispatch(GetOrder());
-    // dispatch(GetOrderLatest());
-    // dispatch(GetSumProducts());
-    // dispatch(GetUsers());
-    // dispatch(GetSalesOrders());
-  // }, [dispatch]);
-console.log(items);
-  // const data: IData[] = [
-  //   { month: "Jan", sales: 4000, orders: 2400 },
-  //   { month: "Feb", sales: 3000, orders: 2210 },
-  //   { month: "Mar", sales: 5000, orders: 2290 },
-  //   { month: "Apr", sales: 4780, orders: 2000 },
-  //   { month: "May", sales: 5890, orders: 2780 },
-  //   { month: "Jun", sales: 4390, orders: 1890 },
-  // ];
+  const { data, isLoading: l1 } = useGetRecentOrdersQuery();
+  const { data: items = [], isLoading: l6 } = useGetSalesOrdersQuery();
+  const { orders: orderRecentTopTen = [] } = data ?? {};
+  console.log(items);
   return (
     <div className="min-h-screen">
       {/* ======= HEADER ======= */}
@@ -109,7 +78,7 @@ console.log(items);
           },
           {
             title: "Orders",
-            value: orders.orders ??0,
+            value: orders.orders ?? 0,
             Icon: ShoppingCart,
             gradient: "from-blue-500 to-indigo-600",
             iconBg: "bg-blue-100",

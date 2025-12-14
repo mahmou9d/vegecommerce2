@@ -47,20 +47,20 @@ const Loader = () => (
   </div>
 );
 
-type TProduct = {
-  id: number;
-  name: string;
-  description: string;
-  original_price: string;
-  final_price: string;
-  discount: number;
-  stock: number;
-  categories: string[];
-  tags: string[];
-  img: string;
-  average_rating: number;
-  img_url: string;
-};
+// type TProduct = {
+//   id: number;
+//   name: string;
+//   description: string;
+//   original_price: string;
+//   final_price: string;
+//   discount: number;
+//   stock: number;
+//   categories: string[];
+//   tags: string[];
+//   img: string;
+//   average_rating: number;
+//   img_url: string;
+// };
 const ProtectedAdminRoute = ({ children }: { children: React.ReactNode }) => {
   const { data, isLoading } = useGetRoleQuery();
 

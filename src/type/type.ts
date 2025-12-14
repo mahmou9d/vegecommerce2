@@ -112,6 +112,18 @@ export type OrderRecent = {
   created: string; // يمكن تحويلها لاحقًا إلى Date إذا أحببت
   items: OrderItem[];
 };
+export interface RecentOrdersData {
+  orders: OrderRecent[];
+  count: number;
+  next: string | null;
+  previous: string | null;
+}
+export interface RecentOrdersDatares {
+  results: OrderRecent[];
+  count: number;
+  next: string | null;
+  previous: string | null;
+}
 export interface SalesOrder {
   month: string;
   orders: number;

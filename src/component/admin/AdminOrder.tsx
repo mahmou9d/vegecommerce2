@@ -64,101 +64,114 @@ interface StatusOption {
 }
 
 const AdminOrder: React.FC = () => {
-  const { data: Counted = {} as Counted } = useGetOrdersCountQuery();
-  const { data: orderRecent = [], isLoading: l1 } = useGetRecentOrdersQuery();
-  const [patchOrders] = usePatchOrdersMutation();
-  const [selectedOrder, setSelectedOrder] = useState<OrderRecent | null>(null);
-  const [searchTerm, setSearchTerm] = useState<string>("");
-  const [filterStatus, setFilterStatus] = useState<OrderStatus | "all">("all");
-  const [status, setStatus] = useState<OrderStatus>("pending");
+   const [page, setPage] = useState(1);
+   const { data: Counted = {} as Counted } = useGetOrdersCountQuery();
+   const { data, isLoading } = useGetRecentOrdersQuery(page);
+   const [patchOrders] = usePatchOrdersMutation();
 
-  // Update status when selectedOrder changes
-  useEffect(() => {
-    if (selectedOrder) {
-      setStatus(selectedOrder.status as OrderStatus);
-    }
-  }, [selectedOrder]);
+   const [selectedOrder, setSelectedOrder] = useState<OrderRecent | null>(null);
+   const [searchTerm, setSearchTerm] = useState<string>("");
+   const [filterStatus, setFilterStatus] = useState<OrderStatus | "all">("all");
+   const [status, setStatus] = useState<OrderStatus>("pending");
 
-  const statusOptions: StatusOption[] = [
-    {
-      value: "pending",
-      label: "Pending",
-      color: "text-amber-700",
-      bgColor: "bg-amber-50 border-amber-200",
-      icon: Clock,
-    },
-    {
-      value: "paid",
-      label: "paid",
-      color: "text-blue-700",
-      bgColor: "bg-blue-50 border-blue-200",
-      icon: Package,
-    },
-    {
-      value: "shipped",
-      label: "Shipped",
-      color: "text-purple-700",
-      bgColor: "bg-purple-50 border-purple-200",
-      icon: Truck,
-    },
-    {
-      value: "delivered",
-      label: "Delivered",
-      color: "text-green-700",
-      bgColor: "bg-green-50 border-green-200",
-      icon: CheckCircle,
-    },
-    {
-      value: "cancelled",
-      label: "Cancelled",
-      color: "text-red-700",
-      bgColor: "bg-red-50 border-red-200",
-      icon: XCircle,
-    },
-  ];
+   // Update status when selectedOrder changes
+   useEffect(() => {
+     if (selectedOrder) {
+       setStatus(selectedOrder.status as OrderStatus);
+     }
+   }, [selectedOrder]);
 
-  const getStatusInfo = (status: OrderStatus): StatusOption => {
-    return statusOptions.find((s) => s.value === status) || statusOptions[0];
-  };
+   // ✅ الـ statusOptions كـ constant
+   const statusOptions: StatusOption[] = [
+     {
+       value: "pending",
+       label: "Pending",
+       color: "text-amber-700",
+       bgColor: "bg-amber-50 border-amber-200",
+       icon: Clock,
+     },
+     {
+       value: "paid",
+       label: "paid",
+       color: "text-blue-700",
+       bgColor: "bg-blue-50 border-blue-200",
+       icon: Package,
+     },
+     {
+       value: "shipped",
+       label: "Shipped",
+       color: "text-purple-700",
+       bgColor: "bg-purple-50 border-purple-200",
+       icon: Truck,
+     },
+     {
+       value: "delivered",
+       label: "Delivered",
+       color: "text-green-700",
+       bgColor: "bg-green-50 border-green-200",
+       icon: CheckCircle,
+     },
+     {
+       value: "cancelled",
+       label: "Cancelled",
+       color: "text-red-700",
+       bgColor: "bg-red-50 border-red-200",
+       icon: XCircle,
+     },
+   ];
 
-  // const handleStatusChange = async (id: number, newStatus: OrderStatus) => {
-  //   try {
-  //     await patchOrders({
-  //       id,
-  //       status: newStatus,
-  //     }).unwrap();
-  //   } catch (error) {
-  //     console.error("Failed to update order status:", error);
-  //   }
-  // };
-const handleStatusChange = async (id: number, newStatus: OrderStatus) => {
-  try {
-    await patchOrders({
-      id,
-      status: newStatus,
-    }).unwrap();
+   const getStatusInfo = (status: OrderStatus): StatusOption => {
+     return statusOptions.find((s) => s.value === status) || statusOptions[0];
+   };
 
-    const orderElement = document.getElementById(`order-${id}`);
-    if (orderElement) {
-      orderElement.scrollIntoView({
-        behavior: "smooth",
-        block: "center",
-      });
-    }
-  } catch (error) {
-    console.error("Failed to update order status:", error);
-  }
-};
-  const filteredOrders = orderRecent.filter((order) => {
-    const matchesSearch =
-      order.customer.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.email.toLowerCase().includes(searchTerm.toLowerCase());
+   const handleStatusChange = async (id: number, newStatus: OrderStatus) => {
+     try {
+       await patchOrders({
+         id,
+         status: newStatus,
+       }).unwrap();
 
-    const matchesStatus =
-      filterStatus === "all" || order.status === filterStatus;
+       setTimeout(() => {
+         const orderElement = document.getElementById(`order-${id}`);
+         if (orderElement) {
+           orderElement.scrollIntoView({
+             behavior: "smooth",
+             block: "center",
+           });
+         }
+       }, 300);
+     } catch (error) {
+       console.error("Failed to update order status:", error);
+     }
+   };
 
-    return matchesSearch && matchesStatus;
-  });
+   console.log(data);
+
+   // Loading state
+   if (isLoading) {
+     return (
+       <div className="flex justify-center items-center min-h-screen">
+         <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-emerald-600"></div>
+       </div>
+     );
+   }
+
+   // No data state
+   if (!data) return null;
+
+   const { orders, count, next, previous } = data;
+
+   const filteredOrders = orders.filter((order) => {
+     const matchesSearch =
+       order.customer.toLowerCase().includes(searchTerm.toLowerCase()) ||
+       order.email.toLowerCase().includes(searchTerm.toLowerCase());
+
+     const matchesStatus =
+       filterStatus === "all" || order.status === filterStatus;
+
+     return matchesSearch && matchesStatus;
+   });
+
   return (
     <div className="min-h-screen">
       {/* ======= HEADER ======= */}
@@ -401,6 +414,46 @@ const handleStatusChange = async (id: number, newStatus: OrderStatus) => {
               })}
             </AnimatePresence>
           )}
+          {/* Pagination Buttons */}
+          <div className="flex justify-center items-center gap-4 mt-6">
+            <motion.button
+              disabled={!previous}
+              onClick={() => {
+                setPage((p) => p - 1)
+               setTimeout(() => {
+                 window.scrollTo({
+                   top: 0,
+                   behavior: "smooth",
+                 });
+               }, 100);}}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="px-6 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-2xl font-bold shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            >
+              ← Previous
+            </motion.button>
+
+            <span className="px-6 py-3 bg-emerald-100 text-emerald-700 rounded-2xl font-black border-2 border-emerald-300">
+              Page {Math.ceil(count/10)}
+            </span>
+
+            <motion.button
+              disabled={!next}
+              onClick={() => {
+                setPage((p) => p + 1)
+               setTimeout(() => {
+                 window.scrollTo({
+                   top: 0,
+                   behavior: "smooth",
+                 });
+               }, 100);}}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="px-6 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-2xl font-bold shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            >
+              Next →
+            </motion.button>
+          </div>
         </div>
 
         {/* Order Details */}
