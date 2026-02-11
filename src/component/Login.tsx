@@ -5,9 +5,7 @@ import { useState } from "react";
 import { FaRegEye, FaRegEyeSlash } from "react-icons/fa6";
 import { Button } from "../components/ui/button";
 import { useNavigate } from "react-router-dom";
-// import { useAppDispatch, useAppSelector } from "../store/hook";
-import { RootState } from "../store";
-import { useGetRoleQuery, useLoginMutation } from "../store/authSlice";
+import { useLoginMutation } from "../store/authSlice";
 import { useToast } from "../hooks/use-toast";
 
 // Type for login form inputs
@@ -28,18 +26,9 @@ const schema = yup.object().shape({
 const Login = () => {
   // Toast hook for showing notifications
   const { toast } = useToast();
-// console.log("BASE URL:", import.meta.env.VITE_BASE_URL);
-  // Navigation hook
   const nav = useNavigate();
 
-  // Redux dispatch
-  // const dispatch = useAppDispatch();
-
-  // Get authentication state from Redux
-  // const { loading, access, error } = useAppSelector(
-  //   (state: RootState) => state.auth
-  // );
-const [login, { isLoading, error }] = useLoginMutation();
+const [login] = useLoginMutation();
 
   // State for toggling password visibility
   const [showPassword, setShowPassword] = useState(false);
@@ -56,22 +45,24 @@ const [login, { isLoading, error }] = useLoginMutation();
   // Handle form submission
   const onSubmit = async (data: ILogin) => {
     try {
-      // Dispatch login action
-      await login(data)
+      const result = await login(data).unwrap();
 
       // Show success toast
+      if (result) {
       toast({
         title: "Login successful 🎉",
         description: "Welcome back!",
       });
-
+        nav("/");
+      }
       // Navigate to homepage
-      nav("/");
+      
     } catch (err: any) {
       // Show error toast if login fails
       toast({
         title: "Login failed",
-        description: err || "Invalid email or password",
+        description:
+          err?.data?.message || err?.message || "Invalid email or password",
       });
     }
   };

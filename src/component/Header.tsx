@@ -1,7 +1,7 @@
 // =============================
 // Import React, Hooks & Helpers
 // =============================
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 // =============================
@@ -41,11 +41,7 @@ import { Progress } from "../components/ui/progress";
 // =============================
 // Import Redux Hooks & Actions
 // =============================
-// import { useAppDispatch, useAppSelector } from "../store/hook";
-import {
-  useGetCartQuery,
-  useRemoveFromCartMutation,
-} from "../store/cartSlice";
+import { useGetCartQuery, useRemoveFromCartMutation } from "../store/cartSlice";
 import { useGetRoleQuery, useLogoutMutation } from "../store/authSlice";
 import { useGetWishlistQuery } from "../store/wishlistSlice";
 
@@ -128,16 +124,19 @@ const Header = () => {
   const [logout, { isLoading }] = useLogoutMutation();
   const { data: items } = useGetCartQuery();
   const [removeFromCart] = useRemoveFromCartMutation();
-  const access =localStorage.getItem("access")
+  const access = localStorage.getItem("access");
+
   // Local cart state
   const [cart, setCart] = useState<Product[]>([]);
+  const [showCart, setShowCart] = useState(false);
+  const cartRef = useRef<HTMLDivElement>(null);
 
   // Wishlist Items
   const { data: items2 = [] } = useGetWishlistQuery();
   const { data } = useGetRoleQuery();
 
   // Variables
-  const limit = 1000; // free shipping limit
+  const limit = 1000;
   const nav = useNavigate();
 
   // Calculate cart quantity
@@ -147,66 +146,32 @@ const Header = () => {
 
   // Calculate cart subtotal
   const subtotal = Array.isArray(items?.items ?? [])
-    ? (items?.items ??[]).reduce((sum, item) => sum + Number(item.subtotal || 0), 0)
+    ? (items?.items ?? []).reduce(
+        (sum, item) => sum + Number(item.subtotal || 0),
+        0,
+      )
     : 0;
 
   // Progress bar for free shipping
   const progress = Math.min((subtotal / limit) * 100, 100);
 
-  // =============================
-  // Remove item from cart
-  // =============================
-  // const removeItem = (product_id: number) => {
-  //   dispatch(RemoveCart({ product_id }))
-  //     .unwrap()
-  //     .then(() => {
-  //       dispatch(GetToCart());
-  //       toast({
-  //         title: "Removed from cart 🛒",
-  //         description: "The item has been removed successfully.",
-  //       });
-  //     })
-  //     .catch(() => {
-  //       if (access) {
-  //         toast({
-  //           title: "Error ❌",
-  //           description: "Failed to remove item from cart.",
-  //         });
-  //       } else {
-  //         toast({ title: "Error ❌", description: "Please login first" });
-  //       }
-  //     });
-  // };
-  const removeItem = (product_id: number) => {
-    // احفظ النسخة القديمة للـ rollback
-    const previousCart = [...(items?.items ?? [])]; // cart جاي من useSelector
+  // Close cart when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (cartRef.current && !cartRef.current.contains(event.target as Node)) {
+        setShowCart(false);
+      }
+    };
 
-    // 🔥 Optimistic Update — شيّل العنصر من UI فورًا
-    // dispatch(
-    //   removeItemLocally({
-    //     product_id,
-    //   })
-    // );
+    if (showCart) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
 
-    // إرسال الريكوست
-    removeFromCart({ product_id })
-      .unwrap()
-      .then(() => {
-        toast({
-          title: "Removed from cart",
-          description: "The item was successfully removed.",
-        });
-      })
-      .catch(() => {
-        // ❌ Rollback — رجّع الحالة القديمة
-        // dispatch(rollbackRemove(previousCart));
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showCart]);
 
-        toast({
-          title: "Remove failed",
-          description: "Restored the item.",
-        });
-      });
-  };
   // =============================
   // Logout handler
   // =============================
@@ -217,30 +182,40 @@ const Header = () => {
           title: "Logged out ✅",
           description: "You have been logged out successfully.",
         });
-      localStorage.removeItem("access");
-      localStorage.removeItem("refresh");
-        // Remove all cart items & wishlist items on logout
-        // Promise.all(
-        //   items.map((item) =>
-        //     dispatch(RemoveCart({ product_id: item.product_id })).unwrap()
-        //   )
-        // );
-        // Promise.all(
-        //   items2.map((item) =>
-        //     dispatch(WishlistRemove(item.product_id)).unwrap()
-        //   )
-        // );
-
+        localStorage.removeItem("access");
+        localStorage.removeItem("refresh");
         nav("/");
       })
       .catch((err) => {
         toast({ title: "Error ❌", description: err || "Logout failed" });
       });
   };
-   const total =
-     items?.items?.reduce((sum, item) => sum + item.price * item.quantity, 0) ??
-     0;
-     
+
+  // =============================
+  // Remove from cart handler
+  // =============================
+  const handleRemoveFromCart = async (
+    product_id: number,
+    product_name: string,
+  ) => {
+    try {
+      await removeFromCart({ product_id }).unwrap();
+      toast({
+        title: "Removed from cart 🗑️",
+        description: `${product_name} has been removed from your cart.`,
+      });
+    } catch {
+      toast({
+        title: "Error ❌",
+        description: "Failed to remove item from cart.",
+      });
+    }
+  };
+
+  const total =
+    items?.items?.reduce((sum, item) => sum + item.price * item.quantity, 0) ??
+    0;
+
   // =============================
   // Return JSX
   // =============================
@@ -267,6 +242,8 @@ const Header = () => {
               <HiSearch className="absolute bg-[#122d40] text-white rounded-[100px] left-[88%] top-[4px] text-[47px] p-[6px]" />
             </div>
           </div>
+
+          {/* ===== MOBILE ICONS ===== */}
           <div className="relative flex gap-[6px] lg:hidden">
             {data?.is_admin && (
               <Link
@@ -527,6 +504,8 @@ const Header = () => {
               </SheetContent>
             </Sheet>
           </div>
+
+          {/* ===== DESKTOP ICONS ===== */}
           <div className="hidden items-center gap-[10px] lg:flex">
             <div className="flex gap-2">
               <BiSolidPhoneCall className="w-[45px] h-[45px] p-[10px] text-white text-[20px] border border-[#ffffff26] hover:border-[#01e281] hover:text-[#01e281] transition-all duration-200 rounded-full" />
@@ -535,32 +514,34 @@ const Header = () => {
                 <h1 className="text-white text-[18px]">01009014597</h1>
               </div>
             </div>
-            <div className="relative group/item">
-              <Link
-                to={access ? "/cart" : "/"}
-                onClick={(e) => {
+
+            {/* ===== CART DROPDOWN (click-based) ===== */}
+            <div ref={cartRef} className="relative">
+              <div
+                onClick={() => {
                   if (!access) {
-                    e.preventDefault();
                     toast({
                       title: "Error ❌",
                       description: "Please login first",
                     });
+                  } else {
+                    setShowCart((prev) => !prev);
                   }
                 }}
+                className="cursor-pointer"
               >
                 <FaBasketShopping className="w-[45px] h-[45px] p-[10px] text-white text-[20px] border border-[#ffffff26] rounded-full" />
                 <span className="absolute right-[-25%] top-[25%] bg-[#01e281] text-[13px] text-[#122d40] rounded-full w-5 h-5 flex justify-center text-center">
                   {subquantity}
                 </span>
-              </Link>
+              </div>
 
               <div
-                className="
-      absolute right-[-45%] z-[100] w-[400px] bg-white shadow-xl rounded-xl 
-      opacity-0 scale-95 translate-y-3 pointer-events-none
-      transition-all duration-300 ease-in-out
-      group-hover/item:opacity-100 group-hover/item:scale-100 group-hover/item:translate-y-0 group-hover/item:pointer-events-auto 
-    "
+                className={`absolute right-[-45%] z-[100] w-[400px] bg-white shadow-xl rounded-xl transition-all duration-300 ease-in-out ${
+                  showCart
+                    ? "opacity-100 scale-100 translate-y-0 pointer-events-auto"
+                    : "opacity-0 scale-95 translate-y-3 pointer-events-none"
+                }`}
               >
                 <TiArrowSortedUp className="absolute top-[-13px] text-white text-[22px] right-[32px]" />
                 {Array.isArray(items?.items) && items?.items.length !== 0 ? (
@@ -576,6 +557,7 @@ const Header = () => {
                               onClick={() => {
                                 nav(`/singleProduct/${item.product_id}`);
                                 window.scrollTo(0, 0);
+                                setShowCart(false);
                               }}
                               className="flex gap-4"
                             >
@@ -597,9 +579,10 @@ const Header = () => {
 
                             <IoClose
                               onClick={() =>
-                                removeFromCart({
-                                  product_id: item.product_id,
-                                })
+                                handleRemoveFromCart(
+                                  item.product_id,
+                                  item.product_name,
+                                )
                               }
                               className="text-[20px]"
                             />
@@ -618,9 +601,9 @@ const Header = () => {
                           <FaCartArrowDown />
                           <p className="flex items-center pl-2">
                             Add{" "}
-                            <p className="font-bold px-2">
+                            <span className="font-bold px-2">
                               ${(limit - (total ?? 0)).toFixed(2)}
-                            </p>{" "}
+                            </span>{" "}
                             more to get free shipping!
                           </p>
                         </div>
@@ -631,6 +614,7 @@ const Header = () => {
                       </div>
                       <div
                         onClick={() => {
+                          setShowCart(false);
                           nav("/cart");
                           window.scrollTo(0, 0);
                         }}
@@ -723,8 +707,6 @@ const Header = () => {
                     Offers
                   </div>
                 </a>
-
-                {/* الدروب داون */}
                 <ul className="absolute  p-12 top-full left-0 ml-[-205%] w-[169vh] opacity-0 invisible transition-all duration-300 bg-[#122d40] shadow-lg rounded-[15px] group-hover:opacity-100 group-hover:visible">
                   <div className="flex container justify-between gap-7">
                     {category.map((item, i) => {
@@ -762,8 +744,6 @@ const Header = () => {
                     Quick find
                   </div>
                 </a>
-
-                {/* الدروب داون */}
                 <ul className="absolute p-6  top-full left-0 ml-[-190%] w-[75vh] opacity-0 invisible transition-all duration-300 bg-[#122d40] shadow-lg rounded-[15px] group-hover:opacity-100 group-hover:visible">
                   <div className="container flex justify-between">
                     <div>

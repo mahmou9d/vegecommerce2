@@ -1,21 +1,13 @@
-// import { TiHome } from "react-icons/ti";
-// import { IoIosArrowForward } from "react-icons/io";
 import * as yup from "yup";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useState } from "react";
 import { FaRegEye, FaRegEyeSlash } from "react-icons/fa6";
 import { Button } from "../components/ui/button";
-// import { signupUser } from "../store/authSecSlice";
-// import { useAppDispatch, useAppSelector } from "../store/hook";
-// import { RootState } from "../store";
 import { useNavigate } from "react-router-dom";
 import { useLoginMutation, useSignupMutation } from "../store/authSlice";
 import { useToast } from "../hooks/use-toast";
 
-// -------------------------------
-// Signup form interface
-// -------------------------------
 interface ISignup {
   username: string;
   email: string;
@@ -23,9 +15,6 @@ interface ISignup {
   password2: string;
 }
 
-// -------------------------------
-// Validation schema (Yup)
-// -------------------------------
 const schema = yup.object().shape({
   username: yup.string().required("Name is required"),
   email: yup.string().email("Invalid email").required("Email is required"),
@@ -38,22 +27,13 @@ const schema = yup.object().shape({
     .oneOf([yup.ref("password1")], "Passwords must match")
     .required("Confirm your password"),
 });
-
-// -------------------------------
-// Signup Component
-// -------------------------------
 const Signup = () => {
   const { toast } = useToast();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  // const dispatch = useAppDispatch();
-  const nav = useNavigate();
 
-  // Access signup state from Redux
-  // const { loading, message, error } = useAppSelector(
-  //   (state: RootState) => state.authSec
-  // );
+  const nav = useNavigate();
  const [signup, { isLoading, isSuccess }] = useSignupMutation();
  const [login] = useLoginMutation();
   // React Hook Form setup with Yup validation
@@ -70,15 +50,29 @@ const Signup = () => {
   // -------------------------------
   const onSubmit = async (data: ISignup) => {
     try {
-      // First: signup
-      await signup(data)
+      const signupResult = await signup(data);
+          if (signupResult.error) {
+            toast({
+              title: "Registration failed ❌",
+              description: "An error occurred, please try again.",
+            });
+            return;
+          }
 
       // Second: auto-login after signup
       const loginPayload = {
         email: data.email,
         password: data.password1,
       };
-      await login(loginPayload);
+       const loginResult = await login(loginPayload);
+    if (loginResult.error) {
+      toast({
+        title: "Registration failed but automatic login failed",
+        description: "Please log in manually.",
+      });
+      nav("/login");
+      return;
+    }
 localStorage.setItem("username", data.username);
       // Success notification
       toast({
@@ -91,7 +85,7 @@ localStorage.setItem("username", data.username);
       // Error notification
       toast({
         title: "Signup Failed ❌",
-        description: err?.message || "Something went wrong, please try again.",
+        description: err?.data?.message || err?.message || "Something went wrong, please try again.",
       });
     }
   };

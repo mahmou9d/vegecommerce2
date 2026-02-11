@@ -1,6 +1,4 @@
-// import { useAppDispatch, useAppSelector } from "../../store/hook";
 import { Card, CardContent } from "../../components/ui/card";
-// import { motion } from "framer-motion";
 import { ShoppingCart, Package, Users, DollarSign } from "lucide-react";
 import {
   ResponsiveContainer,
@@ -14,14 +12,6 @@ import {
   BarChart,
   Bar,
 } from "recharts";
-// import { RootState } from "../../store";
-// import { useEffect } from "react";
-// import { GetOrder } from "../../store/OrderSlice";
-// import { GetTopSelling } from "../../store/TopSellingSlice";
-// import { GetSumProducts } from "../../store/ProductsSlice";
-// import { GetUsers } from "../../store/SumUsersSlice";
-// import { GetTotalsales } from "../../store/TotalsalesSlice";
-// import { GetOrderLatest } from "../../store/OrderLatestSlice";
 import {
   useGetOrdersCountQuery,
   useGetRecentOrdersQuery,

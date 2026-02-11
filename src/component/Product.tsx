@@ -2,25 +2,15 @@ import { useEffect, useMemo, useCallback, useState } from "react";
 import { useNavigate } from "react-router";
 import { GoHeart, GoHeartFill } from "react-icons/go";
 import { RiShoppingCartLine } from "react-icons/ri";
-// import { useAppDispatch, useAppSelector } from "../store/hook";
-import { useAddToWishlistMutation, useGetWishlistQuery, useRemoveFromWishlistMutation } from "../store/wishlistSlice";
-// import {
-//   addWishlistLocally,
-//   GetWishlist,
-//   removeWishlistLocally,
-// } from "../store/GetwishlistSlice";
-// import {
-//   addItemLocally,
-//   AddToCart,
-//   GetToCart,
-//   rollbackRemove,
-// } from "../store/cartSlice";
+import {
+  useAddToWishlistMutation,
+  useGetWishlistQuery,
+  useRemoveFromWishlistMutation,
+} from "../store/wishlistSlice";
 import { Rating, RatingButton } from "../components/ui/shadcn-io/rating";
 import { useToast } from "../hooks/use-toast";
-import React from "react";
-import { TProduct } from "../store/UpdataProductSlice";
 import { useAddToCartMutation, useGetCartQuery } from "../store/cartSlice";
-// import { setEditingProduct } from "../store/editingProductSlice";
+import { TProduct } from "@/type/type";
 
 interface IItem {
   id?: number;
@@ -41,100 +31,35 @@ interface IItem {
 const ProductComponent = ({ item }: { item: TProduct }) => {
   const { toast } = useToast();
   const nav = useNavigate();
-  // const dispatch = useAppDispatch();
-  // const { items, total } = useAppSelector((state) => state?.cart);
-  // const getwishlist = useAppSelector((state) => state.Getwishlists.items);
   const { data: getwishlist = [], isLoading: loadingwish } =
     useGetWishlistQuery();
-    const [removeFromWishlist] = useRemoveFromWishlistMutation();
-    const [addToWishlist] = useAddToWishlistMutation();
-  // const { access } = useAppSelector((state) => state?.auth);
-  // const { items, total } = useAppSelector((state) => state?.cart);
- const { data: items } = useGetCartQuery();
- const [addToCart] = useAddToCartMutation();
-  // const loadingwish = useAppSelector((state) => state.wishlist.loading);
+  const [removeFromWishlist] = useRemoveFromWishlistMutation();
+  const [addToWishlist] = useAddToWishlistMutation();
+  const { data: items } = useGetCartQuery();
+  const [addToCart] = useAddToCartMutation();
   const [wishlistBtnLoading, setWishlistBtnLoading] = useState(false);
   const [cartBtnLoading, setCartBtnLoading] = useState(false);
-  // let inWishlist = useMemo(
-  //   () => (item.id ? getwishlist.some((w) => w.product_id === item.id) : false),
-  //   [item.id, getwishlist]
-  // );
-  // ⚡ حالة التوجل الحقيقية
   const [inWishlistState, setInWishlistState] = useState(false);
-  const access =localStorage.getItem("access")
-  // const handleEditProduct = (item: IItem) => {
-  //   dispatch(setEditingProduct(item)); // ضع المنتج في store
-  //   nav("/admin"); // اذهب للفورم
-  // };
-  // ⚡ Sync from Redux → local state
+  const access = localStorage.getItem("access");
   useEffect(() => {
     if (item.id) {
       setInWishlistState(getwishlist.some((w) => w.product_id === item.id));
     }
   }, [item.id, getwishlist]);
-  // useEffect(() => {
-  //   dispatch(GetWishlist());
-  // }, []);
-
-  // const handleAddToCart = useCallback(async () => {
-  //   if (!item.id) return;
-  //     setCartBtnLoading(true);
-  //   try {
-  //     await dispatch(AddToCart({ product_id: item.id, quantity: 1 })).unwrap();
-  //     dispatch(GetToCart());
-  //     toast({
-  //       title: "Added to cart 🛒",
-  //       description: `${item.name} has been added to your cart.`,
-  //     });
-  //   } catch {
-  //     if (access) {
-  //       toast({
-  //         title: "Error ❌",
-  //         description: "Failed to add item to cart.",
-  //       });
-  //     } else {
-  //       toast({
-  //         title: "Error ❌",
-  //         description: "Please login first",
-  //       });
-  //     }
-
-  //   }   finally {
-  //     setCartBtnLoading(false);
-  //   }
-  // }, [item.id, item.name, dispatch, toast, access]);
   const handleAddToCart = useCallback(async () => {
     if (!item.id) return;
 
     setCartBtnLoading(true);
-    const previousCart = [...(items?.items ?? [])]; // للـ rollback
+    const previousCart = [...(items?.items ?? [])];
 
     try {
-      // إضافة محلية سريعة (Optimistic)
-
-      // dispatch(
-      //   addItemLocally({
-      //     product_id: item.id,
-      //     product_name: item.name,
-      //     price: Number(item.final_price),
-      //     img_url: item.img_url,
-      //   })
-      // );
-
-      // if (access) {
-      //   toast({
-      //     title: "Added to cart 🛒",
-      //     description: `${item.name} has been added to your cart.`,
-      //   });
-      // }
-      setCartBtnLoading(false);
-      // تحديث السلة على السيرفر
       await addToCart({ product_id: item.id, quantity: 1 }).unwrap();
+      toast({
+        title: "Added to cart ✅",
+        description: `${item.name} has been added to your cart.`,
+      });
+      setCartBtnLoading(false);
     } catch (err) {
-      // ❌ rollback
-      // previousCart.forEach((cartItem) => {
-      //   dispatch(rollbackRemove({ item: cartItem }));
-      // });
       setCartBtnLoading(false);
       toast({
         title: "Error ❌",
@@ -147,54 +72,6 @@ const ProductComponent = ({ item }: { item: TProduct }) => {
     }
   }, [item, items, toast, access]);
 
-  // const toggleWishlist = async () => {
-
-  //   if (!item.id) return;
-
-  //   setWishlistBtnLoading(true);
-  //   try {
-  //     if (inWishlist) {
-  //       await dispatch(WishlistRemove(item.id)).unwrap();
-  //       toast({
-  //         title: "Removed ❤️",
-  //         description: `${item.name} removed from wishlist`,
-  //       });
-  //     } else {
-  //       await dispatch(WishlistItems(item.id)).unwrap();
-  //       toast({
-  //         title: "Added ❤️",
-  //         description: `${item.name} added to wishlist`,
-  //       });
-  //     }
-  //   } catch {
-  //     if (access) {
-  //       toast({
-  //         title: "Error ❌",
-  //         description: "Failed to add item to wishlist.",
-  //       });
-  //     } else {
-  //       toast({
-  //         title: "Error ❌",
-  //         description: "Please login first",
-  //       });
-  //     }
-  //   } finally {
-  //     dispatch(GetWishlist());
-  //     setWishlistBtnLoading(false);
-  //   }
-  // };
-
-  // const handleAddToCart = async () => {
-  //   if (!item.id) return;
-
-  //   setCartBtnLoading(true);
-  //   try {
-  //     await dispatch(AddToCart({ product_id: item.id, quantity: 1 })).unwrap();
-  //     toast({ title: "Added 🛒", description: `${item.name} added to cart` });
-  //   } finally {
-  //     setCartBtnLoading(false);
-  //   }
-  // };
   const toggleWishlist = async () => {
     if (!item.id) return;
 
@@ -202,49 +79,20 @@ const ProductComponent = ({ item }: { item: TProduct }) => {
 
     try {
       if (inWishlistState) {
-        // remove locally
-
-        // dispatch(removeWishlistLocally(item.id));
-        // setInWishlistState(false);
-        // if (access) {
-        //   toast({
-        //     title: "Removed ❤️",
-        //     description: `${item.name} removed from wishlist`,
-        //   });
-        // }
-
-        setWishlistBtnLoading(false);
         await removeFromWishlist(item.id).unwrap();
+        toast({
+          title: "Removed from wishlist 🗑️",
+          description: `${item.name} has been removed from your wishlist.`,
+        });
+        setWishlistBtnLoading(false);
       } else {
-        // add locally
-        // dispatch(
-        //   addWishlistLocally({
-        //     product_id: item.id!,
-        //     name: item.name,
-        //     description: item.description,
-        //     original_price: item.original_price,
-        //     final_price: item.final_price as string,
-        //     discount: item.discount,
-        //     stock: item.stock,
-        //     categories: item.categories,
-        //     tags: item.tags,
-        //     img: Array.isArray(item.img)
-        //       ? typeof item.img[0] === "string"
-        //         ? item.img[0]
-        //         : URL.createObjectURL(item.img[0])
-        //       : "",
-
-        //     average_rating: item.average_rating as number,
-        //     img_url: item.img_url as string,
-        //   })
-        // );
         setInWishlistState(true);
-        // toast({
-        //   title: "Added ❤️",
-        //   description: `${item.name} added to wishlist`,
-        // });
         setWishlistBtnLoading(false);
         await addToWishlist(item.id).unwrap();
+        toast({
+          title: "Added to wishlist ❤️",
+          description: `${item.name} has been added to your wishlist.`,
+        });
       }
     } catch {
       toast({
@@ -259,10 +107,7 @@ const ProductComponent = ({ item }: { item: TProduct }) => {
   };
 
   return (
-    <div
-      // onClick={() => handleEditProduct(item)}
-      className="cursor-pointer relative overflow-visible group/item w-[440px] h-[500px] py-12 bg-white p-[30px] -mt-3 flex flex-col justify-between rounded-ee-[25px] rounded-ss-[25px] shadow-[0px_8px_64px_0px_#122d401a]"
-    >
+    <div className="cursor-pointer relative overflow-visible group/item w-[440px] h-[500px] py-12 bg-white p-[30px] -mt-3 flex flex-col justify-between rounded-ee-[25px] rounded-ss-[25px] shadow-[0px_8px_64px_0px_#122d401a]">
       {/* Wishlist button */}
       <div className="relative group flex">
         {wishlistBtnLoading ? (

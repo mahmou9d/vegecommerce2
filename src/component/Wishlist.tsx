@@ -4,7 +4,6 @@ import { RiShoppingCartLine } from "react-icons/ri";
 import { TiHome } from "react-icons/ti";
 import { IoClose } from "react-icons/io5";
 import { RootState } from "../store";
-// import { useAppDispatch, useAppSelector } from "../store/hook";
 import {
   useGetWishlistQuery,
   useRemoveFromWishlistMutation,
@@ -12,42 +11,29 @@ import {
 import { useAddToCartMutation } from "../store/cartSlice";
 import { Button } from "../components/ui/button";
 import { Link } from "react-router-dom";
-// import { GetWishlist, removeWishlistLocally } from "../store/GetwishlistSlice";
 import { useToast } from "../hooks/use-toast";
 
 const Wishlist = () => {
-  // const dispatch = useAppDispatch();
   const { toast } = useToast();
   const [addToCart] = useAddToCartMutation();
   const { data: items = [], isLoading } = useGetWishlistQuery();
   const [removeFromWishlist] = useRemoveFromWishlistMutation();
-  // Select wishlist state from Redux store
-  // const { items, loading, error } = useAppSelector(
-  //   (state: RootState) => state?.Getwishlists
-  // );
 
-  // console.log(items)
-  // Fetch wishlist items when component loads (if empty)
-  // useEffect(() => {
-  //   if (items.length === 0) {
-  //     dispatch(GetWishlist());
-  //   }
-  // }, [dispatch, items.length]);
-
-  /**
-   * Remove an item from wishlist
-   */
   const removeItem = (product_id: number) => {
-    // dispatch(removeWishlistLocally(product_id));
-    // toast({
-    //   title: "Removed ❤️",
-    //   description: `The item has been removed from your wishlist.`,
-    // });
+
     removeFromWishlist(product_id)
       .unwrap()
       .then(() => {
-        // dispatch(GetWishlist()); // Refresh wishlist after removing
-      });
+        toast({
+          title: "Removed from wishlist 🗑️",
+          description: "The item was successfully removed.",
+        });
+      }).catch(() => {
+        toast({
+          title: "Remove failed ❌",
+          description: "Could not remove the item, please try again.",
+        });
+      })
   };
 
   /**
@@ -55,22 +41,13 @@ const Wishlist = () => {
    */
   const handleAddToCart = (item: any) => {
     console.log(item);
-    // dispatch(
-    //   addItemLocally({
-    //     product_id: item.product_id,
-    //     product_name: item.name || "no",
-    //     price: Number(item.final_price),
-    //     img_url: item.img_url,
-    //   })
-    // );
-    // toast({
-    //   title: "Added 🛒",
-    //   description: `The item has been added to your cart.`,
-    // });
     addToCart({ product_id: item.product_id, quantity: 1 })
       .unwrap()
       .then(() => {
-        // dispatch(GetToCart()); // Refresh cart after adding
+        toast({
+          title: "Added to cart 🛒",
+          description: `${item.name} has been added to your cart.`,
+        });
       })
       .catch(() => {
         toast({
@@ -79,45 +56,7 @@ const Wishlist = () => {
         });
       });
   };
-  // const handleAddToCart = useCallback(async () => {
-  //   if (!item.id) return;
 
-  //   // setCartBtnLoading(true);
-  //   const previousCart = [...items]; // للـ rollback
-
-  //   try {
-  //     // إضافة محلية سريعة (Optimistic)
-
-  //     dispatch(addItemLocally({
-  //       product_id: item.id,
-  //       product_name: item.name,
-  //       price: Number(item.final_price),
-  //       img_url: item.img_url
-  //     }))
-
-  //     toast({
-  //       title: "Added to cart 🛒",
-  //       description: `${item.name} has been added to your cart.`,
-  //     });
-  //   // setCartBtnLoading(false);
-  //     // تحديث السلة على السيرفر
-  //     await dispatch(AddToCart({ product_id: item.id, quantity: 1 })).unwrap();
-  //   } catch (err) {
-  //     // ❌ rollback
-  //     previousCart.forEach((cartItem) => {
-  //       dispatch(rollbackRemove({ item: cartItem }));
-  //     });
-  // //  setCartBtnLoading(false);
-  //     toast({
-  //       title: "Error ❌",
-  //       description: access
-  //         ? "Failed to add item to cart."
-  //         : "Please login first",
-  //     });
-  //   } finally {
-  //     // setCartBtnLoading(false);
-  //   }
-  // }, [item, items, dispatch, toast, access]);
   return (
     <div>
       {/* Wishlist Header Section */}
@@ -143,7 +82,7 @@ const Wishlist = () => {
               {/* Remove Button */}
               <div className="relative group flex">
                 <IoClose
-                  onClick={() => removeItem(product.product_id)}
+                  onClick={() => removeItem(product.product_id as number)}
                   className="absolute right-[-345px] xl:right-[-405px] top-[-65px] text-white bg-[#ff2d2d] shadow-[1px_1px_10px_#1111110d] group-hover:rotate-90 w-10 h-10 p-[6px] rounded-full duration-300"
                 />
               </div>

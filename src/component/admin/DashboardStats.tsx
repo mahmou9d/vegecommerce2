@@ -1,4 +1,3 @@
-// import { useAppDispatch, useAppSelector } from "../../store/hook";
 import { Card, CardContent } from "../../components/ui/card";
 import { useEffect, useMemo, useState } from "react";
 import {
@@ -13,9 +12,6 @@ import {
   Legend,
   CartesianGrid,
 } from "recharts";
-import { RootState } from "../../store";
-// import { GetTotalstockSlice } from "../../store/TotalstockSlice";
-// import { GetTopSelling } from "../../store/TopSellingSlice";
 import { useGetProductsQuery } from "../../store/UpdataProductSlice";
 import { useGetTopSellingQuery } from "../../store/SalesOrdersSlice";
 import { motion } from "framer-motion";
@@ -83,29 +79,20 @@ const items: IItem[] = [
 ];
 
 export default function DashboardStats() {
-  // const dispatch = useAppDispatch();
-  // const { products, loading, error } = useAppSelector(
-  //   (state: RootState) => state.product
-  // );
-  // const { products  } = useAppSelector(
-  //   (state: RootState) => state.product
-  // );
   const { data: products = [], isLoading, refetch } = useGetProductsQuery();
   const { data: items = [], isLoading: l5 } = useGetTopSellingQuery();
-  // const { items } = useAppSelector((state: RootState) => state.TopSelling);
   console.log(items);
 
   const [tickFontSize, setTickFontSize] = useState(14);
 
   useEffect(() => {
-    // dispatch(GetTopSelling());
     const handleResize = () => {
       if (window.innerWidth < 640) {
-        setTickFontSize(10); // شاشة صغيرة
+        setTickFontSize(10); 
       } else if (window.innerWidth < 1024) {
-        setTickFontSize(12); // شاشة متوسطة
+        setTickFontSize(12);
       } else {
-        setTickFontSize(14); // شاشة كبيرة
+        setTickFontSize(14);
       }
     };
 
@@ -147,22 +134,6 @@ export default function DashboardStats() {
       products.length
     );
   }, []);
-
-  // const discountData = useMemo(() => {
-  //   const map: Record<number, number> = {};
-  //   items.forEach((item) => {
-  //     map[item.discount] = (map[item.discount] || 0) + 1;
-  //   });
-  //   return Object.keys(map).map((key) => ({
-  //     discount: key,
-  //     count: map[Number(key)],
-  //   }));
-  // }, []);
-  const topSelling = [
-    { name: "T-Shirt", sales: 120 },
-    { name: "Sneakers", sales: 90 },
-    { name: "Backpack", sales: 70 },
-  ];
   return (
     <div className="min-h-screen">
       {/* ======= HEADER ======= */}

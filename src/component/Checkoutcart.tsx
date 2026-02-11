@@ -4,7 +4,7 @@ import { Button } from "../components/ui/button";
 import { Progress } from "../components/ui/progress";
 
 // React + hooks
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 
 // Icons
 import { FaArrowRight, FaCartArrowDown } from "react-icons/fa6";
@@ -26,14 +26,7 @@ import {
   CommandItem,
   CommandList,
 } from "../components/ui/command";
-
-// Redux store hooks + actions
-// import { useAppDispatch, useAppSelector } from "../store/hook";
 import {
-  // Checkout,
-  // DeleteToCart,
-  // GetToCart,
-  // RemoveCart,
   useCheckoutMutation,
   useGetCartQuery,
 } from "../store/cartSlice";
@@ -73,10 +66,6 @@ const schema = yup.object().shape({
 const Checkoutcart = () => {
   // Toast notification
   const { toast } = useToast();
-  // Router navigation
-  const nav = useNavigate();
-  // Redux dispatch
-  // const dispatch = useAppDispatch();
   const [checkout, { isLoading: isCheckingOut }] = useCheckoutMutation();
   const [createCheckoutSession] = useCreateCheckoutSessionMutation();
 
@@ -90,29 +79,14 @@ const Checkoutcart = () => {
   // Country selected value
   const [countryValue, setCountryValue] = React.useState("");
 
-  // Get items from redux store
-  // const { items, order_id } = useAppSelector((state) => state?.cart);
   const { data: items, isLoading } = useGetCartQuery();
-  // console.log(order_id, "order_id");
-  // On mount, fetch cart items
-  // useEffect(() => {
-  //   dispatch(GetToCart());
-  // }, [dispatch]);
 
-  // Calculate total price
   const total =
     items?.items.reduce((sum, item) => sum + Number(item.price) * item.quantity, 0);
-
-  // Free shipping progress
   const limit = 1000;
   const progress = Math.min((total as number / limit) * 100, 100);
 
-  // Clear placeholder after focus delay
-  const handleFocus = () => {
-    setTimeout(() => {
-      setPlaceholder("");
-    }, 2000);
-  };
+
 
   // React Hook Form config
   const {
@@ -152,40 +126,11 @@ const Checkoutcart = () => {
             console.log(res.session_id);
 
             window.location.href = res.url as string;
-
-            // useEffect(() => {
-            // if (window.location.pathname === "/payment-success") {
-            //   // Promise.all(
-            //   //   items.map((item) =>
-            //   //     dispatch(
-            //   //       RemoveCart({ product_id: item.product_id })
-            //   //     ).unwrap()
-            //   //   )
-            //   // )
-            //                       dispatch(
-            //                         DeleteToCart()
-            //                       )
-            //                         .unwrap()
-            //                         .then(() => {
-            //                           dispatch(GetToCart());
-            //                         })
-            //                         .catch(() => {
-            //                           toast({
-            //                             title: "Error ❌",
-            //                             description:
-            //                               "Failed to clear your cart, please try again.",
-            //                           });
-            //                         });
-            // }
-            // }, []);
           })
           .catch((err) => {
             console.log("Error:", err);
           });
         const orderId = res.order_id;
-
-        // Redirect to order complete page
-        // nav("/payment-success", { replace: true });
         window.scrollTo(0, 0);
       })
       .catch((err) => {

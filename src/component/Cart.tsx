@@ -1,7 +1,3 @@
-// ==================== Imports ====================
-// React hooks
-import { useEffect, useState } from "react";
-
 // Icons
 import { IoIosArrowForward } from "react-icons/io";
 import { TiHome } from "react-icons/ti";
@@ -23,20 +19,10 @@ import { Progress } from "../components/ui/progress";
 
 // Redux actions
 import {
-  // EditCart,
-  // GetToCart,
-  // RemoveCart,
-  // removeItemLocally,
-  // rollbackEdit,
-  // rollbackRemove,
-  // updateQuantityLocally,
   useEditCartMutation,
   useGetCartQuery,
   useRemoveFromCartMutation,
 } from "../store/cartSlice";
-// import { useAppDispatch, useAppSelector } from "../store/hook";
-import { RootState } from "../store";
-// import { productUser } from "../store/productSlice";
 
 // Components
 import Product from "./Product";
@@ -53,141 +39,53 @@ import { useGetProductsQuery } from "../store/UpdataProductSlice";
 
 // ==================== Component ====================
 const Cart = () => {
-  const { toast } = useToast(); // Toast hook for notifications
-  const nav = useNavigate(); // Navigation hook
-  // const dispatch = useAppDispatch(); // Redux dispatch
+  const { toast } = useToast();
+  const nav = useNavigate();
 const [editCart] = useEditCartMutation();
-  // Get products from Redux store
-  // const { products, loading, error } = useAppSelector(
-  //   (state: RootState) => state.product
-  // );
   const { data: products = [], isLoading, refetch } = useGetProductsQuery();
    const { data: items } = useGetCartQuery();
    const [removeFromCart] = useRemoveFromCartMutation();
-  // Fetch products if not loaded yet
-  // useEffect(() => {
-  //   if (products.length === 0) {
-  //     dispatch(productUser());
-  //   }
-  // }, [dispatch, products.length]);
 
-  // Get cart items from Redux store
-  // const { items, total } = useAppSelector((state) => state.cart);
+const updateQuantity = (
+  product_id: number,
+  type: "inc" | "dec",
+  currentQty: number
+) => {
+  const newQty =
+    type === "inc" ? currentQty + 1 : Math.max(1, currentQty - 1);
 
-  // Fetch cart on mount
-  // useEffect(() => {
-  //   dispatch(GetToCart());
-  // }, [dispatch]);
-
-  // ==================== Update Item Quantity ====================
-  // const updateQuantity = (
-  //   product_id: number,
-  //   type: "inc" | "dec",
-  //   currentQty: number
-  // ) => {
-  //   // Calculate new quantity based on type
-  //   const newQty =
-  //     type === "inc" ? currentQty + 1 : Math.max(0, currentQty - 1);
-
-  //   // Dispatch Redux action to edit cart
-  //   dispatch(EditCart({ product_id, quantity: newQty }))
-  //     .unwrap()
-  //     .then(() => {
-  //       dispatch(GetToCart()); // Refresh cart after update
-  //       toast({
-  //         title: "Cart updated",
-  //         description: `Quantity ${
-  //           type === "inc" ? "increased" : "decreased"
-  //         } successfully.`,
-  //       });
-  //     });
-  // };
-  const updateQuantity = (
-    product_id: number,
-    type: "inc" | "dec",
-    currentQty: number
-  ) => {
-    const newQty =
-      type === "inc" ? currentQty + 1 : Math.max(1, currentQty - 1);
-
-    // Save previous value for rollback
-    const previousQty = currentQty;
-
-    // 🔥 Optimistic Update — update UI immediately
-    // dispatch(
-    //   updateQuantityLocally({
-    //     product_id,
-    //     quantity: newQty,
-    //   })
-    // );
-    // toast({
-    //   title: "Cart updated",
-    //   description: `Quantity ${
-    //     type === "inc" ? "increased" : "decreased"
-    //   } successfully.`,
-    // });
-    // Send request
-    editCart({ product_id, quantity: newQty })
-      .unwrap()
-      .then(() => {})
-      .catch(() => {
-        // ❌ Rollback if failed
-        // dispatch(
-        //   rollbackEdit({
-        //     product_id,
-        //     quantity: previousQty,
-        //   })
-        // );
-
-        toast({
-          title: "Update failed",
-          description: "Restored previous quantity.",
-        });
+  editCart({ product_id, quantity: newQty })
+    .unwrap()
+    .then(() => {
+      toast({
+        title: "Cart updated ✅",
+        description: `Quantity changed to ${newQty}.`,
       });
-  };
-
-  // ==================== Remove Item ====================
-  // const removeItem = (product_id: number) => {
-  //   // Dispatch Redux action to remove item from cart
-  //   dispatch(RemoveCart({ product_id }))
-  //     .unwrap()
-  //     .then(() => {
-  //       dispatch(GetToCart()); // Refresh cart after removal
-  //       toast({
-  //         title: "Removed from cart",
-  //         description: "The item was successfully removed.",
-  //       });
-  //     });
-  // };
-  const removeItem = (product_id: number) => {
-    // احفظ النسخة القديمة للـ rollback
-    const previousCart = [...(items?.items ?? [])]; // cart جاي من useSelector
-
-    // 🔥 Optimistic Update — شيّل العنصر من UI فورًا
-    // dispatch(
-    //   removeItemLocally({
-    //     product_id,
-    //   })
-    // );
-    toast({
-      title: "Removed from cart",
-      description: "The item was successfully removed.",
+    })
+    .catch(() => {
+      toast({
+        title: "Update failed ❌",
+        description: "Restored previous quantity.",
+      });
     });
-    // إرسال الريكوست
-    removeFromCart({ product_id })
-      .unwrap()
-      .then(() => {})
-      .catch(() => {
-        // ❌ Rollback — رجّع الحالة القديمة
-        // dispatch(rollbackRemove(previousCart));
+};
 
-        toast({
-          title: "Remove failed",
-          description: "Restored the item.",
-        });
+const removeItem = (product_id: number) => {
+  removeFromCart({ product_id })
+    .unwrap()
+    .then(() => {
+      toast({
+        title: "Removed from cart 🗑️",
+        description: "The item was successfully removed.",
       });
-  };
-
+    })
+    .catch(() => {
+      toast({
+        title: "Remove failed ❌",
+        description: "Could not remove the item, please try again.",
+      });
+    });
+};
   // ==================== Calculate Totals ====================
   const limit = 1000; // Free shipping limit
   const subtotal = Array.isArray(items?.items)
@@ -453,17 +351,6 @@ const [editCart] = useEditCartMutation();
                   </h1>
                   <h2 className="w-[28%] p-6">${total.toFixed(2)}</h2>
                 </div>
-                {/* Subtotal Row */}
-                {/* <div className="flex justify-between border-b border-[#a7a7a733] p-5">
-                  <h1 className=" p-5 text-[16px] font-bold">Subtotal</h1>
-                  <h2 className=" p-5">${subtotal.toFixed(2)}</h2>
-                </div> */}
-
-                {/* Total Row */}
-                {/* <div className="flex justify-between p-5 text-[16px] font-bold">
-                  <h1 className=" p-5">Total</h1>
-                  <h2 className=" p-5">${subtotal.toFixed(2)}</h2>
-                </div> */}
               </div>
 
               {/* Free Shipping Progress */}

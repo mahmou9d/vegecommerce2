@@ -27,15 +27,7 @@ const links = [
     Icon: <FaLink />,
     title: "Refund Policy",
   },
-  // Extra examples for phone or email (currently commented out)
-  // {
-  //   Icon: <IoCall />,
-  //   title: "01153032052",
-  // },
-  // {
-  //   Icon: <HiOutlineMailOpen />,
-  //   title: "mfb4010@gmail.com",
-  // },
+
 ];
 
 // ==================== Main Footer component ====================
