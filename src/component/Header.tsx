@@ -42,7 +42,11 @@ import { Progress } from "../components/ui/progress";
 // Import Redux Hooks & Actions
 // =============================
 import { useGetCartQuery, useRemoveFromCartMutation } from "../store/cartSlice";
-import { useGetRoleQuery, useLogoutMutation } from "../store/authSlice";
+import {
+  useGetRoleQuery,
+  useLoginMutation,
+  useLogoutMutation,
+} from "../store/authSlice";
 import { useGetWishlistQuery } from "../store/wishlistSlice";
 
 // =============================
@@ -119,43 +123,80 @@ interface Product {
 // Header Component
 // =============================
 const Header = () => {
-  // Hooks
   const { toast } = useToast();
-  const [logout, { isLoading }] = useLogoutMutation();
-  const { data: items } = useGetCartQuery();
-  const [removeFromCart] = useRemoveFromCartMutation();
-  const access = localStorage.getItem("access");
+  const nav = useNavigate();
 
-  // Local cart state
-  const [cart, setCart] = useState<Product[]>([]);
+  // =============================
+  // States
+  // =============================
+  const [access, setAccess] = useState(localStorage.getItem("access"));
   const [showCart, setShowCart] = useState(false);
   const cartRef = useRef<HTMLDivElement>(null);
 
-  // Wishlist Items
-  const { data: items2 = [] } = useGetWishlistQuery();
-  const { data } = useGetRoleQuery();
+  // =============================
+  // API Hooks
+  // =============================
+  const [logout] = useLogoutMutation();
+  const [login] = useLoginMutation();
+  const [removeFromCart] = useRemoveFromCartMutation();
+  const { data: items } = useGetCartQuery();
 
+  // Skip API call if no access token
+  const { data: roleData } = useGetRoleQuery(undefined, {
+    skip: !access,
+  });
+
+  // =============================
   // Variables
+  // =============================
   const limit = 1000;
-  const nav = useNavigate();
-
-  // Calculate cart quantity
   const subquantity = Array.isArray(items?.items ?? [])
     ? items?.items.reduce((sum, item) => sum + Number(item.quantity || 0), 0)
     : 0;
-
-  // Calculate cart subtotal
   const subtotal = Array.isArray(items?.items ?? [])
-    ? (items?.items ?? []).reduce(
-        (sum, item) => sum + Number(item.subtotal || 0),
-        0,
-      )
+    ? items?.items.reduce((sum, item) => sum + Number(item.subtotal || 0), 0)
     : 0;
+  const progress = Math.min((Number(subtotal)/ limit) * 100, 100);
+  const total =
+    items?.items?.reduce((sum, item) => sum + item.price * item.quantity, 0) ??
+    0;
 
-  // Progress bar for free shipping
-  const progress = Math.min((subtotal / limit) * 100, 100);
+  // =============================
+  // Auto Login (Once Only)
+  // =============================
+  useEffect(() => {
+    const hasLoggedIn = localStorage.getItem("hasLoggedIn");
 
-  // Close cart when clicking outside
+    if (!access && hasLoggedIn !== "true") {
+      const autoLogin = async () => {
+        try {
+          const result = await login({
+            email: "user@admin.com",
+            password: "123456",
+          }).unwrap();
+
+          if (result?.access) {
+            localStorage.setItem("access", result.access);
+            localStorage.setItem("hasLoggedIn", "true");
+            setAccess(result.access);
+
+            toast({
+              title: "Login successful 🎉",
+              description: "Welcome back!",
+            });
+          }
+        } catch (error) {
+          console.error("Auto-login failed:", error);
+        }
+      };
+
+      autoLogin();
+    }
+  }, []);
+
+  // =============================
+  // Close Cart on Outside Click
+  // =============================
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (cartRef.current && !cartRef.current.contains(event.target as Node)) {
@@ -173,27 +214,34 @@ const Header = () => {
   }, [showCart]);
 
   // =============================
-  // Logout handler
+  // Handlers
   // =============================
-  const handleLogout = () => {
-    logout()
-      .then(() => {
-        toast({
-          title: "Logged out ✅",
-          description: "You have been logged out successfully.",
-        });
-        localStorage.removeItem("access");
-        localStorage.removeItem("refresh");
-        nav("/");
-      })
-      .catch((err) => {
-        toast({ title: "Error ❌", description: err || "Logout failed" });
+  const handleLogout = async () => {
+    try {
+      await logout().unwrap();
+
+      // Clear tokens
+      localStorage.removeItem("access");
+      localStorage.removeItem("refresh");
+      // Keep hasLoggedIn to prevent re-login
+
+      // Update state immediately
+      setAccess(null);
+
+      toast({
+        title: "Logged out ✅",
+        description: "You have been logged out successfully.",
       });
+
+      nav("/");
+    } catch (err: any) {
+      toast({
+        title: "Error ❌",
+        description: err?.data?.detail || "Logout failed",
+      });
+    }
   };
 
-  // =============================
-  // Remove from cart handler
-  // =============================
   const handleRemoveFromCart = async (
     product_id: number,
     product_name: string,
@@ -212,9 +260,20 @@ const Header = () => {
     }
   };
 
-  const total =
-    items?.items?.reduce((sum, item) => sum + item.price * item.quantity, 0) ??
-    0;
+  const handleProtectedAction = (
+    e: React.MouseEvent,
+    callback?: () => void,
+  ) => {
+    if (!access) {
+      e.preventDefault();
+      toast({
+        title: "Error ❌",
+        description: "Please login first",
+      });
+    } else if (callback) {
+      callback();
+    }
+  };
 
   // =============================
   // Return JSX
@@ -222,7 +281,7 @@ const Header = () => {
   return (
     <div>
       <div className=" bg-[#122d40]">
-        <div className="container py-7 px-4 lg:h-[200px]  mx-auto lg:pt-[40px] lg:pb-[80px] flex items-center justify-between">
+        <div className="container py-7 px-4 lg:h-[200px]  mx-auto lg:pt-[40px] lg:pb-[80px] flex items-center justify-around">
           <div className="flex items-center">
             <Link to={"/"}>
               <img
@@ -233,30 +292,30 @@ const Header = () => {
               />
             </Link>
             <div className="w-[1px] h-10 bg-[#a7a7a733] mx-10 mt-3 hidden lg:block"></div>
-            <div className="bg-[#ffffff26] w-[420px] h-[55px] text-white rounded-[100px] relative hidden lg:block">
+            <div className="bg-[#ffffff26] w-[300px] h-[55px] text-white rounded-[100px] relative hidden lg:block">
               <input
                 type="text"
                 className="w-full h-full  bg-transparent px-[25px] outline-none"
                 placeholder="What are you looking for?"
               />
-              <HiSearch className="absolute bg-[#122d40] text-white rounded-[100px] left-[88%] top-[4px] text-[47px] p-[6px]" />
+              <HiSearch className="absolute bg-[#122d40] text-white rounded-[100px] left-[83%] top-[4px] text-[47px] p-[6px]" />
             </div>
           </div>
 
           {/* ===== MOBILE ICONS ===== */}
           <div className="relative flex gap-[6px] lg:hidden">
-            {data?.is_admin && (
+            {access && roleData?.is_admin && (
               <Link
-                className="w-[45px] h-[45px] p-[10px] text-white text-[20px] border text-center flex justify-center items-center font-semibold border-[#ffffff26] rounded-full"
+                className="w-[55px] h-[45px] p-[10px] text-white text-[12px] border text-center flex justify-center items-center font-semibold border-[#ffffff26] rounded-full"
                 to={"/admin"}
               >
-                AM
+                Admin Panel
               </Link>
             )}
             {access ? (
               <button
                 onClick={handleLogout}
-                className="font-semibold duration-300 h-[45px] p-[10px] text-white text-[16px] border border-[#ffffff26] rounded-full hover:bg-[#01e281] hover:text-[#122d40] transition"
+                className="font-semibold duration-300 h-[45px] p-[10px] text-white text-[12px] border border-[#ffffff26] rounded-full hover:bg-[#01e281] hover:text-[#122d40] transition"
               >
                 Logout
               </button>
@@ -594,7 +653,7 @@ const Header = () => {
                           <RiFileListLine />
                           <p>Cart subtotal</p>
                         </div>
-                        <p className="font-bold">${subtotal.toFixed(2)}</p>
+                        <p className="font-bold">${Number(subtotal).toFixed(2)}</p>
                       </div>
                       <div className=" pb-5 border-b border-dashed">
                         <div className="flex items-center justify-center px-1 text-[14px] mt-4">
@@ -663,15 +722,15 @@ const Header = () => {
               </button>
             ) : (
               <Link to={"/login"}>
-                <GoPerson className="w-[45px] h-[45px] p-[10px] text-white text-[20px] border border-[#ffffff26] rounded-full" />
+                <GoPerson className="w-[45px] h-[45px] p-[10px] text-white text-[16px] border border-[#ffffff26] rounded-full" />
               </Link>
             )}
-            {data?.is_admin && (
+            {access && roleData?.is_admin && (
               <Link
-                className="w-[45px] h-[45px] p-[10px] text-white text-[20px] border text-center flex justify-center items-center font-semibold border-[#ffffff26] rounded-full"
+                className="w-[100px] h-[55px] p-[10px] text-white text-[16px] border text-center flex justify-center items-center font-semibold border-[#ffffff26] rounded-full"
                 to={"/admin"}
               >
-                AM
+                Admin Panel
               </Link>
             )}
           </div>

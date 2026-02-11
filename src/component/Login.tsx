@@ -1,7 +1,7 @@
 import * as yup from "yup";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FaRegEye, FaRegEyeSlash } from "react-icons/fa6";
 import { Button } from "../components/ui/button";
 import { useNavigate } from "react-router-dom";
@@ -28,7 +28,7 @@ const Login = () => {
   const { toast } = useToast();
   const nav = useNavigate();
 
-const [login] = useLoginMutation();
+  const [login] = useLoginMutation();
 
   // State for toggling password visibility
   const [showPassword, setShowPassword] = useState(false);
@@ -37,10 +37,20 @@ const [login] = useLoginMutation();
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<ILogin>({
     resolver: yupResolver(schema),
   });
+
+//  useEffect(() => {
+//    const token = localStorage.getItem("access");
+//    if (!token) {
+//      setValue("email", "user@admin.com");
+//      setValue("password", "123456");
+//      handleSubmit(onSubmit)();
+//    }
+//  }, []);
 
   // Handle form submission
   const onSubmit = async (data: ILogin) => {
@@ -49,14 +59,13 @@ const [login] = useLoginMutation();
 
       // Show success toast
       if (result) {
-      toast({
-        title: "Login successful 🎉",
-        description: "Welcome back!",
-      });
+        toast({
+          title: "Login successful 🎉",
+          description: "Welcome back!",
+        });
         nav("/");
       }
       // Navigate to homepage
-      
     } catch (err: any) {
       // Show error toast if login fails
       toast({
@@ -143,7 +152,7 @@ const [login] = useLoginMutation();
 
         {/* Signup Redirect */}
         <p className="mt-6 text-center text-sm text-gray-600">
-          Don’t have an account?{" "}
+          Don't have an account?{" "}
           <a
             href="/signup"
             className="text-[#01e281] font-medium hover:underline"
